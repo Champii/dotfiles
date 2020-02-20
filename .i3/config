@@ -86,10 +86,10 @@ bindsym $mod+x split h, exec konsole
 bindsym $mod+z split v, exec konsole
 
 # change split in horizontal orientation
-bindsym $mod+h split h
+#bindsym $mod+h split h
 
 # change split in vertical orientation
-bindsym $mod+v split v
+#bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
