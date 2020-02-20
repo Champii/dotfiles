@@ -3,3 +3,5 @@
 .xinitrc
 .i3/config
 .config/starship.toml
+.aliasrc
+.zplugrc
