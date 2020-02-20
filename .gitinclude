@@ -1,3 +1,5 @@
 .zshrc
-/themes/*
-/plugins/*
+.zpreztorc
+.xinitrc
+.i3/
+.config/starship.toml
