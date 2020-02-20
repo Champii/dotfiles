@@ -1,5 +1,5 @@
 .zshrc
 .zpreztorc
 .xinitrc
-.i3/
+.i3/config
 .config/starship.toml
