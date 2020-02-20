@@ -1,17 +1,12 @@
 # Aliases
 
-# Exa
-alias ls="exa --git"
-alias l="ls -l"
-alias la="l -a"
-alias lt="l --tree"
-alias lta="la --tree"
-alias lg="l --grid"
-alias lga="la --grid"
-
+# ls overrides
+alias la='exa -lbhHigmuSa --time-style=long-iso --git --color-scale'  # all list
+alias lx='exa -lbhHigmuSa@ --time-style=long-iso --git --color-scale' # all + extended list
 
 # Rm (Trash)
 alias rm="trash-put"
+
 # Misc
 alias am="alsamixer"
 alias src="source ~/.zshrc"
@@ -33,20 +28,8 @@ alias yr="yay -Rsc"
 # Ping
 alias ping="cping"
 alias p="ping"
-alias pg="ping google.fr"
+#alias pg="ping google.fr"
 alias p8="ping 8.8.8.8"
-
-# Git
-alias gco="git checkout"
-alias gc="git commit -m"
-alias gca="git commit -am"
-alias ga="git commit --amend"
-alias gaa="git commit -a --amend"
-alias gs="git status"
-alias clone="git clone"
-alias pull="git pull origin `git rev-parse --abbrev-ref HEAD`"
-alias push="git push origin `git rev-parse --abbrev-ref HEAD`"
-alias pushf="git push -f origin `git rev-parse --abbrev-ref HEAD`"
 
 # Screen
 alias sdet="screen -d -m -S"
@@ -60,3 +43,5 @@ alias ne="emacs -nw"
 # Glances
 alias glances="glances --fs-free-space -1 --enable-process-extended --process-short-name -b"
 
+# Vim
+alias v="vim"
