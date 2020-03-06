@@ -1,0 +1,11 @@
+{
+    "suggest.enablePreview": true,
+    "suggest.numberSelect":true,
+    "diagnostic.checkCurrentLine": true,
+    "diagnostic.refreshOnInsertMode": true,
+    "diagnostic.refreshAfterSave":true,
+    "codeLens.enable": true,
+    "coc.preferences.formatOnType": true
+
+}
+

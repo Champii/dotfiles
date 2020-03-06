@@ -15,7 +15,7 @@ alias please="sudo"
 alias ps="procs"
 alias cat="bat --theme TwoDark"
 alias find="fd"
-alias howdoi="hors -c"
+alias howdoi="hors -c -a -e google"
 alias cp="xcp"
 alias du="dust"
 
@@ -44,4 +44,7 @@ alias ne="emacs -nw"
 alias glances="glances --fs-free-space -1 --enable-process-extended --process-short-name -b"
 
 # Vim
-alias v="vim"
+alias v="nvim -O"
+alias vi="v"
+alias nano="v"
+alias vs="v -S"

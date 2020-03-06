@@ -10,7 +10,7 @@ zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
 
 zplug "desyncr/auto-ls", from:"github", use:"auto-ls.plugin.zsh"
 
-zplug "nocttuam/autodotenv", from:"github"
+#zplug "nocttuam/autodotenv", from:"github"
 
 zplug "djui/alias-tips", from:github
 
@@ -79,6 +79,8 @@ zplug "sobolevn/wakatime-zsh-plugin"
 zplug "sinetoami/web-search"
 
 zplug "bryanculver/opus.plugin.zsh"
+
+zplug "softmoth/zsh-vim-mode"
 
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then

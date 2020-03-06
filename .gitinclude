@@ -6,3 +6,6 @@
 .aliasrc
 .zplugrc
 .zprezto/
+.config/nvim/init.vim
+.config/nvim/coc.vim
+.config/nvim/coc-settings.json
