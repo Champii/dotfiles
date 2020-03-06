@@ -130,10 +130,15 @@ bindkey '^x^e' anyframe-widget-insert-git-branch
 
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
 
+auto-ls-custom-ls () {
+    ls -l
+}
+
 auto-ls-custom-git () {
     CHANGED=$(git diff-index --name-only HEAD --)
     if [ -n "$CHANGED" ]; then
 	auto-ls-git-status
     fi
 }
-AUTO_LS_COMMANDS=(ls custom-git)
+
+AUTO_LS_COMMANDS=(custom-ls custom-git)
