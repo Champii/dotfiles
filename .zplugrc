@@ -2,6 +2,8 @@
 
 source ~/.zplug/init.zsh
 
+zplug "lukechilds/zsh-nvm"
+
 zplug "hlissner/zsh-autopair", defer:2
 
 zplug "fcambus/ansiweather", from:github, use:"ansiweather.plugin.zsh"

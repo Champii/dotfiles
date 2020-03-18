@@ -16,12 +16,5 @@ source $ANYRC_DANYRCD/.aliasrc
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
 
-# Fzf
-alias fzfp="fzf --preview 'bat --theme TwoDark --style=numbers --color=always {} | head -500'"
-export FZF_DEFAULT_OPTS="--height=50% --layout=reverse --border -m"
-
-export FZF_COMPLETION_TRIGGER='~~'
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(starship init zsh)"
 

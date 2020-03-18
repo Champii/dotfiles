@@ -279,6 +279,7 @@ bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output D
 #exec emacs -daemon
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
+# bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
 # Screenshot
 bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/pictures/'

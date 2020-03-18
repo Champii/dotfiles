@@ -10,10 +10,12 @@ set incsearch	" Searches for strings incrementally
  
 set nowrap
 set autoindent	" Auto-indent new lines
-set shiftwidth=4	" Number of auto-indent spaces
+" set shiftwidth=4	" Number of auto-indent spaces
 set smartindent	" Enable smart-indent
-set smarttab	" Enable smart-tabs
-set softtabstop=4	" Number of spaces per Tab
+" set smarttab	" Enable smart-tabs
+" set softtabstop=2	" Number of spaces per Tab
+set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
+
 set smartcase
 set ruler
 set cursorline
@@ -23,6 +25,7 @@ set autoread
 set undolevels=1000	" Number of undo levels
 set backspace=indent,eol,start	" Backspace behavior
 set spell spelllang=en_us
+set spell!
 
 set ttyfast
 set relativenumber
@@ -37,6 +40,8 @@ set clipboard=unnamedplus
 call plug#begin('~/.config/nvim/plugged')
 
 Plug 'tpope/vim-fugitive'
+
+Plug 'StanAngeloff/php.vim'
 
 Plug 'autozimu/LanguageClient-neovim', {
     \ 'branch': 'next',
@@ -62,7 +67,8 @@ Plug 'tpope/vim-surround'
 
 Plug 'easymotion/vim-easymotion'
 
-Plug 'frazrepo/vim-rainbow'
+" Plug 'frazrepo/vim-rainbow'
+Plug 'luochen1990/rainbow'
 
 Plug 'mattn/emmet-vim'
 
@@ -88,7 +94,8 @@ Plug 'jiangmiao/auto-pairs'
 
 Plug 'mileszs/ack.vim'
 
-Plug 'nathanaelkane/vim-indent-guides'
+" Plug 'nathanaelkane/vim-indent-guides'
+Plug 'Yggdroot/indentLine'
 
 Plug 'rust-lang/rust.vim'
 
@@ -103,6 +110,13 @@ Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
 Plug 'brettanomyces/nvim-editcommand'
 
 Plug 'Vigemus/nvimux'
+
+Plug 'leafgarland/typescript-vim'
+
+Plug 'pangloss/vim-javascript'
+
+" Always last
+Plug 'ryanoasis/vim-devicons'
 
 call plug#end()
 
@@ -161,6 +175,10 @@ map <Leader>k <Plug>(easymotion-k)
 
 " Rainbow
 let g:rainbow_active = 1
+let g:rainbow_conf = {
+\   'guifgs': ['red', 'green', 'cyan', 'magenta'],
+\   'ctermfgs': ['darkblue', 'darkmagenta', 'darkcyan', 'darkred', 'darkgreen'],
+\ }
 
 " Airline
 let g:airline_powerline_fonts = 1
@@ -172,8 +190,8 @@ nnoremap <M-[> :bprevious<CR>
 nnoremap <M-]> :bnext<CR>
 
 " GitGutter
-let g:gitgutter_highlight_lines = 1
-let g:gitgutter_highlight_linenrs = 1
+let g:gitgutter_highlight_lines = 0
+let g:gitgutter_highlight_linenrs = 0
 
 " Syntastic
 set statusline+=%#warningmsg#
@@ -216,14 +234,7 @@ command! -bang -nargs=? -complete=dir Files
 
 " Indent
 let g:indent_guides_enable_on_vim_startup = 1
-
-hi IndentGuidesOdd  ctermbg=grey
-hi IndentGuidesEven ctermbg=darkgrey
-" let g:indent_guides_auto_colors = 0
-" autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=red   ctermbg=3
-" autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=4
-let g:indent_guides_start_level = 2
-let g:indent_guides_guide_size = 1
+let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 map <C-p> :Files<CR>
 
@@ -266,3 +277,24 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+
+" Elixir fix
+au BufRead,BufNewFile *.ex,*.exs set filetype=elixir
+au BufRead,BufNewFile *.eex set filetype=eelixir
+
+" Syntastic
+let g:syntastic_mode_map = { 'mode': 'active',
+                            \ 'active_filetypes': ['python', 'javascript'],
+                            \ 'passive_filetypes': [] }
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ['eslint']
+
+command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
