@@ -27,7 +27,7 @@ alias ys="yay -Ss"
 alias yr="yay -Rsc"
 
 # Ping
-alias ping="cping"
+alias ping="cping -LT"
 alias p="ping"
 #alias pg="ping google.fr"
 alias p8="ping 8.8.8.8"

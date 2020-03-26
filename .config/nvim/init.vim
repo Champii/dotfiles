@@ -118,6 +118,8 @@ Plug 'pangloss/vim-javascript'
 " Always last
 Plug 'ryanoasis/vim-devicons'
 
+Plug 'prettier/vim-prettier', { 'do': 'npm install' }
+
 call plug#end()
 
 source ~/.config/nvim/coc.vim
