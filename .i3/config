@@ -21,8 +21,29 @@ exec xset fp rehash
 
 font pango:DejaVu Sans Mono, FontAwesome 8
 
+default_orientation vertical
+
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+
+mouse_warping none
+
+popup_during_fullscreen smart
+workspace_auto_back_and_forth yes
+
+# Mark and goto
+# read 1 character and mark the current window with this character
+bindsym $mod+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
+
+# read 1 character and go to the window with the character
+bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+
+# Scratchpad
+# Make the currently focused window a scratchpad
+bindsym $mod+Shift+p move scratchpad
+
+# Show the first scratchpad window
+bindsym $mod+p scratchpad show
 
 # start a terminal
 bindsym $mod+Return exec konsole
@@ -31,8 +52,8 @@ bindsym $mod+Return exec konsole
 bindsym $mod+Shift+q kill
 
 # Borders
-new_window pixel 1
-new_float pixel 1
+default_border pixel 1
+default_floating_border pixel 1
 
 # Colors
 set $back               #1d1F21
@@ -46,7 +67,7 @@ set $darkred            #A54242
 set $green              #B5BD56
 
 #class                  border      backgr.     text        split
-client.focused          $green      $green      $black      $red
+client.focused          $yellow     $green      $black      $red
 client.focused_inactive $grey       $grey       $lightgrey  $grey
 client.unfocused        $grey       $grey       $lightgrey  $grey
 client.urgent           $red        $red        $black      $red
@@ -208,13 +229,13 @@ bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen
 for_window [class="^.*"] border pixel 1
 
 # Smart Gaps
-smart_gaps on
+# smart_gaps on
 
 # Smart Borders
 smart_borders on
 
 # Set inner/outer gaps
-gaps inner 8
+# gaps inner 8
 gaps outer 0
 
 # Gaps mode
@@ -268,9 +289,6 @@ exec albert
 exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
-# Emacs bindings
-bindsym $mod+n exec emacsclient -create-frame -a ""
-
 exec xrandr --output HDMI-1 --auto --right-of eDP-1
 exec xrandr --output DP-2 --auto --right-of DP-2
 
@@ -279,7 +297,13 @@ bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output D
 #exec emacs -daemon
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
+bindsym $mod+n exec --no-startup-id raiseorlaunch -s neovide
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
 # Screenshot
 bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/pictures/'
+
+bindsym --release $mod+h exec --no-startup-id "i3-vim-nav h"
+bindsym --release $mod+j exec --no-startup-id "i3-vim-nav j"
+bindsym --release $mod+k exec --no-startup-id "i3-vim-nav k"
+bindsym --release $mod+l exec --no-startup-id "i3-vim-nav l"
