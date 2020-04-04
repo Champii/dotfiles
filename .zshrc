@@ -18,3 +18,5 @@ source $ANYRC_DANYRCD/.aliasrc
 
 eval "$(starship init zsh)"
 
+
+source /home/champii/.config/broot/launcher/bash/br

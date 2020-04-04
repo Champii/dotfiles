@@ -274,7 +274,7 @@ nmap <F8> :TagbarToggle<CR>
 " Custom
 " nnoremap <C-c> :set insert
 
-set guifont=Delugia\ Nerd\ Font:h8
+set guifont=Delugia\ Nerd\ Font:h7
 " set guifont=xos4\ Terminess\ Powerline:h6
 let g:neovide_cursor_vfx_mode = "railgun"
 

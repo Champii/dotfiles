@@ -199,7 +199,8 @@ bar {
 #exec feh --bg-scale ~/pictures/wall_code.jpg
 #exec feh --bg-scale ~/pictures/wall2.jpg
 #exec feh --bg-scale ~/pictures/wall3.jpg
-exec feh --bg-scale ~/pictures/wall4.jpg
+# exec feh --bg-scale ~/pictures/wall4.jpg
+exec feh --bg-scale ~/pictures/forest.jpg
 
 # Lock
 bindsym Control+Mod1+l exec i3lock-fancy
@@ -222,6 +223,9 @@ bindsym XF86MonBrightnessDown exec intelbacklight -dec 200 # decrease screen bri
 # Brightness Min and Max
 bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
+
+# Touchpad toggler
+bindsym $mod+t exec --no-startup-id ~/.i3/toggle_touchpad.sh
 
 ### i3-gaps stuff ###
 
