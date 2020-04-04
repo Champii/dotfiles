@@ -21,7 +21,7 @@ exec xset fp rehash
 
 font pango:DejaVu Sans Mono, FontAwesome 8
 
-default_orientation vertical
+default_orientation horizontal
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -40,10 +40,10 @@ bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # Scratchpad
 # Make the currently focused window a scratchpad
-bindsym $mod+Shift+p move scratchpad
+bindsym $mod+Shift+s move scratchpad
 
 # Show the first scratchpad window
-bindsym $mod+p scratchpad show
+bindsym $mod+s scratchpad show
 
 # start a terminal
 bindsym $mod+Return exec konsole
@@ -116,8 +116,8 @@ bindsym $mod+z split v, exec konsole
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
+# bindsym $mod+w layout stacking
+# bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
@@ -302,6 +302,7 @@ bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output D
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 bindsym $mod+n exec --no-startup-id raiseorlaunch -s neovide
+bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
 # Screenshot

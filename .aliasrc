@@ -64,3 +64,9 @@ export FZF_COMPLETION_TRIGGER='~~'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Cd and lastdir
+function lastdir() {
+    rm /tmp/lastdir.tmp
+    echo $PWD > /tmp/lastdir.tmp
+}
+add-zsh-hook chpwd lastdir
