@@ -106,6 +106,13 @@ bindsym $mod+x split h, exec konsole
 # split in vertical orientation and spawn a term
 bindsym $mod+z split v, exec konsole
 
+# split in horizontal orientation and spawn a vim
+bindsym $mod+Shift+x split h, exec konsole -e /usr/bin/zsh -c "nvim"
+
+# split in vertical orientation and spawn a vim
+bindsym $mod+Shift+z split v, exec konsole -e /usr/bin/zsh -c "nvim"
+
+
 # change split in horizontal orientation
 #bindsym $mod+h split h
 

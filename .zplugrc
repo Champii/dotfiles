@@ -6,7 +6,7 @@ zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
 
-zplug "fcambus/ansiweather", from:github, use:"ansiweather.plugin.zsh"
+# zplug "fcambus/ansiweather", from:github, use:"ansiweather.plugin.zsh"
 
 zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
 
@@ -42,7 +42,7 @@ zplug "vladmyr/dotfiles-plugin"
 
 zplug "DarrinTisdale/zsh-aliases-exa"
 
-zplug "fabiokiatkowski/exercism.plugin.zsh"
+# zplug "fabiokiatkowski/exercism.plugin.zsh"
 
 zplug "mdumitru/fancy-ctrl-z"
 
@@ -64,7 +64,7 @@ zplug 'micrenda/zsh-nohup', defer:2
 
 zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
 
-zplug 'caarlos0-graveyard/zsh-pg'
+# zplug 'caarlos0-graveyard/zsh-pg'
 
 zplug "damofthemoon/zsh-quotify"
 
@@ -78,7 +78,7 @@ zplug "le0me55i/zsh-systemd"
 
 zplug "sobolevn/wakatime-zsh-plugin"
 
-zplug "sinetoami/web-search"
+# zplug "sinetoami/web-search"
 
 zplug "bryanculver/opus.plugin.zsh"
 

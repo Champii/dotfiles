@@ -2,6 +2,7 @@
 set number	" Show line numbers
 set showmatch	" Highlight matching brace
 set visualbell	" Use visual bell (no beeping)
+set showcmd
 
 set hlsearch	" Highlight all search results
 set smartcase	" Enable smart-case search
@@ -16,7 +17,6 @@ set smartindent	" Enable smart-indent
 " set softtabstop=2	" Number of spaces per Tab
 set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
 
-set smartcase
 set ruler
 set cursorline
 set background=dark
@@ -30,6 +30,7 @@ set spell!
 set ttyfast
 set relativenumber
 set undofile
+set colorcolumn=80
 
 let mapleader = ","
 
@@ -57,9 +58,9 @@ Plug 'junegunn/fzf.vim'
 " Use release branch (Recommend)
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-Plug 'scrooloose/nerdtree'
+" Plug 'scrooloose/nerdtree'
 
-Plug 'Xuyuanp/nerdtree-git-plugin'
+" Plug 'Xuyuanp/nerdtree-git-plugin'
 
 Plug 'timonv/vim-cargo'
 
@@ -139,6 +140,8 @@ Plug 'mboughaba/i3config.vim'
 
 Plug 'termhn/i3-vim-nav'
 
+Plug 'rstacruz/sparkup'
+
 " Always last
 Plug 'ryanoasis/vim-devicons'
 
@@ -148,7 +151,7 @@ source ~/.config/nvim/coc.vim
 
 nnoremap <esc> :noh<return><esc>
 
-nmap <space>e :NERDTreeToggle<CR>
+" nmap <space>e :NERDTreeToggle<CR>
 "map <C-n> :NERDTreeToggle<CR>
 
 let g:mapleader = "\<Space>"
