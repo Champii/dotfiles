@@ -33,7 +33,7 @@ workspace_auto_back_and_forth yes
 
 # Mark and goto
 # read 1 character and mark the current window with this character
-bindsym $mod+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
+bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
 # read 1 character and go to the window with the character
 bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
@@ -42,8 +42,14 @@ bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 # Make the currently focused window a scratchpad
 bindsym $mod+Shift+s move scratchpad
 
-# Show the first scratchpad window
-bindsym $mod+s scratchpad show
+# Show the terminal scratchpad window
+bindsym $mod+Tab [instance="konsole"] scratchpad show
+
+# Show the auryo scratchpad window
+bindsym $mod+s [instance="auryo"] scratchpad show
+
+# Show the rambox scratchpad window
+bindsym $mod+m [instance="rambox"] scratchpad show
 
 # start a terminal
 bindsym $mod+Return exec konsole
@@ -62,15 +68,16 @@ set $grey               #373B41
 set $lightgrey          #707880
 set $white              #C5C8C6
 set $yellow             #F0C674
-set $red                #CC6666
+set $red                #cc2925
+set $orange             #ffb86c
 set $darkred            #A54242
 set $green              #B5BD56
 
 #class                  border      backgr.     text        split
-client.focused          $yellow     $green      $black      $red
+client.focused          $red        $darkred    $black      $red
 client.focused_inactive $grey       $grey       $lightgrey  $grey
 client.unfocused        $grey       $grey       $lightgrey  $grey
-client.urgent           $red        $red        $black      $red
+client.urgent           $red        $grey       $black      $red
 client.background       $back
 
 # Launcher
@@ -189,7 +196,9 @@ bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
 
 
 # WMFocus
-bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
+# bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
+bindsym $mod+d exec --no-startup-id konsole --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
+for_window [title="~ : i3-dmenu-deskto"] floating enable
 
 
 # Workspace navigation
@@ -308,7 +317,7 @@ bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output D
 #exec emacs -daemon
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
-bindsym $mod+n exec --no-startup-id raiseorlaunch -s neovide
+bindsym $mod+n exec --no-startup-id raiseorlaunch -s 'emacsclient -create-frame -a ""'
 bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 

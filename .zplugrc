@@ -26,17 +26,17 @@ zplug "psprint/zsh-cmd-architect"
 
 zplug "mollifier/anyframe"
 
-zplug "kiurchv/asdf.plugin.zsh", defer:2
+#zplug "kiurchv/asdf.plugin.zsh", defer:2
 
-zplug "vifon/deer", use:deer
-zle -N deer
-bindkey '\ek' deer
+# zplug "vifon/deer", use:deer
+# zle -N deer
+# bindkey '\ek' deer
 
 zplug "tymm/zsh-directory-history"
 
-zplug "webyneter/docker-aliases"
+# zplug "webyneter/docker-aliases"
 
-zplug "sroze/docker-compose-zsh-plugin"
+# zplug "sroze/docker-compose-zsh-plugin"
 
 zplug "vladmyr/dotfiles-plugin"
 
@@ -58,7 +58,7 @@ zplug 'ytet5uy4/fzf-widgets'
 
 zplug 'wyntau/fzf-zsh'
 
-zplug 'oldratlee/hacker-quotes'
+# zplug 'oldratlee/hacker-quotes'
 
 zplug 'micrenda/zsh-nohup', defer:2
 
@@ -66,7 +66,7 @@ zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
 
 # zplug 'caarlos0-graveyard/zsh-pg'
 
-zplug "damofthemoon/zsh-quotify"
+# zplug "damofthemoon/zsh-quotify"
 
 zplug "RobSis/zsh-reentry-hook"
 

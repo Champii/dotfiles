@@ -54,5 +54,6 @@ xset fp+ $HOME/.fonts/ohsnap
 xset fp+ $HOME/.fonts/terminesspowerline
 
 
+# exec emacs
 i3
 
