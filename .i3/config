@@ -43,7 +43,7 @@ bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 bindsym $mod+Shift+s move scratchpad
 
 # Show the terminal scratchpad window
-bindsym $mod+Tab [instance="konsole"] scratchpad show
+bindsym $mod+Tab [title="scratchpad"] scratchpad show
 
 # Show the auryo scratchpad window
 bindsym $mod+s [instance="auryo"] scratchpad show
@@ -81,7 +81,8 @@ client.urgent           $red        $grey       $black      $red
 client.background       $back
 
 # Launcher
-bindsym Mod1+space exec albert show
+# bindsym Mod1+space exec albert show
+bindsym Mod1+space exec dmenu_run -h 8 -p Open -nb "#232427"
 
 # change focus
 bindsym $mod+h focus left
@@ -114,10 +115,10 @@ bindsym $mod+x split h, exec konsole
 bindsym $mod+z split v, exec konsole
 
 # split in horizontal orientation and spawn a vim
-bindsym $mod+Shift+x split h, exec konsole -e /usr/bin/zsh -c "nvim"
+bindsym $mod+Shift+x split h
 
 # split in vertical orientation and spawn a vim
-bindsym $mod+Shift+z split v, exec konsole -e /usr/bin/zsh -c "nvim"
+bindsym $mod+Shift+z split v
 
 
 # change split in horizontal orientation
@@ -199,6 +200,7 @@ bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
 bindsym $mod+d exec --no-startup-id konsole --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
 for_window [title="~ : i3-dmenu-deskto"] floating enable
+for_window [title="scratchpad"] move scratchpad
 
 
 # Workspace navigation
@@ -216,7 +218,7 @@ bar {
 #exec feh --bg-scale ~/pictures/wall2.jpg
 #exec feh --bg-scale ~/pictures/wall3.jpg
 # exec feh --bg-scale ~/pictures/wall4.jpg
-exec feh --bg-scale ~/pictures/forest.jpg
+exec feh --bg-scale ~/pictures/wall_new.jpeg
 
 # Lock
 bindsym Control+Mod1+l exec i3lock-fancy
@@ -303,21 +305,21 @@ mode "$mode_gaps_outer" {
 exec libinput-gestures
 
 # Albert demon
-exec albert
+# exec albert
 
 # Autolock
 exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
-exec xrandr --output HDMI-1 --auto --right-of eDP-1
-exec xrandr --output DP-2 --auto --right-of DP-2
+exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
+exec_always xrandr --output DP-2 --auto --right-of DP-2
 
 bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output DP-2 --off && pkill lemonbar && exec lemonbar
 
-#exec emacs -daemon
+
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
-bindsym $mod+n exec --no-startup-id raiseorlaunch -s 'emacsclient -create-frame -a ""'
+bindsym $mod+n exec --no-startup-id raiseorlaunch -s emacs
 bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
@@ -328,3 +330,13 @@ bindsym --release $mod+h exec --no-startup-id "i3-vim-nav h"
 bindsym --release $mod+j exec --no-startup-id "i3-vim-nav j"
 bindsym --release $mod+k exec --no-startup-id "i3-vim-nav k"
 bindsym --release $mod+l exec --no-startup-id "i3-vim-nav l"
+
+#Default assignations
+assign [title="^first"] number 1
+assign [class="emacs"] number 2
+assign [class="brave-browser"] number 3
+
+exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
+exec --no-startup-id emacs
+exec --no-startup-id brave

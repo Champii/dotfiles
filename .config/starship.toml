@@ -34,8 +34,15 @@ truncation_length = 8
 #style = "dimmed white"
 
 [git_commit]
+style = "bold #A57442"
 commit_hash_length = 8
 only_detached = false
+
+[git_status]
+style = "bold #666666"
+
+[git_branch]
+style = "bold #a54242"
 
 [memory_usage]
 show_percentage = true

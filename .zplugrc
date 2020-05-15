@@ -144,3 +144,5 @@ auto-ls-custom-git () {
 }
 
 AUTO_LS_COMMANDS=(custom-ls custom-git)
+
+# fast-theme q-jmnemonic

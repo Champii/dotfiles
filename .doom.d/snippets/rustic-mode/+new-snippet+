@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: Specs System
+# key: sys                             
+# --
+struct ${1:NewSystem};
+
+impl<'a> System<'a> for $1 {
+    type SystemData = ${2:(Entities<'a>,)};
+
+    fn run(&mut self, ${3:(entities,)}: Self::SystemData) {
+       $0;
+    }
+}

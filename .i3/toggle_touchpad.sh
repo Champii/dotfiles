@@ -1,8 +1,8 @@
 #!/bin/bash
 
-device=13
+device=14
 state=$(xinput list-props $device | grep "Device Enabled" | cut -f3)
-echo $state
+echo "$state"
 
 if [ $state == 1 ]; then
 xinput --disable "$device"
