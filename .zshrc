@@ -8,6 +8,7 @@ export GOPATH=$HOME/go
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/champii/.local/bin:$HOME/.cabal/bin:$GOROOT/bin:$GOPATH/bin:$HOME/.bin:$HOME/.cargo/bin:/home/champii/.local/bin"
 export PATH="$PATH:$HOME/prog/fzf-fs"
 export PATH="$PATH:$HOME/.bin"
+export PATH="$HOME/prog/git-fuzzy/bin:$PATH"
 
 # Lastdir
 touch /tmp/lastdir.tmp
@@ -23,6 +24,10 @@ source $ANYRC_DANYRCD/.aliasrc
 
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
+
+if [ -f /etc/bash.command-not-found ]; then
+    . /etc/bash.command-not-found
+fi
 
 source /home/champii/.config/broot/launcher/bash/br
 

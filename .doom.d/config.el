@@ -19,13 +19,15 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "monospace" :size 9))
+;; (setq doom-font (font-spec :family "monospace" :size 9))
+(setq doom-font "xos4 Terminess Powerline-9")
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-snazzy)
-;; (load-theme 'doom-snazzy)
+;; (load "~/.doom.d/doom-snazzy-custom-theme")
+(setq doom-theme 'doom-one)
+;; (load-theme 'doom-snazzy2 t)
 
 ;; (custom-theme-set-faces 'doom-snazzy
 ;;   '(hl-line :background "#FFFFFF" :weight bold))
@@ -36,8 +38,9 @@
 ;;   '(buffer :background "#232627" :weight bold)
 ;;   '(region :background "#232627" :weight bold))
 
-(custom-set-faces!
-  '(mode-line :background "#252829" :weight normal))
+;; HERE
+;; (custom-set-faces!
+;;   '(mode-line :background "#252829" :weight normal))
 
 ;; (custom-set-faces!
 ;;   '(treemacs-dir :background "#252829" :weight normal) '(treemacs-dir :background "#252829" :weight normal)
@@ -54,7 +57,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type 'relative)
+;; (setq display-line-numbers-type 'relative)
 
 
 ;; Here are some additional functions/macros that could help you configure Doom:
@@ -85,10 +88,10 @@
 
 (beacon-mode 1)
 
-(require 'dimmer)
-(dimmer-configure-which-key)
-(dimmer-configure-helm)
-(dimmer-mode t)
+;; (require 'dimmer)
+;; (dimmer-configure-which-key)
+;; (dimmer-configure-helm)
+;; (dimmer-mode t)
 
 (drag-stuff-global-mode 1)
 (drag-stuff-define-keys)

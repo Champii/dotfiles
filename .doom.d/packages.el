@@ -51,6 +51,6 @@
 (package! drag-stuff)
 (package! aggressive-indent)
 (package! theme-magic)
-(package! theme-magic)
 (package! evil-fringe-mark)
 (package! rainbow-identifiers)
+(package! vue-mode)

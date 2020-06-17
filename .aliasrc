@@ -38,7 +38,7 @@ alias satt="screen -r"
 alias sls="screen -ls"
 
 # emacs
-alias emacs="emacsclient -create-frame -a \"\""
+# alias emacs="emacsclient -create-frame -a \"\""
 alias ne="emacs -nw"
 
 # Glances
