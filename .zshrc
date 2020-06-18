@@ -1,4 +1,4 @@
-export EDITOR=nvim
+export EDITOR="emacs -nw"
 
 # Go Path
 export GOROOT=/usr/local/go

@@ -321,6 +321,7 @@ bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output D
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 bindsym $mod+n exec --no-startup-id raiseorlaunch -s emacs
 bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
+bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
 # Screenshot

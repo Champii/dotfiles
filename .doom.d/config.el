@@ -57,7 +57,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-;; (setq display-line-numbers-type 'relative)
+(setq display-line-numbers-type 'relative)
 
 
 ;; Here are some additional functions/macros that could help you configure Doom:
@@ -152,10 +152,15 @@
 
 (define-key evil-normal-state-map (kbd "zx") 'save-buffer)
 ;; (define-key evil-insert-state-map "zx" 'save-buffer-exit-insert)
-(define-key evil-insert-state-map (kbd "<f13>") 'save-buffer-exit-insert)
-(define-key evil-normal-state-map (kbd "<f13>") 'save-buffer-exit-insert)
+;; (define-key evil-insert-state-map (kbd "<f13>") 'save-buffer-exit-insert)
+;; (define-key evil-normal-state-map (kbd "<f13>") 'save-buffer-exit-insert)
 
 (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+
+(define-key evil-insert-state-map (kbd "C-h") 'left-char)
+(define-key evil-insert-state-map (kbd "C-j") 'down-line)
+(define-key evil-insert-state-map (kbd "C-k") 'custom-increase-window-height)
+(define-key evil-insert-state-map (kbd "C-l") 'right-char)
 
 (evil-define-command split-goto-h ()
   "Split horizontaly and goto created window"
@@ -170,6 +175,8 @@
 ;; Keybinding is confusing here
 (define-key evil-normal-state-map (kbd "gv") 'split-goto-h)
 (define-key evil-normal-state-map (kbd "gh") 'split-goto-v)
+
+(define-key evil-normal-state-map (kbd "SPC g h") 'git-gutter:popup-hunk)
 
 ;; (load "~/.doom.d/modebar.el")
 
@@ -209,3 +216,23 @@
 ;; (kill-buffer "*scratch*")
 
 ;; (add-hook 'after-init-hook #'doom/quickload-session)
+(defun force-fold ()
+  "Fold the file at level 3"
+  (interactive)
+  (when (eq major-mode 'rustic-mode)
+    (+fold/close-all 3))
+  (when (eq major-mode 'js-mode)
+    (+fold/close-all 3))
+)
+
+(add-hook 'after-change-major-mode-hook #'force-fold)
+
+(set-email-account! "INBOX"
+  '((mu4e-sent-folder       . "/INBOX/Sent Mail")
+    (mu4e-drafts-folder     . "/INBOX/Drafts")
+    (mu4e-trash-folder      . "/INBOX/Trash")
+    (mu4e-refile-folder     . "/INBOX/All Mail")
+    (smtpmail-smtp-user     . "champii.akronym@gmail.com")
+    (user-mail-address      . "champii.akronym@gmail.com")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\n"))
+  t)
