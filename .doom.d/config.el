@@ -26,7 +26,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;; (load "~/.doom.d/doom-snazzy-custom-theme")
-(setq doom-theme 'doom-one)
+
 ;; (load-theme 'doom-snazzy2 t)
 
 ;; (custom-theme-set-faces 'doom-snazzy
@@ -167,6 +167,16 @@
   (evil-window-split)
   (evil-window-down 1))
 
+(evil-define-command split-goto-new-h ()
+  "Split horizontaly and goto created window with scratchbuffer"
+  (split-goto-h)
+  (doom/switch-to-scratch-buffer))
+
+(evil-define-command split-goto-new-v ()
+  "Split verticaly and goto created window with scratchbuffer"
+  (split-goto-v)
+  (doom/switch-to-scratch-buffer))
+
 (evil-define-command split-goto-v ()
   "Split verticaly and goto created window"
   (evil-window-vsplit)
@@ -176,8 +186,14 @@
 (define-key evil-normal-state-map (kbd "gv") 'split-goto-h)
 (define-key evil-normal-state-map (kbd "gh") 'split-goto-v)
 
+(define-key evil-normal-state-map (kbd "gV") 'split-goto-new-h)
+(define-key evil-normal-state-map (kbd "gH") 'split-goto-new-v)
+
 (define-key evil-normal-state-map (kbd "SPC g h") 'git-gutter:popup-hunk)
 
+(define-key evil-normal-state-map (kbd "SPC M M") '=irc)
+(define-key evil-normal-state-map (kbd "SPC M c") '+irc/ivy-jump-to-channel)
+(define-key evil-normal-state-map (kbd "SPC M a") 'tracking-next-buffer)
 ;; (load "~/.doom.d/modebar.el")
 
 ;; (global-set-key (kbd "SPC r t") 'string-rectangle)
@@ -236,3 +252,45 @@
     (user-mail-address      . "champii.akronym@gmail.com")    ;; only needed for mu < 1.4
     (mu4e-compose-signature . "---\n"))
   t)
+
+(setq browse-url-browser-function 'eaf-open-browser)
+(defalias 'browse-web #'eaf-open-browser)
+
+
+(autoload 'circe "circe" "Connect to an IRC server" t)
+;; (setq circe-network-options
+;;       '(("BitlBee"
+;;          :host "localhost"
+;;          :port 6668
+;;          :nick "champii"
+;;          :channels ("&bitlbee")
+;;          )))
+
+;; (defun fc-bitlbee-auth (nick user host command args)
+;;   "Authenticate to a bitlbee server."
+;;   (when (and (string= command "JOIN")
+;;              (circe-server-my-nick-p nick))
+;;     (with-circe-server-buffer
+;;       (when (string= circe-server-network "bitlbee")
+;;         (circe-server-send
+;;          (format "PRIVMSG #bitlbee :identify %s"
+;;                  001127))))))
+
+;; (setq circe-receive-message-functions ())
+;; (eval-after-load "circe"
+;;   '(progn
+;;      (require 'lui-irc-colors)
+;;      (add-to-list 'lui-pre-output-hook 'lui-irc-colors)
+;;      (add-to-list 'circe-receive-message-functions
+;;                   'fc-bitlbee-auth)))
+
+;; (circe "localhost" :port 6667 :server-network "bitlbee")
+(defun bitlbee ()
+  (interactive)
+  (circe "localhost" :port 6667 :server-network "bitlbee")
+  (save-window-excursion
+    (set-buffer "localhost:6667")
+    (setq circe-chat-target "&bitlbee")
+    (with-circe-server-buffer
+      (circe-command-SAY (format "identify %s" "001127")))))
+;; (bitlbee)

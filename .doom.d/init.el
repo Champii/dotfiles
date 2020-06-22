@@ -14,6 +14,10 @@
 ;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
 ;;      directory (for easy access to its source code).
 
+(add-to-list 'load-path "/home/champii/prog/emacs-application-framework")
+(require 'eaf)
+(require 'eaf-evil)
+
 (doom! :input
        ;;chinese
        ;;japanese
@@ -126,7 +130,7 @@
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
        (java +meghanada) ; the poster child for carpal tunnel syndrome
-       ;javascript        ; all(hope(abandon(ye(who(enter(here))))))
+       javascript        ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
        ;;latex             ; writing papers in Emacs has never been so fun
@@ -166,7 +170,7 @@
 
        :app
        calendar
-       ;;irc               ; how neckbeards socialize
+       irc               ; how neckbeards socialize
        (rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
 
