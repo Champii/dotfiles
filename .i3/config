@@ -208,11 +208,25 @@ bindsym Ctrl+$mod+l workspace next
 bindsym Ctrl+$mod+h workspace prev
 
 # Bar
+# bar {
+#         i3bar_command ~/.i3/lemonbar/i3_lemonbar.sh
+#         position top
+# }
 bar {
-        i3bar_command ~/.i3/lemonbar/i3_lemonbar.sh
-        position top
+    font pango:DejaVu Sans Mono, FontAwesome 6
+    position top
+    height 10
+    status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
+    colors {
+        separator #A54242
+        background #222222
+        statusline #dddddd
+        focused_workspace #A54242 #A54242 #ffffff
+        active_workspace #333333 #333333 #ffffff
+        inactive_workspace #333333 #333333 #888888
+        urgent_workspace #2f343a #900000 #ffffff
+    }
 }
-
 # Background
 #exec feh --bg-scale ~/pictures/wall_code.jpg
 #exec feh --bg-scale ~/pictures/wall2.jpg
