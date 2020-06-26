@@ -217,6 +217,7 @@ bar {
     position top
     height 10
     status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
+    separator_symbol ""
     colors {
         separator #A54242
         background #222222

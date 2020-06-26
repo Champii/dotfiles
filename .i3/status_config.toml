@@ -19,12 +19,22 @@ max_width = 100
 show_marks = "all"
 
 [[block]]
+block = "pacman"
+interval = 600
+format = "{pacman} + {aur} = {both} updates available"
+format_singular = "{both} update available"
+format_up_to_date = ""
+critical_updates_regex = "(linux |linux-lts|linux-zen)"
+# aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
+aur_command = "pikaur -Qua"
+
+[[block]]
 block = "net"
 device = "wlp2s0"
 ssid = true
 signal_strength = true
-graph_down = true
 speed_up = false
+graph_down = true
 interval = 5
 use_bits = false
 hide_inactive = true
@@ -32,8 +42,8 @@ hide_inactive = true
 [[block]]
 block = "net"
 device = "enp62s0u1u4"
-graph_down = true
 speed_up = false
+graph_down = true
 interval = 5
 use_bits = false
 hide_inactive = true
@@ -68,14 +78,14 @@ warning_mem = 60.0
 critical_mem = 80.0
 
 [[block]]
+block = "load"
+interval = 1
+
+[[block]]
 block = "cpu"
 interval = 1
 info = 10
 format = "{barchart} {utilization}% {frequency}GHz"
-
-[[block]]
-block = "load"
-interval = 1
 
 [[block]]
 block = "temperature"
@@ -94,11 +104,6 @@ block = "sound"
 [[block]]
 block = "backlight"
 
-[[block]]
-block = "battery"
-interval = 10
-format = "{percentage}% {time}"
-
 # [[block]]
 # block = "speedtest"
 # bytes = true
@@ -111,11 +116,6 @@ interval = 60
 format = "%a %d/%m %R"
 
 [[block]]
-block = "pacman"
-interval = 600
-format = "{pacman} + {aur} = {both} updates available"
-format_singular = "{both} update available"
-format_up_to_date = ""
-critical_updates_regex = "(linux |linux-lts|linux-zen)"
-# aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
-aur_command = "pikaur -Qua"
+block = "battery"
+interval = 10
+format = "{percentage}% {time}"
