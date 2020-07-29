@@ -258,39 +258,3 @@
 
 
 (autoload 'circe "circe" "Connect to an IRC server" t)
-;; (setq circe-network-options
-;;       '(("BitlBee"
-;;          :host "localhost"
-;;          :port 6668
-;;          :nick "champii"
-;;          :channels ("&bitlbee")
-;;          )))
-
-;; (defun fc-bitlbee-auth (nick user host command args)
-;;   "Authenticate to a bitlbee server."
-;;   (when (and (string= command "JOIN")
-;;              (circe-server-my-nick-p nick))
-;;     (with-circe-server-buffer
-;;       (when (string= circe-server-network "bitlbee")
-;;         (circe-server-send
-;;          (format "PRIVMSG #bitlbee :identify %s"
-;;                  001127))))))
-
-;; (setq circe-receive-message-functions ())
-;; (eval-after-load "circe"
-;;   '(progn
-;;      (require 'lui-irc-colors)
-;;      (add-to-list 'lui-pre-output-hook 'lui-irc-colors)
-;;      (add-to-list 'circe-receive-message-functions
-;;                   'fc-bitlbee-auth)))
-
-;; (circe "localhost" :port 6667 :server-network "bitlbee")
-(defun bitlbee ()
-  (interactive)
-  (circe "localhost" :port 6667 :server-network "bitlbee")
-  (save-window-excursion
-    (set-buffer "localhost:6667")
-    (setq circe-chat-target "&bitlbee")
-    (with-circe-server-buffer
-      (circe-command-SAY (format "identify %s" "001127")))))
-;; (bitlbee)
