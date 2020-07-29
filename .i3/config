@@ -43,7 +43,7 @@ bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 bindsym $mod+Shift+s move scratchpad
 
 # Show the terminal scratchpad window
-bindsym $mod+Tab [title="scratchpad"] scratchpad show
+bindsym $mod+Tab scratchpad show
 
 # Show the auryo scratchpad window
 bindsym $mod+s [instance="auryo"] scratchpad show
@@ -352,7 +352,9 @@ assign [title="^first"] number 1
 assign [class="emacs"] number 2
 assign [class="brave-browser"] number 3
 
-exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+# exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+exec --no-startup-id emacs
+
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs
 # exec --no-startup-id brave
