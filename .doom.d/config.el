@@ -239,6 +239,8 @@
     (+fold/close-all 3))
   (when (eq major-mode 'js-mode)
     (+fold/close-all 3))
+  (when (eq major-mode 'kotlin-mode)
+    (+fold/close-all 3))
 )
 
 (add-hook 'after-change-major-mode-hook #'force-fold)
@@ -258,3 +260,28 @@
 
 
 (autoload 'circe "circe" "Connect to an IRC server" t)
+
+(setq global-hl-line-mode t)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   '("~/org/roam/20200731054917-test.org" "/home/champii/org/20200506133516-root.org" "/home/champii/org/20200506135858-test.org" "/home/champii/org/20200506141506-main.org" "/home/champii/org/journal.org" "/home/champii/org/main.org" "/home/champii/org/notes.org" "/home/champii/org/projects.org" "/home/champii/org/todo.org")))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; VTERM
+
+;; (push (list "find-file-below"
+;;             (lambda (path)
+;;               (if-let* ((buf (find-file-noselect path))
+;;                         (window (display-buffer-below-selected buf nil)))
+;;                   (select-window window)
+;;                 (message "Failed to open file: %s" path))))
+;;       vterm-eval-cmds)

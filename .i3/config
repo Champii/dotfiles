@@ -200,7 +200,7 @@ bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
 bindsym $mod+d exec --no-startup-id konsole --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
 for_window [title="~ : i3-dmenu-deskto"] floating enable
-for_window [title="scratchpad"] move scratchpad
+# for_window [title="scratchpad"] move scratchpad
 
 
 # Workspace navigation
@@ -354,6 +354,8 @@ assign [class="brave-browser"] number 3
 
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
 exec --no-startup-id emacs
+
+for_window [title="emacs@arch"] move scratchpad
 
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs
