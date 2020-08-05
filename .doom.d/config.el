@@ -259,7 +259,7 @@
 (defalias 'browse-web #'eaf-open-browser)
 
 
-(autoload 'circe "circe" "Connect to an IRC server" t)
+;; (autoload 'circe "circe" "Connect to an IRC server" t)
 
 (setq global-hl-line-mode t)
 (custom-set-variables
