@@ -29,6 +29,28 @@ The Mod key is set to Mod3 which is in my case rebound to CapsLock for conveigna
 set $mod Mod3
 #+END_SRC
 
+** Colors
+
+#+BEGIN_SRC sh
+set $back               #1d1F21
+set $black              #282A2E
+set $grey               #373B41
+set $lightgrey          #707880
+set $white              #C5C8C6
+set $yellow             #F0C674
+set $red                #cc2925
+set $orange             #ffb86c
+set $darkred            #A54242
+set $green              #B5BD56
+
+#class                  border      backgr.     text        split
+client.focused          $red        $darkred    $black      $red
+client.focused_inactive $grey       $grey       $lightgrey  $grey
+client.unfocused        $grey       $grey       $lightgrey  $grey
+client.urgent           $red        $grey       $black      $red
+client.background       $back
+#+END_SRC
+
 ** Fonts
 
 *** System setup
@@ -51,22 +73,31 @@ This needs to have the FontAwesome installed
 font pango:DejaVu Sans Mono, FontAwesome 8
 #+END_SRC
 
-** Mark and Goto
-
-*** Mark
-
-Read 1 character and mark the current window with this character
+** Bar
 
 #+BEGIN_SRC sh
-bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
+bar {
+    font pango:DejaVu Sans Mono, FontAwesome 6
+    position top
+    height 10
+    status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
+    separator_symbol ""
+    colors {
+        separator #A54242
+        background #222222
+        statusline #dddddd
+        focused_workspace #A54242 #A54242 #ffffff
+        active_workspace #333333 #333333 #ffffff
+        inactive_workspace #333333 #333333 #888888
+        urgent_workspace #2f343a #900000 #ffffff
+    }
+}
 #+END_SRC
 
-*** Goto
-
-Read 1 character and go to the window with the character
+** Launcher
 
 #+BEGIN_SRC sh
-bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+bindsym Mod1+space exec dmenu_run -h 8 -p Open -nb "#232427"
 #+END_SRC
 
 ** Scratchpad
@@ -93,70 +124,6 @@ Show the rambox scratchpad window
 
 #+BEGIN_SRC sh
 bindsym $mod+m [instance="rambox"] scratchpad show
-#+END_SRC
-
-** Colors
-
-#+BEGIN_SRC sh
-set $back               #1d1F21
-set $black              #282A2E
-set $grey               #373B41
-set $lightgrey          #707880
-set $white              #C5C8C6
-set $yellow             #F0C674
-set $red                #cc2925
-set $orange             #ffb86c
-set $darkred            #A54242
-set $green              #B5BD56
-
-#class                  border      backgr.     text        split
-client.focused          $red        $darkred    $black      $red
-client.focused_inactive $grey       $grey       $lightgrey  $grey
-client.unfocused        $grey       $grey       $lightgrey  $grey
-client.urgent           $red        $grey       $black      $red
-client.background       $back
-#+END_SRC
-
-** Launcher
-
-#+BEGIN_SRC sh
-bindsym Mod1+space exec dmenu_run -h 8 -p Open -nb "#232427"
-#+END_SRC
-
-** Movements
-
-*** Change focus
-#+BEGIN_SRC sh
-bindsym $mod+h focus left
-bindsym $mod+j focus down
-bindsym $mod+k focus up
-bindsym $mod+l focus right
-#+END_SRC
-
-*** Alternatively, you can use the cursor keys:
-
-#+BEGIN_SRC sh
-#bindsym $mod+Left focus left
-#bindsym $mod+Down focus down
-#bindsym $mod+Up focus up
-#bindsym $mod+Right focus right
-#+END_SRC
-
-*** Move focused window
-#+BEGIN_SRC sh
-bindsym $mod+Shift+h move left
-bindsym $mod+Shift+j move down
-bindsym $mod+Shift+k move up
-bindsym $mod+Shift+l move right
-#+END_SRC
-
-*** Alternatively, you can use the cursor keys:
-
-#+BEGIN_SRC sh
-#bindsym $mod+Shift+Left move left
-#bindsym $mod+Shift+Down move down
-#bindsym $mod+Shift+Up move up
-#bindsym $mod+Shift+Right move right
 #+END_SRC
 
 ** Workspaces
@@ -199,7 +166,62 @@ workspace 2:fn  output DP2
 workspace 3:www output HDMI1
 #+END_SRC
 
-** Split
+*** Navigation
+
+#+BEGIN_SRC sh
+bindsym Ctrl+$mod+l workspace next
+bindsym Ctrl+$mod+h workspace prev
+#+END_SRC
+
+** Layout
+
+*** Focus
+
+**** Change focus
+
+#+BEGIN_SRC sh
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+#+END_SRC
+
+**** Alternatively, you can use the cursor keys:
+
+#+BEGIN_SRC sh
+#bindsym $mod+Left focus left
+#bindsym $mod+Down focus down
+#bindsym $mod+Up focus up
+#bindsym $mod+Right focus right
+#+END_SRC
+
+**** Move focused window
+#+BEGIN_SRC sh
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+#+END_SRC
+
+**** Alternatively, you can use the cursor keys:
+
+#+BEGIN_SRC sh
+#bindsym $mod+Shift+Left move left
+#bindsym $mod+Shift+Down move down
+#bindsym $mod+Shift+Up move up
+#bindsym $mod+Shift+Right move right
+#+END_SRC
+**** Tiling
+
+#+BEGIN_SRC sh
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+#+END_SRC
+
+*** Split
 
 - [ ] Restore change split with h and v
 
@@ -224,41 +246,92 @@ bindsym $mod+Shift+z split v
 #bindsym $mod+v split v
 #+END_SRC
 
-** I3 System
+*** Orientation
 
 #+BEGIN_SRC sh
-# reload the configuration file
+default_orientation horizontal
+#+END_SRC
+
+*** Floating
+
+**** Drag
+
+Use Mouse+$mod to drag floating windows to their wanted position
+
+#+BEGIN_SRC sh
+floating_modifier $mod
+#+END_SRC
+
+**** Toggle tiling/floating
+
+#+BEGIN_SRC sh
+bindsym $mod+Shift+space floating toggle
+#+END_SRC
+
+*** Resize
+
+Live resize
+
+#+BEGIN_SRC sh
+#bindsym $mod+Mod1+Left resize shrink width 1 px or 1 ppt
+#bindsym $mod+Mod1+Down resize grow height 1 px or 1 ppt
+#bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
+#bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
+
+bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
+bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
+bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
+bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
+#+END_SRC
+
+** I3 Commands
+
+*** Reload
+
+#+BEGIN_SRC sh
 bindsym $mod+Shift+c reload
+#+END_SRC
 
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+*** Restart
+
+Restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+
+#+BEGIN_SRC sh
 bindsym $mod+Shift+r restart
+#+END_SRC
 
-# exit i3 (logs you out of your X session)
+*** Exit
+
+Exit i3 (logs you out of your X session)
+
+#+BEGIN_SRC sh
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'pkill lemonbar; i3-msg exit'"
 #+END_SRC
 
 ** I3-Gaps
 
-#+BEGIN_SRC sh
-### i3-gaps stuff ###
+*** Smart borders
 
+#+BEGIN_SRC sh
+smart_borders on
+#+END_SRC
+
+*** Outer gaps
+
+#+BEGIN_SRC sh
+gaps outer 0
+#+END_SRC
+
+*** Modes
+
+#+BEGIN_SRC sh
 # Necessary for i3-gaps to work properly (pixel can be any value)
 for_window [class="^.*"] border pixel 1
 
-# Smart Gaps
-# smart_gaps on
-
-# Smart Borders
-smart_borders on
-
-# Set inner/outer gaps
-# gaps inner 8
-gaps outer 0
-
-# Gaps mode
 set $mode_gaps Gaps: (o) outer, (i) inner
 set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
+
 bindsym $mod+Shift+g mode "$mode_gaps"
 
 mode "$mode_gaps" {
@@ -293,37 +366,31 @@ mode "$mode_gaps_outer" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
-
-# -- End gaps mode
 #+END_SRC
 
-** Bar
+** Mark and Goto
+
+*** Mark
+
+Read 1 character and mark the current window with this character
 
 #+BEGIN_SRC sh
-# Bar
-# bar {
-#         i3bar_command ~/.i3/lemonbar/i3_lemonbar.sh
-#         position top
-# }
-bar {
-    font pango:DejaVu Sans Mono, FontAwesome 6
-    position top
-    height 10
-    status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
-    separator_symbol ""
-    colors {
-        separator #A54242
-        background #222222
-        statusline #dddddd
-        focused_workspace #A54242 #A54242 #ffffff
-        active_workspace #333333 #333333 #ffffff
-        inactive_workspace #333333 #333333 #888888
-        urgent_workspace #2f343a #900000 #ffffff
-    }
-}
+bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 #+END_SRC
 
-** X11 Keybindings
+*** Goto
+
+Read 1 character and go to the window with the character
+
+#+BEGIN_SRC sh
+bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+#+END_SRC
+
+** X11
+
+*** Keybindings
+
+**** Volume
 
 #+BEGIN_SRC sh
 # Volume keys
@@ -333,14 +400,27 @@ bindsym XF86AudioMute exec amixer -q set Master mute
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
+#+END_SRC
 
-# Brightness keys
+**** Brightness keys
+
+#+BEGIN_SRC sh
 bindsym XF86MonBrightnessUp exec intelbacklight -inc 200 # increase screen brightness
 bindsym XF86MonBrightnessDown exec intelbacklight -dec 200 # decrease screen brightness
+#+END_SRC
 
-# Brightness Min and Max
+**** Brightness Min and Max
+
+#+BEGIN_SRC sh
 bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
+#+END_SRC
+
+*** Screen output
+
+#+BEGIN_SRC sh
+exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
+exec_always xrandr --output DP-2 --auto --right-of DP-2
 #+END_SRC
 
 ** Raise or Launch
@@ -353,36 +433,34 @@ bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 #+END_SRC
 
+** Borders
+
+#+BEGIN_SRC sh
+default_border pixel 1
+default_floating_border pixel 1
+#+END_SRC
+** Autolock
+
+#+BEGIN_SRC sh
+exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
+    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
+#+END_SRC
+
 * To Dispatch
 
 #+BEGIN_SRC sh
 ### TO DISPATCH
-
-default_orientation horizontal
-
-
-# Use Mouse+$mod to drag floating windows to their wanted position
-floating_modifier $mod
 
 mouse_warping none
 
 popup_during_fullscreen smart
 workspace_auto_back_and_forth yes
 
-
-
 # start a terminal
 bindsym $mod+Return exec konsole
 
 # kill focused window
 bindsym $mod+Shift+q kill
-
-# Borders
-default_border pixel 1
-default_floating_border pixel 1
-
-
-
 
 
 # enter fullscreen mode for the focused container
@@ -393,31 +471,10 @@ bindsym $mod+f fullscreen toggle
 # bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 
-# toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
 
-# change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
-
-# focus the parent container
-bindsym $mod+a focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
-
-
-
-# Live resize
-#bindsym $mod+Mod1+Left resize shrink width 1 px or 1 ppt
-#bindsym $mod+Mod1+Down resize grow height 1 px or 1 ppt
-#bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
-#bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
-
-bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
-bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
-bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
-bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
-
 
 # WMFocus
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
@@ -426,9 +483,6 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 # for_window [title="scratchpad"] move scratchpad
 
 
-# Workspace navigation
-bindsym Ctrl+$mod+l workspace next
-bindsym Ctrl+$mod+h workspace prev
 
 # Background
 #exec feh --bg-scale ~/pictures/wall_code.jpg
@@ -454,12 +508,6 @@ exec libinput-gestures
 # Albert demon
 # exec albert
 
-# Autolock
-exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
-    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
-
-exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
-exec_always xrandr --output DP-2 --auto --right-of DP-2
 
 bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output DP-2 --off && pkill lemonbar && exec lemonbar
 
