@@ -54,6 +54,7 @@ alias vs="v -S"
 alias f="fzf"
 alias fzfp="fzf --preview 'bat --theme TwoDark --style=numbers --color=always {} | head -500'"
 alias fp="fzfp"
+alias fpc='cat `fp`'
 
 alias rgf="rg --column --line-number --hidden --ignore-case --no-heading --color=always"
 

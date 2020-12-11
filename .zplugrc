@@ -42,7 +42,7 @@ zplug "vladmyr/dotfiles-plugin"
 
 zplug "DarrinTisdale/zsh-aliases-exa"
 
-# zplug "fabiokiatkowski/exercism.plugin.zsh"
+zplug "fabiokiatkowski/exercism.plugin.zsh"
 
 zplug "mdumitru/fancy-ctrl-z"
 
@@ -68,7 +68,7 @@ zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
 
 # zplug "damofthemoon/zsh-quotify"
 
-zplug "RobSis/zsh-reentry-hook"
+# zplug "RobSis/zsh-reentry-hook" // BROKEN, HANG THE SHELL
 
 zplug "gko/ssh-connect", use:"ssh-connect.sh"
 

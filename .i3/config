@@ -4,25 +4,6 @@
 
 set $mod Mod3
 
-exec xset fp+ $HOME/.fonts/misc
-exec xset fp+ $HOME/.fonts/ohsnap
-exec xset fp+ $HOME/.fonts/terminesspowerline
-exec xset fp rehash
-
-font pango:DejaVu Sans Mono, FontAwesome 8
-
-bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
-
-bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
-
-bindsym $mod+Shift+s move scratchpad
-
-bindsym $mod+Tab scratchpad show
-
-bindsym $mod+s [instance="auryo"] scratchpad show
-
-bindsym $mod+m [instance="rambox"] scratchpad show
-
 set $back               #1d1F21
 set $black              #282A2E
 set $grey               #373B41
@@ -41,27 +22,39 @@ client.unfocused        $grey       $grey       $lightgrey  $grey
 client.urgent           $red        $grey       $black      $red
 client.background       $back
 
-bindsym Mod1+space exec dmenu_run -h 8 -p Open -nb "#232427"
+exec xset fp+ $HOME/.fonts/misc
+exec xset fp+ $HOME/.fonts/ohsnap
+exec xset fp+ $HOME/.fonts/terminesspowerline
+exec xset fp rehash
 
-bindsym $mod+h focus left
-bindsym $mod+j focus down
-bindsym $mod+k focus up
-bindsym $mod+l focus right
+font pango:DejaVu Sans Mono, FontAwesome 8
 
-#bindsym $mod+Left focus left
-#bindsym $mod+Down focus down
-#bindsym $mod+Up focus up
-#bindsym $mod+Right focus right
+bar {
+    font pango:DejaVu Sans Mono, FontAwesome 6
+    position top
+    height 10
+    status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
+    separator_symbol ""
+    colors {
+        separator #A54242
+        background #222222
+        statusline #dddddd
+        focused_workspace #A54242 #A54242 #ffffff
+        active_workspace #333333 #333333 #ffffff
+        inactive_workspace #333333 #333333 #888888
+        urgent_workspace #2f343a #900000 #ffffff
+    }
+}
 
-bindsym $mod+Shift+h move left
-bindsym $mod+Shift+j move down
-bindsym $mod+Shift+k move up
-bindsym $mod+Shift+l move right
+bindsym $mod+space exec dmenu_run -h 8 -p Open -nb "#232427"
 
-#bindsym $mod+Shift+Left move left
-#bindsym $mod+Shift+Down move down
-#bindsym $mod+Shift+Up move up
-#bindsym $mod+Shift+Right move right
+bindsym $mod+Shift+s move scratchpad
+
+bindsym $mod+Tab scratchpad show
+
+bindsym $mod+s [instance="auryo"] scratchpad show
+
+bindsym $mod+m [instance="rambox"] scratchpad show
 
 bindsym $mod+1 workspace 1:>_
 bindsym $mod+2 workspace 2:fn
@@ -89,6 +82,35 @@ workspace 1:>_ output eDP1
 workspace 2:fn  output DP2
 workspace 3:www output HDMI1
 
+bindsym Ctrl+$mod+l workspace next
+bindsym Ctrl+$mod+h workspace prev
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+#bindsym $mod+Left focus left
+#bindsym $mod+Down focus down
+#bindsym $mod+Up focus up
+#bindsym $mod+Right focus right
+
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+#bindsym $mod+Shift+Left move left
+#bindsym $mod+Shift+Down move down
+#bindsym $mod+Shift+Up move up
+#bindsym $mod+Shift+Right move right
+
+# change focus between tiling / floating windows
+bindsym $mod+Shift+t focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
 # split in horizontal orientation and spawn a term
 bindsym $mod+x split h, exec konsole
 
@@ -108,34 +130,39 @@ bindsym $mod+Shift+z split v
 # change split in vertical orientation
 #bindsym $mod+v split v
 
-# reload the configuration file
+default_orientation horizontal
+
+floating_modifier $mod
+
+bindsym $mod+Shift+space floating toggle
+
+#bindsym $mod+Mod1+Left resize shrink width 1 px or 1 ppt
+#bindsym $mod+Mod1+Down resize grow height 1 px or 1 ppt
+#bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
+#bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
+
+bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
+bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
+bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
+bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
+
 bindsym $mod+Shift+c reload
 
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
-# exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'pkill lemonbar; i3-msg exit'"
 
-### i3-gaps stuff ###
+smart_borders on
+
+gaps outer 0
 
 # Necessary for i3-gaps to work properly (pixel can be any value)
 for_window [class="^.*"] border pixel 1
 
-# Smart Gaps
-# smart_gaps on
-
-# Smart Borders
-smart_borders on
-
-# Set inner/outer gaps
-# gaps inner 8
-gaps outer 0
-
-# Gaps mode
 set $mode_gaps Gaps: (o) outer, (i) inner
 set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
+
 bindsym $mod+Shift+g mode "$mode_gaps"
 
 mode "$mode_gaps" {
@@ -171,29 +198,9 @@ mode "$mode_gaps_outer" {
         bindsym Escape mode "default"
 }
 
-# -- End gaps mode
+bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
-# Bar
-# bar {
-#         i3bar_command ~/.i3/lemonbar/i3_lemonbar.sh
-#         position top
-# }
-bar {
-    font pango:DejaVu Sans Mono, FontAwesome 6
-    position top
-    height 10
-    status_command /usr/bin/i3status-rs ~/.i3/status_config.toml
-    separator_symbol ""
-    colors {
-        separator #A54242
-        background #222222
-        statusline #dddddd
-        focused_workspace #A54242 #A54242 #ffffff
-        active_workspace #333333 #333333 #ffffff
-        inactive_workspace #333333 #333333 #888888
-        urgent_workspace #2f343a #900000 #ffffff
-    }
-}
+bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # Volume keys
 bindsym XF86AudioRaiseVolume exec amixer -q set Master 5%+ unmute
@@ -203,13 +210,14 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# Brightness keys
 bindsym XF86MonBrightnessUp exec intelbacklight -inc 200 # increase screen brightness
 bindsym XF86MonBrightnessDown exec intelbacklight -dec 200 # decrease screen brightness
 
-# Brightness Min and Max
 bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
+
+exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
+exec_always xrandr --output DP-2 --auto --right-of DP-2
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 bindsym $mod+n exec --no-startup-id raiseorlaunch -s emacs
@@ -217,19 +225,11 @@ bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
-default_orientation horizontal
+default_border pixel 1
+default_floating_border pixel 1
 
-floating_modifier $mod
-
-#bindsym $mod+Mod1+Left resize shrink width 1 px or 1 ppt
-#bindsym $mod+Mod1+Down resize grow height 1 px or 1 ppt
-#bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
-#bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
-
-bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
-bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
-bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
-bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
+exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
+    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
 ### TO DISPATCH
 
@@ -244,9 +244,6 @@ bindsym $mod+Return exec konsole
 # kill focused window
 bindsym $mod+Shift+q kill
 
-# Borders
-default_border pixel 1
-default_floating_border pixel 1
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -256,21 +253,10 @@ bindsym $mod+f fullscreen toggle
 # bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 
-# toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
 
-# change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
-
-# focus the parent container
-bindsym $mod+a focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
-
-
-
-
 
 # WMFocus
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
@@ -279,9 +265,6 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 # for_window [title="scratchpad"] move scratchpad
 
 
-# Workspace navigation
-bindsym Ctrl+$mod+l workspace next
-bindsym Ctrl+$mod+h workspace prev
 
 # Background
 #exec feh --bg-scale ~/pictures/wall_code.jpg
@@ -307,12 +290,6 @@ exec libinput-gestures
 # Albert demon
 # exec albert
 
-# Autolock
-exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
-    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
-
-exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
-exec_always xrandr --output DP-2 --auto --right-of DP-2
 
 bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output DP-2 --off && pkill lemonbar && exec lemonbar
 
@@ -332,10 +309,10 @@ assign [title="^first"] number 1
 assign [class="emacs"] number 2
 assign [class="brave-browser"] number 3
 
-# exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
-exec --no-startup-id emacs
+exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+# exec --no-startup-id emacs
 
-for_window [title="emacs@arch"] move scratchpad
+# for_window [title="emacs@arch"] move scratchpad
 
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs

@@ -221,6 +221,22 @@
                (reusable-frames . visible)
                (window-height . 0.15)))
 
+;; (add-to-list 'display-buffer-alist
+;;              '((with-current-buffer "*cargo-test*" t)
+;;                (display-buffer-reuse-window display-buffer-in-side-window)
+;;                (side . left)
+;;                ;;(dedicated . t) ;dedicated is supported in emacs27
+;;                (reusable-frames . visible)
+;;                (window-width . 0.15)))
+
+;; (add-to-list 'display-buffer-alist
+;;              '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'rustic-cargo-test-mode)))
+;;                (display-buffer-reuse-window display-buffer-in-side-window)
+;;                (side . right)
+;;                ;; (dedicated . t) ;dedicated is supported in emacs27
+;;                (reusable-frames . visible)
+;;                (window-width . 0.3)))
+
 (evil-set-initial-state 'vterm-mode 'emacs)
 
 (eval-after-load 'vterm
@@ -268,7 +284,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(org-agenda-files
-   '("~/org/roam/2020-08-08.org" "~/.i3/config.org" "~/org/roam/20200804064349-goldsilver.org" "/home/champii/org/journal.org" "/home/champii/org/notes.org" "/home/champii/org/projects.org" "/home/champii/org/todo.org")))
+   '("~/org/roam/20200831110916-personnal_planning.org" "~/org/roam/20200804064349-goldsilver.org" "~/org/roam/main.org" "~/org/roam/2020-08-08.org" "~/.i3/config.org" "/home/champii/org/journal.org" "/home/champii/org/notes.org" "/home/champii/org/projects.org" "/home/champii/org/todo.org")))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

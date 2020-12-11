@@ -94,10 +94,12 @@ bar {
 }
 #+END_SRC
 
+#+RESULTS:
+
 ** Launcher
 
 #+BEGIN_SRC sh
-bindsym Mod1+space exec dmenu_run -h 8 -p Open -nb "#232427"
+bindsym $mod+space exec dmenu_run -h 8 -p Open -nb "#232427"
 #+END_SRC
 
 ** Scratchpad
@@ -211,11 +213,12 @@ bindsym $mod+Shift+l move right
 #bindsym $mod+Shift+Up move up
 #bindsym $mod+Shift+Right move right
 #+END_SRC
+
 **** Tiling
 
 #+BEGIN_SRC sh
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+bindsym $mod+Shift+t focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
@@ -527,10 +530,10 @@ assign [title="^first"] number 1
 assign [class="emacs"] number 2
 assign [class="brave-browser"] number 3
 
-# exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
-exec --no-startup-id emacs
+exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+# exec --no-startup-id emacs
 
-for_window [title="emacs@arch"] move scratchpad
+# for_window [title="emacs@arch"] move scratchpad
 
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs

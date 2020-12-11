@@ -54,3 +54,7 @@
 (package! evil-fringe-mark)
 (package! rainbow-identifiers)
 (package! vue-mode)
+(package! helm-ag)
+;; (package! rustic
+;;   :recipe (:host github :repo "brotzeit/rustic")
+;;   :pin "0c8febe1734158f0c808c652395f9e0e53360744")
