@@ -1,16 +1,1 @@
-.zshrc
-.zpreztorc
-.xinitrc
-.i3/config
-.i3/config.org
-.i3/toggle_touchpad.sh
-.i3/status_config.toml
-.config/starship.toml
-.aliasrc
-.zplugrc
-.zprezto/
-.config/nvim/init.vim
-.config/nvim/coc.vim
-.config/nvim/coc-settings.json
-.zshplugins/
-.doom.d/
+/home/champii/dotfiles/.gitinclude
