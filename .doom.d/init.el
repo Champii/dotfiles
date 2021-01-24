@@ -14,9 +14,26 @@
 ;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
 ;;      directory (for easy access to its source code).
 
-(add-to-list 'load-path "/home/champii/prog/emacs-application-framework")
-(require 'eaf)
+(add-to-list 'load-path "/home/champii/.emacs.d/site-lisp")
+(require 's)
+;; ;; (add-to-list 'load-path "/home/champii/prog/emacs-application-framework")
+(add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
 (require 'eaf-evil)
+
+
+(define-key key-translation-map (kbd "SPC")
+    (lambda (prompt)
+      (if (derived-mode-p 'eaf-mode)
+          (pcase eaf--buffer-app-name
+            ("browser" (if (eaf-call "call_function" eaf--buffer-id "is_focus")
+                           (kbd "SPC")
+                         (kbd eaf-evil-leader-key)))
+            ("pdf-viewer" (kbd eaf-evil-leader-key))
+            ("image-viewer" (kbd eaf-evil-leader-key))
+            (_  (kbd "SPC")))
+        (kbd "SPC"))))
+
 
 (doom! :input
        ;;chinese
@@ -137,7 +154,7 @@
        ;;lean
        ;;factor
        ;;ledger            ; an accounting system in Emacs
-       ;;lua               ; one-based indices? one-based indices
+       lua               ; one-based indices? one-based indices
        markdown          ; writing docs for people to ignore
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht m
@@ -175,7 +192,7 @@
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config
-       ;;literate
+       ;; literate
        (default +bindings +smartparens))
 
 

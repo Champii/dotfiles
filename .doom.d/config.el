@@ -25,7 +25,9 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;; (load "~/.doom.d/doom-snazzy-custom-theme")
+;;(load "~/.doom.d/doom-snazzy-custom-theme")
+
+(setq doom-theme 'doom-snazzy-custom)
 
 ;; (load-theme 'doom-snazzy2 t)
 
@@ -301,3 +303,11 @@
 ;;                   (select-window window)
 ;;                 (message "Failed to open file: %s" path))))
 ;;       vterm-eval-cmds)
+
+;; I3
+;;
+(defun pop-to-buffer-same-window (buffer &optional norecord) (let ((display-buffer-overriding-action '(nil . nil))) (pop-to-buffer buffer display-buffer--same-window-action norecord)))
+(add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/i3-emacs/")
+(require 'i3)
+(require 'i3-integration)
+;; (i3-one-window-per-frame-mode-on)

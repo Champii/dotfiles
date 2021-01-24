@@ -18,7 +18,7 @@
 
   ;; name        default   256       16
   ;; ((bg         '("#282a36" "#282a36" nil          )) ;; this is the background for the hl-line, modeline, and minibuffer
-  ((bg         '("#192223" "#192223" "black"       )) ;; this is the background for the hl-line, modeline, and minibuffer
+  ((bg         '("#232627" "#232627" "black"       )) ;; this is the background for the hl-line, modeline, and minibuffer
    (bg-alt     '("#202324" "#202324" "black"      )) ;; this is the background for the line you arent currently on
    (base0      '("#282a36" "#282a36" "black"      ))
    (base1      '("#34353e" "#34353e" "brightblack"))
@@ -91,7 +91,7 @@
   ;; extra faces
   ;; i have no idea what im doing with the modeline
   ((mode-line
-    :background "#ffffff"
+    :background "#202324"
     :foreground (doom-darken orange 0.15))
 
    (mode-line-inactive

@@ -55,6 +55,12 @@
 (package! rainbow-identifiers)
 (package! vue-mode)
 (package! helm-ag)
+(package! s)
+(package! eaf :recipe (:host github
+                       :repo "manateelazycat/emacs-application-framework"
+                       :files ("*.el" "*.py" "app" "core")
+                       :no-byte-compile t))
+;; (package! code-compass)
 ;; (package! rustic
 ;;   :recipe (:host github :repo "brotzeit/rustic")
 ;;   :pin "0c8febe1734158f0c808c652395f9e0e53360744")

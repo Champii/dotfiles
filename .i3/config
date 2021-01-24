@@ -46,7 +46,7 @@ bar {
     }
 }
 
-bindsym $mod+space exec dmenu_run -h 8 -p Open -nb "#232427"
+bindsym $mod+space exec dmenu_run -h 4 -p Open -nb "#232427" -l 3 -sb "#990000"
 
 bindsym $mod+Shift+s move scratchpad
 
@@ -271,7 +271,8 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 #exec feh --bg-scale ~/pictures/wall2.jpg
 #exec feh --bg-scale ~/pictures/wall3.jpg
 # exec feh --bg-scale ~/pictures/wall4.jpg
-exec feh --bg-scale ~/pictures/wall_new.jpeg
+# exec feh --bg-scale ~/pictures/wall_new.jpeg
+exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
 
 # Lock
 bindsym Control+Mod1+l exec i3lock-fancy

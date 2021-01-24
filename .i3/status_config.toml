@@ -29,15 +29,18 @@ critical_updates_regex = "(linux |linux-lts|linux-zen)"
 aur_command = "pikaur -Qua"
 
 [[block]]
-block = "net"
-device = "wlp2s0"
-ssid = true
-signal_strength = true
-speed_up = false
-graph_down = true
-interval = 5
-use_bits = false
-hide_inactive = true
+block = "networkmanager"
+
+#[[block]]
+#block = "net"
+#device = "wlp2s0"
+#ssid = true
+#signal_strength = true
+#speed_up = false
+#graph_down = true
+#interval = 5
+#use_bits = false
+#hide_inactive = true
 
 [[block]]
 block = "net"
