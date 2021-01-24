@@ -19,7 +19,7 @@ export PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 touch /tmp/lastdir.tmp
 cd `cat /tmp/lastdir.tmp`
 
-colorscript -r
+# colorscript -r
 
 # Plugins
 if [[ -z $ANYRC_DANYRCD  ]] then ANYRC_DANYRCD=$HOME fi
@@ -27,14 +27,14 @@ source "$HOME/.zprezto/init.zsh"
 source $ANYRC_DANYRCD/.zplugrc
 source $ANYRC_DANYRCD/.aliasrc
 
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+# . $HOME/.asdf/asdf.sh
+# . $HOME/.asdf/completions/asdf.bash
 
 if [ -f /etc/bash.command-not-found ]; then
     . /etc/bash.command-not-found
 fi
 
-source /home/champii/.config/broot/launcher/bash/br
+# source /home/champii/.config/broot/launcher/bash/br
 
 # Marker plugins
 export FZF_MARKER_CONF_DIR=~/.marker/tldr
