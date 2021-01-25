@@ -58,6 +58,8 @@ alias fpc='cat `fp`'
 
 alias rgf="rg --column --line-number --hidden --ignore-case --no-heading --color=always"
 
+# Fasd
+alias n="f -e 'emacsclient -nw'"
 
 export FZF_DEFAULT_OPTS="--height=50% --layout=reverse --border -m --ansi"
 export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob \"!.git/*\""

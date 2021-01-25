@@ -40,7 +40,18 @@ fi
 export FZF_MARKER_CONF_DIR=~/.marker/tldr
 [[ -s "$HOME/.local/share/marker/marker.sh" ]] && source "$HOME/.local/share/marker/marker.sh"
 [[ -s "./.zshplugins/fzf-marker.plugin.zsh" ]] && source "./.zshplugins/fzf-marker.plugin.zsh"
+[[ -s "./.zshplugins/fzf-keybindings.zsh" ]] && source "./.zshplugins/fzf-keybindings.zsh"
+
 # [[ -s "./.zshplugins/zsh-interactive-cd.plugin.zsh" ]] && source "./.zshplugins/zsh-interactive-cd.plugin.zsh"
 
+source <(cod init $$ zsh)
+
+eval "$(navi widget zsh)"
+
+eval "$(fasd --init auto zsh-hook zsh-ccomp-install zsh-ccomp zsh-wcomp-install zsh-wcomp)"
 
 eval "$(starship init zsh)"
+
+
+source ~/.xsh
+

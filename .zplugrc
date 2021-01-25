@@ -2,12 +2,15 @@
 
 source ~/.zplug/init.zsh
 
+
 zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
 
-zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
+# zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
 
+AUTO_LS_COMMANDS=(custom-ls custom-git)
+# AUTO_LS_NEWLINE=false
 zplug "desyncr/auto-ls", from:"github", use:"auto-ls.plugin.zsh"
 
 #zplug "nocttuam/autodotenv", from:"github"
@@ -48,7 +51,7 @@ zplug "seletskiy/zsh-fuzzy-search-and-edit"
 
 zplug 'ytet5uy4/fzf-widgets'
 
-zplug 'wyntau/fzf-zsh'
+# zplug 'wyntau/fzf-zsh'
 
 # zplug 'oldratlee/hacker-quotes'
 
@@ -60,7 +63,7 @@ zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
 
 # zplug "damofthemoon/zsh-quotify"
 
-# zplug "RobSis/zsh-reentry-hook" // BROKEN, HANG THE SHELL
+zplug "RobSis/zsh-reentry-hook" #// BROKEN, HANG THE SHELL
 
 zplug "gko/ssh-connect", use:"ssh-connect.sh"
 
@@ -74,7 +77,12 @@ zplug "sobolevn/wakatime-zsh-plugin"
 
 zplug "bryanculver/opus.plugin.zsh"
 
-zplug "softmoth/zsh-vim-mode"
+zplug "zsh-users/zsh-autosuggestions"
+# bindkey -v
+# zplug "softmoth/zsh-vim-mode"
+
+zplug "olets/zsh-abbr"
+
 
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then
@@ -85,40 +93,40 @@ if ! zplug check --verbose; then
 fi
 
 # Then, source plugins and add commands to $PATH
-zplug load
+zplug load 
 
 # CONFIG
 
-bindkey '\e[A' directory-history-search-backward
-bindkey '\e[B' directory-history-search-forward
+# bindkey '\e[A' directory-history-search-backward
+# bindkey '\e[B' directory-history-search-forward
 
-# Anyframe
-autoload -Uz anyframe-init
-anyframe-init
+# # Anyframe
+# autoload -Uz anyframe-init
+# anyframe-init
 
-zstyle ":anyframe:selector:" use fzf
-zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
+# zstyle ":anyframe:selector:" use fzf
+# zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 
-autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
-add-zsh-hook chpwd chpwd_recent_dirs
+# autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+# add-zsh-hook chpwd chpwd_recent_dirs
 
-bindkey '^xb' anyframe-widget-cdr
-bindkey '^x^b' anyframe-widget-checkout-git-branch
+# bindkey '^xb' anyframe-widget-cdr
+# bindkey '^x^b' anyframe-widget-checkout-git-branch
 
-bindkey '^xr' anyframe-widget-execute-history
-bindkey '^x^r' anyframe-widget-execute-history
+# bindkey '^xr' anyframe-widget-execute-history
+# bindkey '^x^r' anyframe-widget-execute-history
 
-bindkey '^xi' anyframe-widget-put-history
-bindkey '^x^i' anyframe-widget-put-history
+# bindkey '^xi' anyframe-widget-put-history
+# bindkey '^x^i' anyframe-widget-put-history
 
-bindkey '^xg' anyframe-widget-cd-ghq-repository
-bindkey '^x^g' anyframe-widget-cd-ghq-repository
+# bindkey '^xg' anyframe-widget-cd-ghq-repository
+# bindkey '^x^g' anyframe-widget-cd-ghq-repository
 
-bindkey '^xk' anyframe-widget-kill
-bindkey '^x^k' anyframe-widget-kill
+# bindkey '^xk' anyframe-widget-kill
+# bindkey '^x^k' anyframe-widget-kill
 
-bindkey '^xe' anyframe-widget-insert-git-branch
-bindkey '^x^e' anyframe-widget-insert-git-branch
+# bindkey '^xe' anyframe-widget-insert-git-branch
+# bindkey '^x^e' anyframe-widget-insert-git-branch
 
 # /Anyframe
 
@@ -134,8 +142,6 @@ auto-ls-custom-git () {
 	auto-ls-git-status
     fi
 }
-
-AUTO_LS_COMMANDS=(custom-ls custom-git)
 
 # fast-theme q-jmnemonic
 
