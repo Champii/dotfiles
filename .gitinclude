@@ -14,3 +14,4 @@
 .config/nvim/coc-settings.json
 .zshplugins/
 .doom.d/
+.emacs.d/site-lisp/
