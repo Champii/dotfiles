@@ -51,7 +51,3 @@ eval "$(navi widget zsh)"
 eval "$(fasd --init auto zsh-hook zsh-ccomp-install zsh-ccomp zsh-wcomp-install zsh-wcomp)"
 
 eval "$(starship init zsh)"
-
-
-source ~/.xsh
-
