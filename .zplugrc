@@ -3,6 +3,7 @@
 source ~/.zplug/init.zsh
 
 
+zplug "tymm/zsh-directory-history"
 zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
@@ -25,13 +26,12 @@ zplug "zpm-zsh/colorize"
 
 zplug "psprint/zsh-cmd-architect"
 
-zplug "mollifier/anyframe"
+# zplug "mollifier/anyframe"
 
 # zplug "vifon/deer", use:deer
 # zle -N deer
 # bindkey '\ek' deer
 
-zplug "tymm/zsh-directory-history"
 
 # zplug "vladmyr/dotfiles-plugin"
 
@@ -77,6 +77,7 @@ zplug "sobolevn/wakatime-zsh-plugin"
 
 zplug "bryanculver/opus.plugin.zsh"
 
+
 zplug "zsh-users/zsh-autosuggestions"
 # bindkey -v
 # zplug "softmoth/zsh-vim-mode"
@@ -96,9 +97,10 @@ fi
 zplug load 
 
 # CONFIG
-
-# bindkey '\e[A' directory-history-search-backward
-# bindkey '\e[B' directory-history-search-forward
+# bindkey '\eOA' history-substring-search-up
+# bindkey '\eOB' history-substring-search-down
+bindkey '\eOA' history-substring-search-up
+bindkey '\eOB' history-substring-search-down
 
 # # Anyframe
 # autoload -Uz anyframe-init

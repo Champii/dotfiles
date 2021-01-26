@@ -79,8 +79,8 @@ bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
 workspace 1:>_ output eDP1
-workspace 2:fn  output DP2
-workspace 3:www output HDMI1
+workspace 2:fn  output HDMI1
+workspace 3:www output DP-2
 
 bindsym Ctrl+$mod+l workspace next
 bindsym Ctrl+$mod+h workspace prev
@@ -217,7 +217,7 @@ bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase scree
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
 
 exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
-exec_always xrandr --output DP-2 --auto --right-of DP-2
+exec_always xrandr --output DP-2 --auto --right-of HDMI-1
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 bindsym $mod+n exec --no-startup-id raiseorlaunch -s emacs
@@ -228,7 +228,7 @@ bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 default_border pixel 1
 default_floating_border pixel 1
 
-exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "i3lock-fancy" \
+exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
 ### TO DISPATCH
@@ -275,7 +275,7 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
 
 # Lock
-bindsym Control+Mod1+l exec i3lock-fancy
+bindsym Control+Mod1+l exec light-locker-command -l
 
 # Compositor
 exec --no-startup-id picom
@@ -318,3 +318,5 @@ exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
 # exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs
 # exec --no-startup-id brave
+
+exec light-locker

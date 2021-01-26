@@ -39,8 +39,8 @@ fi
 # Marker plugins
 export FZF_MARKER_CONF_DIR=~/.marker/tldr
 [[ -s "$HOME/.local/share/marker/marker.sh" ]] && source "$HOME/.local/share/marker/marker.sh"
-[[ -s "./.zshplugins/fzf-marker.plugin.zsh" ]] && source "./.zshplugins/fzf-marker.plugin.zsh"
-[[ -s "./.zshplugins/fzf-keybindings.zsh" ]] && source "./.zshplugins/fzf-keybindings.zsh"
+[[ -s "$HOME/.zshplugins/fzf-marker.plugin.zsh" ]] && source "$HOME/.zshplugins/fzf-marker.plugin.zsh"
+[[ -s "$HOME/.zshplugins/fzf-keybindings.zsh" ]] && source "$HOME/.zshplugins/fzf-keybindings.zsh"
 
 # [[ -s "./.zshplugins/zsh-interactive-cd.plugin.zsh" ]] && source "./.zshplugins/zsh-interactive-cd.plugin.zsh"
 

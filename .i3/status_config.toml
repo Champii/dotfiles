@@ -2,12 +2,13 @@
 name = "slick"
 [theme.overrides]
 idle_bg = "#1e2122"
+# idle_bg = "#1e2122"
 idle_fg = "#abcdef"
 info_bg = "#FFC622"
 info_fg = "#000000"
 warning_bg = "#FF6666"
 warning_fg = "#000000"
-critical_bg = "#FF0000"
+critical_bg = "#FF1111"
 critical_fg = "#000000"
 
 [icons]
