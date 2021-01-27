@@ -23,7 +23,7 @@
    (base0      '("#282a36" "#282a36" "black"      ))
    (base1      '("#34353e" "#34353e" "brightblack"))
    (base2      '("#43454f" "#43454f" "brightblack"))
-   (base3      '("#78787e" "#78787e" "brightblack"))
+   (base3      '("#202223" "#202223" "brightblack"))
    (base4      '("#a5a5a9" "#a5a5a9" "brightblack"))
    (base5      '("#e2e4e5" "#e2e4e5" "brightblack"))
    (base6      '("#eff0eb" "#eff0eb" "brightblack"))
