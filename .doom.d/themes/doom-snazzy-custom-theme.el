@@ -23,7 +23,7 @@
    (base0      '("#282a36" "#282a36" "black"      ))
    (base1      '("#34353e" "#34353e" "brightblack"))
    (base2      '("#43454f" "#43454f" "brightblack"))
-   (base3      '("#202223" "#202223" "brightblack"))
+   (base3      '("#1b1b1b" "#1b1b1b" "brightblack"))
    (base4      '("#a5a5a9" "#a5a5a9" "brightblack"))
    (base5      '("#e2e4e5" "#e2e4e5" "brightblack"))
    (base6      '("#eff0eb" "#eff0eb" "brightblack"))
@@ -61,7 +61,8 @@
    ;; face categories -- required for all themes
    (highlight      red) ;; when searching with (/) ?
    ;; (vertical-bar   (doom-darken base1 0.1)) ;; no idea what this is
-   (vertical-bar (doom-darken red 0.6)) ;; the bar that separates modeline and
+   ;; (vertical-bar (doom-darken bg 0.6)) ;; the bar that separates modeline and
+   (vertical-bar base3) ;; the bar that separates modeline and
                                           ;; minibuffer?
    (selection      dark-grey) ;; for like company autocomplete and stuff
    (builtin magenta) ;; saw this in company autocomplete if i moved my mouse

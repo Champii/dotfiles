@@ -39,7 +39,7 @@ alias sls="screen -ls"
 
 # emacs
 # alias emacs="emacsclient -create-frame -a \"\""
-alias ne="emacs -nw"
+alias ne="emacsclient -nw"
 
 # Glances
 alias glances="glances --fs-free-space -1 --enable-process-extended --process-short-name -b"

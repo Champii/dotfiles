@@ -228,8 +228,8 @@ bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 default_border pixel 1
 default_floating_border pixel 1
 
-exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
-    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
+# exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
+#     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
 ### TO DISPATCH
 
@@ -279,6 +279,7 @@ bindsym Control+Mod1+l exec light-locker-command -l
 
 # Compositor
 exec --no-startup-id picom
+exec --no-startup-id deadd-notification-center
 
 
 # Touchpad toggler
@@ -319,4 +320,4 @@ exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
 # exec --no-startup-id emacs
 # exec --no-startup-id brave
 
-exec light-locker
+# exec light-locker

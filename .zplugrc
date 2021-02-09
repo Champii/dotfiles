@@ -10,9 +10,9 @@ zplug "hlissner/zsh-autopair", defer:2
 
 # zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
 
-AUTO_LS_COMMANDS=(custom-ls custom-git)
+# AUTO_LS_COMMANDS=(custom-ls custom-git)
 # AUTO_LS_NEWLINE=false
-zplug "desyncr/auto-ls", from:"github", use:"auto-ls.plugin.zsh"
+# zplug "desyncr/auto-ls", from:"github", use:"auto-ls.plugin.zsh"
 
 #zplug "nocttuam/autodotenv", from:"github"
 
