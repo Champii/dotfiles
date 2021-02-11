@@ -18,8 +18,9 @@
 
   ;; name        default   256       16
   ;; ((bg         '("#282a36" "#282a36" nil          )) ;; this is the background for the hl-line, modeline, and minibuffer
-  ((bg         '("#232627" "#232627" "black"       )) ;; this is the background for the hl-line, modeline, and minibuffer
-   (bg-alt     '("#202324" "#202324" "black"      )) ;; this is the background for the line you arent currently on
+  ;; ((bg         '("#232627" "#232627" "black"       )) ;; this is the background for the hl-line, modeline, and minibuffer
+  ((bg         '("#141414" "#141414" "black"       )) ;; this is the background for the hl-line, modeline, and minibuffer
+   (bg-alt     '("#1b1b1b" "#1b1b1b" "black"      )) ;; this is the background for the line you arent currently on
    (base0      '("#282a36" "#282a36" "black"      ))
    (base1      '("#34353e" "#34353e" "brightblack"))
    (base2      '("#43454f" "#43454f" "brightblack"))
