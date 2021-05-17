@@ -272,7 +272,8 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 #exec feh --bg-scale ~/pictures/wall3.jpg
 # exec feh --bg-scale ~/pictures/wall4.jpg
 # exec feh --bg-scale ~/pictures/wall_new.jpeg
-exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
+# exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
+exec --no-startup-id feh --bg-scale ~/wallpapers/sunset.jpeg
 
 # Lock
 bindsym Control+Mod1+l exec light-locker-command -l

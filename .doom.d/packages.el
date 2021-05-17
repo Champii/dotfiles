@@ -59,7 +59,7 @@
 (package! eaf :recipe (:host github
                        :repo "manateelazycat/emacs-application-framework"
                        :files ("*.el" "*.py" "app" "core")
-                       :no-byte-compile t))
+                       ))
 ;; (package! code-compass)
 ;; (package! rustic
 ;;   :recipe (:host github :repo "brotzeit/rustic")
