@@ -17,7 +17,13 @@
 
 (global-auto-revert-mode t)
 
-(set-frame-parameter (selected-frame) 'alpha '(85 . 70))
+(setq display-line-numbers-type 'relative)
+
+(global-set-key (kbd "C-c C-c") 'evil-escape)
+
+(setq global-hl-line-mode t)
+
+(set-frame-parameter (selected-frame) 'alpha '(90 . 75))
 
 ;; Line Numbers
 (column-number-mode)
@@ -31,43 +37,81 @@
 
 (set-face-attribute 'default nil :font "xos4 Terminess Powerline-9" :height 50)
 
-(load-theme 'wombat)
-
 ;; Make ESQ quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Package manager
-(require 'package)
+  (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmod.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmod.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
 
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
-(require 'use-package)
-(setq use-package-always-ensure t)
+  (require 'use-package)
+  (setq use-package-always-ensure t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
+ '(custom-safe-themes
+   '("811f9cbab3c21575e207d850b4760f1273aac52492c950a24a7d549b6a3b1e6b" default))
+ '(exwm-floating-border-color "#1b1b1b")
+ '(fci-rule-color "#e2e4e5")
+ '(highlight-tail-colors
+   ((("#1b2a20" "#1b2a20" "brightred")
+     . 0)
+    (("#21292b" "#21292b" "black")
+     . 20)))
+ '(jdee-db-active-breakpoint-face-colors (cons "#282a36" "#ff5c57"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#282a36" "#5af78e"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
+ '(objed-cursor-color "#ff5c57")
  '(package-selected-packages
    '(org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+ '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
+ '(rustic-ansi-faces
+   ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
  '(safe-local-variable-values '((projectile-project-run-cmd . "cargo run")))
+ '(vc-annotate-background "#141414")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#5af78e")
+    (cons 40 "#8df793")
+    (cons 60 "#c0f898")
+    (cons 80 "#f3f99d")
+    (cons 100 "#f7e38c")
+    (cons 120 "#fbcd7c")
+    (cons 140 "#ffb86c")
+    (cons 160 "#ff9e88")
+    (cons 180 "#ff84a4")
+    (cons 200 "#ff6ac1")
+    (cons 220 "#ff659d")
+    (cons 240 "#ff607a")
+    (cons 260 "#ff5c57")
+    (cons 280 "#e06663")
+    (cons 300 "#c1716f")
+    (cons 320 "#a27b7b")
+    (cons 340 "#e2e4e5")
+    (cons 360 "#e2e4e5")))
+ '(vc-annotate-very-old-color nil)
  '(xterm-mouse-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(lsp-face-semhl-member ((t nil))))
+ )
 
 ;; Ivy
 (use-package ivy
@@ -144,26 +188,22 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-snazzy-custom t))
+  (load-theme 'doom-1337-custom t))
 
-;; General keybindings
-(use-package general
-  :config
-  (general-create-definer pii/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
+(use-package key-chord)
 
-  (pii/leader-keys
-    "RET" '(counsel-bookmark :which-key "Bookmarks")
-    "." '(find-file :which-key "Open file")
-    "," '(counsel-switch-buffer :which-key "Switch buffer")
-    "t" '(:ignore t :which-key "Toggles")
-    "tt" '(counsel-load-theme :which-key "Choose theme")
-    "g" '(:ignore t :which-key "Various")
-    "gv" '(evil-window-split :which-key "Window horizontal split")
-    "gh" '(evil-window-vsplit :which-key "Window vertical split")
-    "p" '(projectile-command-map :which-key "Projects")))
+(defun split-goto-h ()
+  "Split horizontaly and goto created window"
+  (interactive)
+  (evil-window-split)
+  (evil-window-down 1))
+
+(defun split-goto-v ()
+  (interactive)
+  "Split verticaly and goto created window"
+  (evil-window-vsplit)
+  (evil-window-right 1))
+
 
 ;; Evil
 (use-package evil
@@ -180,6 +220,72 @@
   :after evil
   :config
   (evil-collection-init))
+
+(defun pii/evil-save-go-normal ()
+  "Save the current buffer and exit insert mode"
+  (interactive)
+  (save-buffer)
+  (evil-normal-state))
+
+;; General keybindings
+(use-package general
+  :config
+  (general-create-definer pii/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (pii/leader-keys
+    ;; Basics
+    "RET" '(counsel-bookmark :which-key "Bookmarks")
+    "." '(find-file :which-key "Open file")
+    "," '(counsel-switch-buffer :which-key "Switch buffer")
+
+    ;; Toggles
+    "t" '(:ignore t :which-key "Toggles")
+    "tt" '(counsel-load-theme :which-key "Choose theme")
+    "th" '(highlight-indent-guides-mode :which-key "Toggle indent guides")
+    "tl" '(display-line-numbers-mode  :which-key "Toggle line numbers")
+
+    "g" '(:ignore t :which-key "Various")
+    "gv" '(evil-window-split :which-key "Window horizontal split")
+    "gh" '(evil-window-vsplit :which-key "Window vertical split")
+
+    "e" '(:ignore t :which-key "Eval")
+    "eb" '(eval-buffer :witch-key "Eval Buffer")
+    "ee" '(eval-last-sexp :witch-key "Eval last SEXP")
+
+    "o" '(:ignore t :which-key "Open")
+    "ot" '(vterm-other-window :which-key "VTerm")
+
+    "w" '(:ignore t :which-key "Windows")
+    "wl" '(evil-window-right :which-key "Go to right window")
+    "wh" '(evil-window-left :which-key "Go to left window")
+    "wj" '(evil-window-down :which-key "Go to down window")
+    "wk" '(evil-window-up :which-key "Go to up window")
+    "wd" '(evil-window-delete :which-key "Close current window")
+
+    "q" '(:ignore t :which-key "Session")
+    "qq" '(save-buffers-kill-terminal :which-key "Session")
+    "p" '(projectile-command-map :which-key "Projects"))
+
+  (setq key-chord-two-keys-delay 0.2)
+  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
+  (key-chord-define evil-normal-state-map "zx" 'save-buffer)
+  (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
+  (key-chord-define evil-normal-state-map "gc" 'comment-line)
+  (key-chord-define evil-normal-state-map "gh" 'evil-window-left)
+  (key-chord-define evil-normal-state-map "gj" 'evil-window-down)
+  (key-chord-define evil-normal-state-map "gk" 'evil-window-up)
+  (key-chord-define evil-normal-state-map "gl" 'evil-window-right)
+  ;; (key-chord-define evil-normal-state-map "gh" 'evil-window-vsplit)
+  ;; (key-chord-define evil-normal-state-map "gv" 'evil-window-split)
+
+  (define-key evil-normal-state-map (kbd "gx") 'evil-window-delete)
+  (define-key evil-normal-state-map (kbd "gv") 'split-goto-h)
+  (define-key evil-normal-state-map (kbd "gb") 'split-goto-v)
+
+  (key-chord-mode 1))
 
 (use-package hydra)
 
@@ -229,8 +335,8 @@
     (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
     (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-level-3 nil :foreground "green"))
+    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+    ;(set-face-attribute 'org-level-3 nil :foreground "green"))
 
 (defun pii/org-mode-setup ()
   (org-indent-mode)
@@ -276,13 +382,9 @@
 
 (use-package flycheck :ensure)
 
-(defun efs/lsp-mode-setup ()
-   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-   (lsp-headerline-breadcrumb-mode))
-
- (use-package lsp-mode
+(use-package lsp-mode
    :commands (lsp lsp-deferred)
-   :hook (lsp-mode . efs/lsp-mode-setup)
+   :hook (lsp-mode)
    :init
    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
    :custom
@@ -374,6 +476,20 @@
  (setq rainbow-identifiers-faces-to-override '(lsp-face-semhl-member
                                                lsp-face-semhl-parameter
                                                lsp-face-semhl-variable))
+
+(use-package vterm
+    :ensure t)
+
+(use-package highlight-indent-guides
+  :hook ((prog-mode text-mode conf-mode) . highlight-indent-guides-mode)
+  :init
+  (setq highlight-indent-guides-method 'character
+        highlight-indent-guides-suppress-auto-error t)
+  :config
+  (highlight-indent-guides-mode)
+  (defun +indent-guides-init-faces-h (&rest _)
+    (when (display-graphic-p)
+      (highlight-indent-guides-auto-set-faces))))
 
 (defun pii/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))
