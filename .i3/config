@@ -46,7 +46,7 @@ bar {
     }
 }
 
-bindsym $mod+space exec dmenu_run -h 4 -p Open -nb "#232427" -l 3 -sb "#990000"
+bindsym $mod+space exec dmenu_run -l 3   -p Open --nb "#232427" --sb "#990000"
 
 bindsym $mod+Shift+s move scratchpad
 
@@ -228,8 +228,8 @@ bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 default_border pixel 1
 default_floating_border pixel 1
 
-# exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
-#     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
+exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
+    -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
 ### TO DISPATCH
 
@@ -251,7 +251,7 @@ bindsym $mod+f fullscreen toggle
 # change container layout (stacked, tabbed, toggle split)
 # bindsym $mod+w layout stacking
 # bindsym $mod+t layout tabbed
-bindsym $mod+e layout toggle split
+bindsym $mod+Ctrl+e layout toggle split
 
 
 
@@ -262,6 +262,7 @@ bindsym $mod+e layout toggle split
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
 bindsym $mod+d exec --no-startup-id konsole --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
 for_window [title="~ : i3-dmenu-deskto"] floating enable
+for_window [title="Emacs Everywhere"] floating enable
 # for_window [title="scratchpad"] move scratchpad
 
 
@@ -273,7 +274,7 @@ for_window [title="~ : i3-dmenu-deskto"] floating enable
 # exec feh --bg-scale ~/pictures/wall4.jpg
 # exec feh --bg-scale ~/pictures/wall_new.jpeg
 # exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
-exec --no-startup-id feh --bg-scale ~/wallpapers/sunset.jpeg
+exec --no-startup-id feh --bg-scale ~/wallpapers/sun.png
 
 # Lock
 bindsym Control+Mod1+l exec light-locker-command -l
@@ -295,6 +296,7 @@ exec libinput-gestures
 
 
 bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output DP-2 --off && pkill lemonbar && exec lemonbar
+bindsym $mod+e exec emacsclient --eval "(emacs-everywhere)"
 
 
 

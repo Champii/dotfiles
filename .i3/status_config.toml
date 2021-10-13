@@ -44,14 +44,14 @@ block = "networkmanager"
 #use_bits = false
 #hide_inactive = true
 
-[[block]]
-block = "net"
-device = "enp62s0u1u4"
-speed_up = false
-graph_down = true
-interval = 5
-use_bits = false
-hide_inactive = true
+# [[block]]
+# block = "net"
+# device = "enp62s0u1u4"
+# speed_up = false
+# graph_down = true
+# interval = 5
+# use_bits = false
+# hide_inactive = true
 
 [[block]]
 block = "disk_space"
@@ -77,7 +77,7 @@ alert = 5.0
 [[block]]
 block = "memory"
 display_type = "memory"
-format_mem = "{Mup}%"
+# format_mem = "{Mup}%"
 format_swap = "{SUp}%"
 warning_mem = 60.0
 critical_mem = 80.0

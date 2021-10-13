@@ -1,6 +1,6 @@
 #!/bin/bash
 
-device=14
+device=15
 state=$(xinput list-props $device | grep "Device Enabled" | cut -f3)
 echo "$state"
 

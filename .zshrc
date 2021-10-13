@@ -2,18 +2,19 @@
 # Dont edit by hand if you intend to regenerate it
 # Consult .zshrc.org
 
-export EDITOR="emacs -nw"
+export EDITOR="emacsclient -nw"
 
 # Go Path
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 
 # Path
-export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/champii/.local/bin:$HOME/.cabal/bin:$GOROOT/bin:$GOPATH/bin:$HOME/.bin:$HOME/.cargo/bin:/home/champii/.local/bin"
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/.local/bin:$HOME/.cabal/bin:$GOROOT/bin:$GOPATH/bin:$HOME/.bin:$HOME/.cargo/bin:$HOME/.local/bin"
 export PATH="$PATH:$HOME/prog/fzf-fs"
 export PATH="$PATH:$HOME/.bin"
 export PATH="$HOME/prog/git-fuzzy/bin:$PATH"
 export PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
 
 # Lastdir
 touch /tmp/lastdir.tmp
@@ -51,3 +52,6 @@ eval "$(navi widget zsh)"
 eval "$(fasd --init auto zsh-hook zsh-ccomp-install zsh-ccomp zsh-wcomp-install zsh-wcomp)"
 
 eval "$(starship init zsh)"
+
+export PATH="$HOME/.poetry/bin:$PATH"
+[ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh

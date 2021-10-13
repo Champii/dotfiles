@@ -200,7 +200,7 @@
 
 ;; (global-set-key (kbd "SPC r t") 'string-rectangle)
 
-(add-to-list 'default-frame-alist '(height . 10))
+(add-to-list 'default-frame-alist '(height . 8))
 
 (setq lsp-rust-server 'rust-analyzer)
 
@@ -273,6 +273,7 @@
     (mu4e-compose-signature . "---\n"))
   t)
 
+;; (setq eaf-browser-keybinding ())
 (setq browse-url-browser-function 'eaf-open-browser)
 (defalias 'browse-web #'eaf-open-browser)
 
@@ -307,7 +308,86 @@
 ;; I3
 ;;
 (defun pop-to-buffer-same-window (buffer &optional norecord) (let ((display-buffer-overriding-action '(nil . nil))) (pop-to-buffer buffer display-buffer--same-window-action norecord)))
-(add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/i3-emacs/")
-(require 'i3)
-(require 'i3-integration)
+;; (add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/i3-emacs/")
+;; (require 'i3)
+;; (require 'i3-integration)
 ;; (i3-one-window-per-frame-mode-on)
+
+;; (add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+(require 'eaf-evil)
+;; (require 'eaf-pdf-viewer)
+;; ;; (require 'eaf-camera)
+;; (require 'eaf-terminal)
+;; ;; (require 'eaf-vue-demo)
+;; (require 'eaf-image-viewer)
+;; (require 'eaf-org-previewer)
+;; (require 'eaf-file-browser)
+;; ;; (require 'eaf-netease-cloud-music)
+;; (require 'eaf-file-manager)
+;; (require 'eaf-airshare)
+;; (require 'eaf-markdown-previewer)
+;; (require 'eaf-mindmap)
+;; (require 'eaf-music-player)
+;; ;; (require 'eaf-jupyter)
+;; (require 'eaf-video-player)
+;; (require 'eaf-system-monitor)
+;; (require 'eaf-file-sender)
+;; ;; (require 'eaf-demo)
+(require 'eaf-browser)
+;; ;; (require 'eaf-mermaid)
+
+;; (use-package! eaf
+;;     :custom
+;;     (find-alternate-file-in-dired t)
+;;     :config
+;;     (setq eaf-browser-default-zoom "2.0")
+
+;;     ;; (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+;;     ;; (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+
+;;     (defun eaf-open-google ()
+;;         "Open Google using EAF."
+;;         (interactive)
+;;         (eaf-open-browser "https://www.google.com")))
+;; (use-package eaf
+;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+;;   :custom
+;;   ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
+;;   (eaf-browser-continue-where-left-off t)
+;;   (eaf-browser-enable-adblocker t)
+;;   (browse-url-browser-function 'eaf-open-browser)
+;;   :config
+;;   (defalias 'browse-web #'eaf-open-browser))
+;;   ;; (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+;;   ;; (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+;;   ;; (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+;;   ;; (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
+;; (require 'eaf-browser)
+
+(define-key key-translation-map (kbd "SPC")
+    (lambda (prompt)
+      (if (derived-mode-p 'eaf-mode)
+          (pcase eaf--buffer-app-name
+            ("browser" (if (eaf-call "call_function" eaf--buffer-id "is_focus")
+                           (kbd "SPC")
+                         (kbd eaf-evil-leader-key)))
+            ("pdf-viewer" (kbd eaf-evil-leader-key))
+            ("image-viewer" (kbd eaf-evil-leader-key))
+            (_  (kbd "SPC")))
+        (kbd "SPC"))))
+
+
+;; Tabnine
+;; (add-to-list 'company-backends #'company-tabnine)
+;; (setq +lsp-company-backends '(company-tabnine company-capf))
+;; (setq +lsp-company-backend '(company-lsp :with company-tabnine :separate))
+;; (setq +lsp-company-backends '(company-tabnine company-capf))
+;; (after! company
+;;   (setq company-idle-delay 0
+;;         company-tabnine-always-trigger t
+;;         company-show-numbers t))
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+
+(custom-set-variables '(gnus-select-method (quote (nnreddit ""))))

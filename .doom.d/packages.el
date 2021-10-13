@@ -55,12 +55,31 @@
 (package! rainbow-identifiers)
 (package! vue-mode)
 (package! helm-ag)
+(package! ctable)
+(package! epc)
+(package! deferred)
 (package! s)
-(package! eaf :recipe (:host github
-                       :repo "manateelazycat/emacs-application-framework"
-                       :files ("*.el" "*.py" "app" "core")
-                       ))
+;; (package! eaf :recipe (:host github
+;;                        :repo "emacs-eaf/emacs-application-framework"
+;;                        :files ("*.el" "*.py" "app" "core")
+;;                        ))
+;; (package! eaf :recipe (:host github
+;;                        :repo "manateelazycat/emacs-application-framework"
+;;                        :files ("*")
+;;                        ))
+;; (package! company-tabnine)
 ;; (package! code-compass)
 ;; (package! rustic
 ;;   :recipe (:host github :repo "brotzeit/rustic")
 ;;   :pin "0c8febe1734158f0c808c652395f9e0e53360744")
+(package! haskell-mode)
+(package! lsp-haskell)
+(package! nnreddit)
+(package! exec-path-from-shell)
+;; (package! eaf :recipe (:host github
+;;                         :repo "emacs-eaf/emacs-application-framework"
+;;                         :files ("*")
+;;                         :build (:not compile)))
+
+;; (add-to-list 'load-path "/home/champii/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
