@@ -23,6 +23,8 @@
 
 (setq global-hl-line-mode t)
 
+(server-start)
+
 (set-frame-parameter (selected-frame) 'alpha '(90 . 75))
 
 ;; Line Numbers
@@ -78,7 +80,7 @@
  '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
  '(objed-cursor-color "#ff5c57")
  '(package-selected-packages
-   '(org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+   '(no-littering desktop-environment org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
  '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
  '(rustic-ansi-faces
    ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
@@ -269,7 +271,7 @@
     "qq" '(save-buffers-kill-terminal :which-key "Session")
     "p" '(projectile-command-map :which-key "Projects"))
 
-  (setq key-chord-two-keys-delay 0.2)
+  (setq key-chord-two-keys-delay 0.3)
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
   (key-chord-define evil-normal-state-map "zx" 'save-buffer)
   (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
@@ -469,7 +471,7 @@
 
  (setq rainbow-identifiers-cie-l*a*b*-lightness 100)
  (setq rainbow-identifiers-cie-l*a*b*-saturation 100)
- (setq rainbow-identifiers-cie-l*a*b*-color-count 20)
+ (setq rainbow-identifiers-cie-l*a*b*-color-count 40)
 
 (setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
  (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
@@ -478,7 +480,7 @@
                                                lsp-face-semhl-variable))
 
 (use-package vterm
-    :ensure t)
+  :ensure t)
 
 (use-package highlight-indent-guides
   :hook ((prog-mode text-mode conf-mode) . highlight-indent-guides-mode)
@@ -486,10 +488,17 @@
   (setq highlight-indent-guides-method 'character
         highlight-indent-guides-suppress-auto-error t)
   :config
-  (highlight-indent-guides-mode)
+  ;; (highlight-indent-guides-mode)
   (defun +indent-guides-init-faces-h (&rest _)
     (when (display-graphic-p)
       (highlight-indent-guides-auto-set-faces))))
+
+(use-package no-littering)
+
+;; no-littering doesn't set this by default so we must place
+;; auto save files in the same path as it uses for sessions
+(setq auto-save-file-name-transforms
+      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
 (defun pii/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))

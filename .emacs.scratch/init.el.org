@@ -40,6 +40,8 @@
 
   (setq global-hl-line-mode t)
 
+  (server-start)
+
 #+end_src
 
 *** Transparency
@@ -386,7 +388,7 @@
       "qq" '(save-buffers-kill-terminal :which-key "Session")
       "p" '(projectile-command-map :which-key "Projects"))
 
-    (setq key-chord-two-keys-delay 0.2)
+    (setq key-chord-two-keys-delay 0.3)
     (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
     (key-chord-define evil-normal-state-map "zx" 'save-buffer)
     (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
@@ -681,7 +683,7 @@ Disabling it for now
 
    (setq rainbow-identifiers-cie-l*a*b*-lightness 100)
    (setq rainbow-identifiers-cie-l*a*b*-saturation 100)
-   (setq rainbow-identifiers-cie-l*a*b*-color-count 20)
+   (setq rainbow-identifiers-cie-l*a*b*-color-count 40)
 
   (setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
    (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
@@ -696,7 +698,7 @@ Disabling it for now
 #+begin_src emacs-lisp
 
   (use-package vterm
-      :ensure t)
+    :ensure t)
 
 #+end_src
 
@@ -710,10 +712,23 @@ Disabling it for now
     (setq highlight-indent-guides-method 'character
           highlight-indent-guides-suppress-auto-error t)
     :config
-    (highlight-indent-guides-mode)
+    ;; (highlight-indent-guides-mode)
     (defun +indent-guides-init-faces-h (&rest _)
       (when (display-graphic-p)
         (highlight-indent-guides-auto-set-faces))))
+
+#+end_src
+
+**** No littering
+
+#+begin_src emacs-lisp
+
+  (use-package no-littering)
+
+  ;; no-littering doesn't set this by default so we must place
+  ;; auto save files in the same path as it uses for sessions
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
 #+end_src
 
@@ -732,3 +747,8 @@ Disabling it for now
 
 #+end_src
 
+* Todo
+- Set vterm defaults
+- set hl indent guide on specific major mods
+- Workspaces
+- Modeline foreground color
