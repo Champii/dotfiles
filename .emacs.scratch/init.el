@@ -25,7 +25,25 @@
 
 (server-start)
 
-(set-frame-parameter (selected-frame) 'alpha '(90 . 75))
+;; The default is 800 kilobytes.  Measured in bytes.
+(setq gc-cons-threshold (* 50 1000 1000))
+
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+          (format "%.2f seconds"
+                  (float-time
+                      (time-subtract after-init-time before-init-time)))
+          gcs-done))
+
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+
+(defvar efs/frame-transparency '(90 . 75))
+
+;; Set frame transparency
+(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; Line Numbers
 (column-number-mode)
@@ -80,7 +98,7 @@
  '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
  '(objed-cursor-color "#ff5c57")
  '(package-selected-packages
-   '(no-littering desktop-environment org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+   '(org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
  '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
  '(rustic-ansi-faces
    ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
@@ -136,6 +154,15 @@
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-wrap t))
+
+(use-package ivy-prescient
+  :after counsel
+  :custom
+  (ivy-prescient-enable-filtering nil)
+  :config
+  ;; Uncomment the following line to have sorting remembered across sessions!
+  (prescient-persist-mode 1)
+  (ivy-prescient-mode 1))
 
 ;; Counsel
 (use-package counsel
@@ -275,7 +302,7 @@
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
   (key-chord-define evil-normal-state-map "zx" 'save-buffer)
   (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
-  (key-chord-define evil-normal-state-map "gc" 'comment-line)
+  (key-chord-define evil-normal-state-map "gc" 'evilnc-comment-or-uncomment-lines)
   (key-chord-define evil-normal-state-map "gh" 'evil-window-left)
   (key-chord-define evil-normal-state-map "gj" 'evil-window-down)
   (key-chord-define evil-normal-state-map "gk" 'evil-window-up)
