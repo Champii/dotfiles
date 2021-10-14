@@ -196,8 +196,8 @@
     :diminish
     :bind (("C-s" . swiper)
            :map ivy-minibuffer-map
+           ("C-l" . ivy-immediate-done)
            ("TAB" . ivy-alt-done)
-           ("C-l" . ivy-alt-done)
            ("C-j" . ivy-next-line)
            ("C-k" . ivy-previous-line)
            :map ivy-switch-buffer-map
