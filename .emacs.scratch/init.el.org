@@ -777,3 +777,4 @@
 - set hl indent guide on specific major mods
 - Workspaces
 - Modeline foreground color
+
