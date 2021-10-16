@@ -18,67 +18,96 @@
 
 *** Sensible default
 
+**** No startup message
+
 #+begin_src emacs-lisp
 
   (setq inhibit-startup-message t)
 
-  (scroll-bar-mode -1)
+#+end_src
 
+**** Clean UI
+
+Basically removing all the cluter from menubar, toolbar and such
+
+#+begin_src emacs-lisp
+
+  (scroll-bar-mode -1)
   (tool-bar-mode -1)
   (tooltip-mode -1)
+  (menu-bar-mode -1)
 
   ;; No borders on windows
   (set-fringe-mode 0)
 
-  (menu-bar-mode -1)
+#+end_src
+
+**** Auto revert mode
+
+Force files to revert when changed on disk
+
+#+begin_src emacs-lisp
 
   (global-auto-revert-mode t)
 
+#+end_src
+
+**** Relative line number
+
+#+begin_src emacs-lisp
+
   (setq display-line-numbers-type 'relative)
+
+#+end_src
+
+**** Highlight current line
+
+#+begin_src emacs-lisp
+
+  (global-hl-line-mode)
+
+#+end_src
+
+**** Escape anywhere
+
+#+begin_src emacs-lisp
 
   (global-set-key (kbd "C-c C-c") 'evil-escape)
 
-  (setq global-hl-line-mode t)
+#+end_src
+
+**** Start the server
+
+#+begin_src emacs-lisp
 
   (server-start)
 
+#+end_src
+
+**** Global visual line mode
+
+#+begin_src emacs-lisp
+
   (setq global-visual-line-mode nil)
+
+#+end_src
+
+**** Disable the GC
+
+It is reactivated at the end of phase
+
+#+begin_src emacs-lisp
 
   ;; The default is 800 kilobytes.  Measured in bytes.
   (setq gc-cons-threshold (* 50 1000 1000))
 
-  (defun efs/display-startup-time ()
-    (message "Emacs loaded in %s with %d garbage collections."
-            (format "%.2f seconds"
-                    (float-time
-                        (time-subtract after-init-time before-init-time)))
-            gcs-done))
-
-  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
-
 #+end_src
 
-*** Transparency
+**** Display startup time
 
 #+begin_src emacs-lisp
 
-  (defvar efs/frame-transparency '(90 . 75))
 
-  ;; Set frame transparency
-  (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-  (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-
-#+end_src
-
-*** Line numbers
-
-#+begin_src emacs-lisp
-
-  ;; Line Numbers
-  (column-number-mode)
   (global-display-line-numbers-mode t)
 
   ;; Disable line numbers for some modes
@@ -129,6 +158,12 @@
   (require 'use-package)
   (setq use-package-always-ensure t)
 
+#+end_src
+
+*** Auto update
+
+#+begin_src emacs-lisp
+
   ;; Auto updates
   (use-package auto-package-update
     :custom
@@ -138,7 +173,15 @@
     :config
     (auto-package-update-maybe)
     (auto-package-update-at-time "09:00"))
-  
+
+#+end_src
+
+*** Custom variables
+
+Still have to find a way to automate this to be updated when init.el is
+
+#+begin_src emacs-lisp
+
   (custom-set-variables
     ;; custom-set-variables was added by Custom.
     ;; If you edit it by hand, you could mess it up, so be careful.
@@ -160,7 +203,7 @@
   '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
   '(objed-cursor-color "#ff5c57")
   '(package-selected-packages
-    '(company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+  '(ace-window avy company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
   '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
   '(rustic-ansi-faces
     ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
@@ -199,143 +242,9 @@
 
 *** Packages
 
-**** Ivy
+**** Keys
 
-#+begin_src emacs-lisp
-
-  ;; Ivy
-  (use-package ivy
-    :diminish
-    :bind (("C-s" . swiper)
-           :map ivy-minibuffer-map
-           ("C-l" . ivy-immediate-done)
-           ("TAB" . ivy-alt-done)
-           ("C-j" . ivy-next-line)
-           ("C-k" . ivy-previous-line)
-           :map ivy-switch-buffer-map
-           ("C-k" . ivy-previous-line)
-           ("C-l" . ivy-alt-done)
-           ("C-d" . ivy-switch-buffer-kill)
-           :map ivy-reverse-i-search-map
-           ("C-k" . ivy-previous-line)
-           ("C-d" . ivy-reverse-i-search-kill))
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq ivy-wrap t))
-
-  (use-package ivy-prescient
-    :after counsel
-    :custom
-    (ivy-prescient-enable-filtering nil)
-    :config
-    ;; Uncomment the following line to have sorting remembered across sessions!
-    (prescient-persist-mode 1)
-    (ivy-prescient-mode 1))
-
-#+end_src
-
-**** Counsel
-
-#+begin_src emacs-lisp
-
-  ;; Counsel
-  (use-package counsel
-    :init (counsel-mode 1)
-    :bind (("C-c b" . counsel-bookmark)
-           :map minibuffer-local-map
-           ("C-r" . 'counsel-minibuffer-history))
-    :config
-    (setq ivy-initial-inputs-alist nil))
-
-  (global-set-key (kbd "C-x b") 'counsel-switch-buffer)
-
-#+end_src
-
-**** Modeline
-
-#+begin_src emacs-lisp
-
-  ;; Modeline
-  (use-package all-the-icons)
-
-  (use-package doom-modeline
-    :ensure t
-    :init (doom-modeline-mode 1)
-    :custom ((doom-modeline-height 10)
-             (doom-modeline-unicode-fallback t)))
-
-#+end_src
-
-**** Rainbow Delimiters 
-
-#+begin_src emacs-lisp
-
-  ;; Rainbow delimiters
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
-
-#+end_src
-
-**** Which Key
-
-#+begin_src emacs-lisp
-
-  ;; Which key
-  (use-package which-key
-    :init (which-key-mode)
-    :diminish which-key-mode
-    :config
-    (setq which-key-idle-delay 0.3))
-
-#+end_src
-
-**** Ivy Rich
-
-#+begin_src emacs-lisp
-
-  ;; Ivy which
-  (use-package ivy-rich
-    :init
-    (ivy-rich-mode 1))
-
-#+end_src
-
-**** Helpful
-
-#+begin_src emacs-lisp
-
-  ;; Helpful
-  (use-package helpful
-    :custom
-    (counsel-describe-function-function #'helpful-callable)
-    (counsel-describe-variable-function #'helpful-variable)
-    :bind
-    ([remap describe-function] . counsel-describe-function)
-    ([remap describe-command] . helpful-command)
-    ([remap describe-variable] . counsel-describe-variable)
-    ([remap describe-key] . counsel-describe-key))
-
-#+end_src
-
-**** Doom Themes
-
-#+begin_src emacs-lisp
-
-  (add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
-  
-  ;; Doom-themes
-  (use-package doom-themes
-    :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-     (load-theme 'doom-1337-custom t))
-
-#+end_src
-
-**** Key Chord
+***** Key Chord
 
 #+begin_src emacs-lisp
 
@@ -343,78 +252,9 @@
 
 #+end_src
 
-**** Evil
+***** General (Keybindings)
 
-#+begin_src emacs-lisp
-
-  (defun split-goto-h ()
-    "Split horizontaly and goto created window"
-    (interactive)
-    (evil-window-split)
-    (evil-window-down 1))
-
-  (defun split-goto-v ()
-    (interactive)
-    "Split verticaly and goto created window"
-    (evil-window-vsplit)
-    (evil-window-right 1))
-
-
-  ;; Evil
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
-    ;:hook (evil-mode . pii/evil-hook)
-    :config
-    (evil-mode 1))
-
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
-
-#+end_src
-
-**** Dired
-
-#+begin_src emacs-lisp
-
-  (use-package dired
-    :ensure nil
-    :commands (dired dired-jump)
-    :bind (("C-x C-j" . dired-jump))
-    :custom ((dired-listing-switches "-agho --group-directories-first"))
-    :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-        "h" 'dired-single-up-directory
-        "l" 'dired-single-buffer))
-
-  (use-package dired-single
-    :commands (dired dired-jump))
-
-  (use-package all-the-icons-dired
-    :hook (dired-mode . all-the-icons-dired-mode))
-
-  (use-package dired-open
-    :commands (dired dired-jump)
-    :config
-    ;; Doesn't work as expected!
-    ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-    (setq dired-open-extensions '(("png" . "feh")
-                                    ("mkv" . "mpv"))))
-
-  (use-package dired-hide-dotfiles
-    :hook (dired-mode . dired-hide-dotfiles-mode)
-    :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-        "H" 'dired-hide-dotfiles-mode))
-
-#+end_src
-
-**** General (Keybindings)
+Define the whole SPC-* keybinding thing
 
 #+begin_src emacs-lisp
 
@@ -475,7 +315,7 @@
     (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
     (key-chord-define evil-normal-state-map "zx" 'save-buffer)
     (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
-    (key-chord-define evil-normal-state-map "g S-d" 'lsp-ui-peek-find-references)
+    (key-chord-define evil-normal-state-map "gD" 'lsp-ui-peek-find-references)
     (key-chord-define evil-normal-state-map "gc" 'evilnc-comment-or-uncomment-lines)
     (key-chord-define evil-normal-state-map "gh" 'evil-window-left)
     (key-chord-define evil-normal-state-map "gj" 'evil-window-down)
@@ -527,60 +367,198 @@
     (define-key evil-normal-state-map (kbd "M-<f13> k") 'pii/increase-window-height)
     (define-key evil-normal-state-map (kbd "M-<f13> l") 'pii/increase-window-width)
 
+   (global-set-key (kbd "M-o") 'ace-window)
+
     (key-chord-mode 1))
 
 #+end_src
 
-**** Hydra
+***** Which Key
+
+A little help for the miserable
 
 #+begin_src emacs-lisp
 
-  (use-package hydra)
+  ;; Which key
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 0.3))
 
 #+end_src
 
-**** Projectile
+**** Theme
+
+***** Modeline
+
+****** All the icons
 
 #+begin_src emacs-lisp
 
-  ;; Projectile
-  (use-package projectile
-    :diminish projectile-mode
-    :config (projectile-mode)
-    :custom (projectile-completion-system 'ivy)
-    :bind-keymap ("C-c p" . projectile-command-map)
-    :init ())
-
-  (use-package counsel-projectile
-    :config (counsel-projectile-mode))
+  ;; Modeline
+  (use-package all-the-icons)
 
 #+end_src
 
-**** Magit
+****** Doom modeline
 
 #+begin_src emacs-lisp
-
-  (use-package magit
-    :commands (magit-status magit-get-current-branch)
-    :custom
-    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 10)
+             (doom-modeline-unicode-fallback t)))
 
 #+end_src
 
-**** Forge
+***** Doom Themes
+
+Using a custom crafted theme from *doom-1337*
 
 #+begin_src emacs-lisp
 
-  (setq auth-sources '("~/.authinfo.gpg"))
-  (use-package forge)
+  (add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
+  
+  ;; Doom-themes
+  (use-package doom-themes
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+     (load-theme 'doom-1337-custom t))
+
+#+end_src
+
+***** Rainbow Delimiters
+
+/Lisp users salivating/
+
+#+begin_src emacs-lisp
+
+  ;; Rainbow delimiters
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+
+#+end_src
+
+***** Rainbow Identifiers
+
+/Java users killing themselves/
+
+#+begin_src emacs-lisp
+
+  (use-package rainbow-identifiers)
+
+  (setq rainbow-identifiers-cie-l*a*b*-lightness 80)
+  (setq rainbow-identifiers-cie-l*a*b*-saturation 80)
+  (setq rainbow-identifiers-cie-l*a*b*-color-count 9)
+
+  (setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
+    (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
+    (setq rainbow-identifiers-faces-to-override '(lsp-face-semhl-member
+                                                 lsp-face-semhl-parameter
+                                                 lsp-face-semhl-variable))
+
+#+end_src
+
+***** Indent guide
+
+#+begin_src emacs-lisp
+
+  (use-package highlight-indent-guides
+    :hook ((prog-mode conf-mode) . highlight-indent-guides-mode)
+    :init
+    (setq highlight-indent-guides-method 'column
+          highlight-indent-guides-suppress-auto-error t)
+    :config
+    ;; (highlight-indent-guides-mode)
+
+    (defun +indent-guides-init-faces-h (&rest _)
+      (when (display-graphic-p)
+        (highlight-indent-guides-auto-set-faces))))
+
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  eshell-mode-hook))
+      (add-hook mode (lambda () (highlight-indent-guides-mode nil))))
+
+#+end_src
+
+**** Evil
+
+***** Evil
+
+****** Define split-goto functions
+
+Setup functions that split the window and immediately jump to it
+
+#+begin_src emacs-lisp
+
+  (defun split-goto-h ()
+    "Split horizontaly and goto created window"
+    (interactive)
+    (evil-window-split)
+    (evil-window-down 1))
+
+  (defun split-goto-v ()
+    (interactive)
+    "Split verticaly and goto created window"
+    (evil-window-vsplit)
+    (evil-window-right 1))
+
+#+end_src
+
+****** Actual Evil package
+
+We deactivate the C-i jump because it messes with the TAB in org mode (go figure)
+
+#+begin_src emacs-lisp
+
+  ;; Evil
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    ;:hook (evil-mode . pii/evil-hook)
+    :config
+    (evil-mode 1))
+
+#+end_src
+
+***** Evil collection
+
+#+begin_src emacs-lisp
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
+
+#+end_src
+
+***** Evil Surround
+
+Change the surroundings
+
+#+begin_src emacs-lisp
+
+  (use-package evil-surround
+    :ensure t
+    :config
+    (global-evil-surround-mode 1))
 
 #+end_src
 
 **** Org
 
-#+begin_src emacs-lisp
+***** Org
 
-   ;; Org
+****** Font setup fn
+
+#+begin_src emacs-lisp
 
   (defun pii/org-font-setup ()
     (font-lock-add-keywords 'org-mode
@@ -608,7 +586,14 @@
        (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
        (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
        (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
-       ;(set-face-attribute 'org-level-3 nil :foreground "green"))
+ 
+#+end_src
+
+****** Setup mode fn
+
+#+begin_src emacs-lisp
+
+   ;; Org
 
   (defun pii/org-mode-setup ()
      (org-indent-mode)
@@ -619,17 +604,22 @@
      (highlight-indent-guides-mode nil)
      (setq evil-auto-indent nil))
 
+#+end_src
+
+****** Org
+
+#+begin_src emacs-lisp
   (use-package org
      :hook (org-mode . pii/org-mode-setup)
      :config
      (setq org-ellipsis " ▾")
      (pii/org-font-setup))
 
-  (use-package org-bullets
-     :hook (org-mode . org-bullets-mode)
-     :custom
-     (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+#+end_src
 
+****** Babel languages
+
+#+begin_src emacs-lisp
   (with-eval-after-load 'org
      (org-babel-do-load-languages
        'org-babel-load-languages
@@ -638,6 +628,11 @@
 
      (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
+#+end_src
+
+****** Templates
+
+#+begin_src emacs-lisp
   (with-eval-after-load 'org
      ;; This is needed as of Org 9.2
      (require 'org-tempo)
@@ -648,7 +643,7 @@
 
 #+end_src
 
-**** Org Roam
+***** Org Roam
 
 #+begin_src emacs-lisp
 
@@ -671,7 +666,17 @@
 
 #+end_src
 
-**** Visual Fill Column
+***** Org bullets
+
+#+begin_src emacs-lisp
+  (use-package org-bullets
+     :hook (org-mode . org-bullets-mode)
+     :custom
+     (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+#+end_src
+
+***** Visual Fill Column
 
 #+begin_src emacs-lisp
 
@@ -685,7 +690,9 @@
 
 #+end_src
 
-**** Flycheck
+**** Code
+
+***** Flycheck
 
 #+begin_src emacs-lisp
 
@@ -693,7 +700,9 @@
 
 #+end_src
 
-**** LSP
+***** LSP
+
+****** Mode
 
 #+begin_src emacs-lisp
 
@@ -724,6 +733,12 @@
     (add-hook 'lsp-mode-hook 'lsp-ui-mode)
     (lsp-enable-which-key-integration t))
 
+#+end_src
+
+****** LSP UI
+
+#+begin_src emacs-lisp
+
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
     :custom
@@ -737,12 +752,18 @@
     (lsp-ui-sideline-show-hover nil)
     (lsp-ui-doc-enable t))
 
+#+end_src
+
+****** LSP Ivy
+
+#+begin_src emacs-lisp
+
   (use-package lsp-ivy
     :after lsp)
 
 #+end_src
 
-**** Evil Nerd Commenter
+***** Evil Nerd Commenter
 
 #+begin_src emacs-lisp
 
@@ -751,7 +772,7 @@
 
 #+end_src
 
-**** Rustic
+***** Rustic
 
 #+begin_src emacs-lisp
 
@@ -786,7 +807,7 @@
       (setq-local buffer-save-without-query t)))
 #+end_src
 
-**** Company
+***** Company
 
 #+begin_src emacs-lisp
 
@@ -806,7 +827,7 @@
 
 #+end_src
 
-**** Yasnippet
+***** Yasnippet
 
 #+begin_src emacs-lisp
 
@@ -818,58 +839,224 @@
 
 #+end_src
 
-**** Rainbow Identifiers
+***** Projectile
 
 #+begin_src emacs-lisp
 
-   (use-package rainbow-identifiers)
+  ;; Projectile
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom (projectile-completion-system 'ivy)
+    :bind-keymap ("C-c p" . projectile-command-map)
+    :init ())
 
-   (setq rainbow-identifiers-cie-l*a*b*-lightness 80)
-   (setq rainbow-identifiers-cie-l*a*b*-saturation 80)
-   (setq rainbow-identifiers-cie-l*a*b*-color-count 9)
-
-  (setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
-    (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
-    (setq rainbow-identifiers-faces-to-override '(lsp-face-semhl-member
-                                                 lsp-face-semhl-parameter
-                                                 lsp-face-semhl-variable))
+  (use-package counsel-projectile
+    :config (counsel-projectile-mode))
 
 #+end_src
 
-**** Term
+***** Forge
 
 #+begin_src emacs-lisp
 
-  (use-package vterm
-    :ensure t)
+  (setq auth-sources '("~/.authinfo.gpg"))
+  (use-package forge)
 
 #+end_src
 
-**** Indent guide
+***** Magit
 
 #+begin_src emacs-lisp
 
-  (use-package highlight-indent-guides
-    :hook ((prog-mode conf-mode) . highlight-indent-guides-mode)
-    :init
-    (setq highlight-indent-guides-method 'column
-          highlight-indent-guides-suppress-auto-error t)
+  (use-package magit
+    :commands (magit-status magit-get-current-branch)
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+#+end_src
+
+**** Emacs Utils
+
+***** Ivy
+
+****** Mode
+
+#+begin_src emacs-lisp
+
+  ;; Ivy
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("C-l" . ivy-immediate-done)
+           ("TAB" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-alt-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
     :config
-    ;; (highlight-indent-guides-mode)
-
-    (defun +indent-guides-init-faces-h (&rest _)
-      (when (display-graphic-p)
-        (highlight-indent-guides-auto-set-faces))))
-
-  ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  eshell-mode-hook))
-      (add-hook mode (lambda () (highlight-indent-guides-mode nil))))
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-wrap t))
 
 #+end_src
 
-**** No littering
+****** Ivy Precient
+
+#+begin_src emacs-lisp
+  
+  (use-package ivy-prescient
+    :after counsel
+    :custom
+    (ivy-prescient-enable-filtering nil)
+    :config
+    ;; Uncomment the following line to have sorting remembered across sessions!
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
+
+#+end_src
+
+****** Ivy Rich
+
+#+begin_src emacs-lisp
+
+  ;; Ivy which
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
+
+#+end_src
+
+***** Counsel
+
+#+begin_src emacs-lisp
+
+  ;; Counsel
+  (use-package counsel
+    :init (counsel-mode 1)
+    :bind (("C-c b" . counsel-bookmark)
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history))
+    :config
+    (setq ivy-initial-inputs-alist nil))
+
+  (global-set-key (kbd "C-x b") 'counsel-switch-buffer)
+
+#+end_src
+
+***** Avy
+
+Easy movement through text
+
+#+begin_src emacs-lisp
+
+  (use-package avy
+    :bind (("M-s" . avy-goto-word-1)))
+  
+#+end_src
+
+***** Ace window
+
+#+begin_src emacs-lisp
+
+  (use-package ace-window
+    :config
+    ;;(general-define-key "C-o" 'ace-buffer)
+    (setq aw-keys '(?h ?t ?n ?s)))
+
+#+end_src
+
+***** Helpful
+
+#+begin_src emacs-lisp
+
+  ;; Helpful
+  (use-package helpful
+    :custom
+    (counsel-describe-function-function #'helpful-callable)
+    (counsel-describe-variable-function #'helpful-variable)
+    :bind
+    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-variable] . counsel-describe-variable)
+    ([remap describe-key] . counsel-describe-key))
+
+#+end_src
+
+***** Dired
+
+****** Mode
+
+#+begin_src emacs-lisp
+
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first"))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+        "h" 'dired-single-up-directory
+        "l" 'dired-single-buffer))
+
+#+end_src
+
+****** Dired single
+
+#+begin_src emacs-lisp
+  (use-package dired-single
+    :commands (dired dired-jump))
+
+#+end_src
+
+****** All the icons dired
+
+#+begin_src emacs-lisp
+  (use-package all-the-icons-dired
+    :hook (dired-mode . all-the-icons-dired-mode))
+
+#+end_src
+
+****** Dired open
+
+#+begin_src emacs-lisp
+  (use-package dired-open
+    :commands (dired dired-jump)
+    :config
+    ;; Doesn't work as expected!
+    ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+    (setq dired-open-extensions '(("png" . "feh")
+                                    ("mkv" . "mpv"))))
+
+#+end_src
+
+****** Hide dotfiles
+
+#+begin_src emacs-lisp
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+        "H" 'dired-hide-dotfiles-mode))
+
+#+end_src
+
+***** Hydra
+
+#+begin_src emacs-lisp
+
+  (use-package hydra)
+
+#+end_src
+
+***** No littering
 
 #+begin_src emacs-lisp
 
@@ -882,15 +1069,27 @@
 
 #+end_src
 
-**** Undo Tree
+***** Undo Tree
 
 #+begin_example emacs-lisp
 
-  (use-package undo-tree)
-  (global-undo-tree-mode)
-  (evil-set-undo-system 'undo-tree)
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode) 
+    (evil-set-undo-system 'undo-tree))
 
 #+end_example
+
+**** Term
+
+***** VTerm
+
+#+begin_src emacs-lisp
+
+  (use-package vterm
+    :ensure t)
+
+#+end_src
 
 ** Auto-tangle
 
@@ -918,6 +1117,7 @@
 
 ** Prio
 
+- Floating windows
 - quick binding for linestart and lineend
 - Drag stuff
 - Git gutterr
@@ -927,6 +1127,7 @@
 
 - Set vterm defaults
 - Workspaces
+- Org tasks, agenda etc
 - Workspace unified motions
 - Irc
 - Mail

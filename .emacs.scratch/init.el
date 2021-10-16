@@ -6,22 +6,20 @@
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)
-
 (tool-bar-mode -1)
 (tooltip-mode -1)
+(menu-bar-mode -1)
 
 ;; No borders on windows
 (set-fringe-mode 0)
-
-(menu-bar-mode -1)
 
 (global-auto-revert-mode t)
 
 (setq display-line-numbers-type 'relative)
 
-(global-set-key (kbd "C-c C-c") 'evil-escape)
+(global-hl-line-mode)
 
-(setq global-hl-line-mode t)
+(global-set-key (kbd "C-c C-c") 'evil-escape)
 
 (server-start)
 
@@ -30,25 +28,6 @@
 ;; The default is 800 kilobytes.  Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-          (format "%.2f seconds"
-                  (float-time
-                      (time-subtract after-init-time before-init-time)))
-          gcs-done))
-
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
-
-(defvar efs/frame-transparency '(90 . 75))
-
-;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-;; Line Numbers
-(column-number-mode)
 (global-display-line-numbers-mode t)
 
 ;; Disable line numbers for some modes
@@ -110,7 +89,7 @@
 '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
 '(objed-cursor-color "#ff5c57")
 '(package-selected-packages
-  '(company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+'(ace-window avy company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
 '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
 '(rustic-ansi-faces
   ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
@@ -145,154 +124,7 @@
   ;; If there is more than one, they won't work right.
  )
 
-;; Ivy
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("C-l" . ivy-immediate-done)
-         ("TAB" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-alt-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-wrap t))
-
-(use-package ivy-prescient
-  :after counsel
-  :custom
-  (ivy-prescient-enable-filtering nil)
-  :config
-  ;; Uncomment the following line to have sorting remembered across sessions!
-  (prescient-persist-mode 1)
-  (ivy-prescient-mode 1))
-
-;; Counsel
-(use-package counsel
-  :init (counsel-mode 1)
-  :bind (("C-c b" . counsel-bookmark)
-         :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history))
-  :config
-  (setq ivy-initial-inputs-alist nil))
-
-(global-set-key (kbd "C-x b") 'counsel-switch-buffer)
-
-;; Modeline
-(use-package all-the-icons)
-
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 10)
-           (doom-modeline-unicode-fallback t)))
-
-;; Rainbow delimiters
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-;; Which key
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 0.3))
-
-;; Ivy which
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1))
-
-;; Helpful
-(use-package helpful
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
-  :bind
-  ([remap describe-function] . counsel-describe-function)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
-  ([remap describe-key] . counsel-describe-key))
-
-(add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
-
-;; Doom-themes
-(use-package doom-themes
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-   (load-theme 'doom-1337-custom t))
-
 (use-package key-chord)
-
-(defun split-goto-h ()
-  "Split horizontaly and goto created window"
-  (interactive)
-  (evil-window-split)
-  (evil-window-down 1))
-
-(defun split-goto-v ()
-  (interactive)
-  "Split verticaly and goto created window"
-  (evil-window-vsplit)
-  (evil-window-right 1))
-
-
-;; Evil
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  ;:hook (evil-mode . pii/evil-hook)
-  :config
-  (evil-mode 1))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-
-(use-package dired
-  :ensure nil
-  :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
-  :custom ((dired-listing-switches "-agho --group-directories-first"))
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-single-up-directory
-      "l" 'dired-single-buffer))
-
-(use-package dired-single
-  :commands (dired dired-jump))
-
-(use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package dired-open
-  :commands (dired dired-jump)
-  :config
-  ;; Doesn't work as expected!
-  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-  (setq dired-open-extensions '(("png" . "feh")
-                                  ("mkv" . "mpv"))))
-
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-      "H" 'dired-hide-dotfiles-mode))
 
 (defun pii/evil-save-go-normal ()
   "Save the current buffer and exit insert mode"
@@ -351,7 +183,7 @@
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
   (key-chord-define evil-normal-state-map "zx" 'save-buffer)
   (key-chord-define evil-insert-state-map "zx" 'pii/evil-save-go-normal)
-  (key-chord-define evil-normal-state-map "g S-d" 'lsp-ui-peek-find-references)
+  (key-chord-define evil-normal-state-map "gD" 'lsp-ui-peek-find-references)
   (key-chord-define evil-normal-state-map "gc" 'evilnc-comment-or-uncomment-lines)
   (key-chord-define evil-normal-state-map "gh" 'evil-window-left)
   (key-chord-define evil-normal-state-map "gj" 'evil-window-down)
@@ -403,30 +235,102 @@
   (define-key evil-normal-state-map (kbd "M-<f13> k") 'pii/increase-window-height)
   (define-key evil-normal-state-map (kbd "M-<f13> l") 'pii/increase-window-width)
 
+ (global-set-key (kbd "M-o") 'ace-window)
+
   (key-chord-mode 1))
 
-(use-package hydra)
+;; Which key
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 0.3))
 
-;; Projectile
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom (projectile-completion-system 'ivy)
-  :bind-keymap ("C-c p" . projectile-command-map)
-  :init ())
+;; Modeline
+(use-package all-the-icons)
 
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 10)
+           (doom-modeline-unicode-fallback t)))
 
-(use-package magit
-  :commands (magit-status magit-get-current-branch)
-  :custom
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+(add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
 
-(setq auth-sources '("~/.authinfo.gpg"))
-(use-package forge)
+;; Doom-themes
+(use-package doom-themes
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+   (load-theme 'doom-1337-custom t))
 
-;; Org
+;; Rainbow delimiters
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package rainbow-identifiers)
+
+(setq rainbow-identifiers-cie-l*a*b*-lightness 80)
+(setq rainbow-identifiers-cie-l*a*b*-saturation 80)
+(setq rainbow-identifiers-cie-l*a*b*-color-count 9)
+
+(setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
+  (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
+  (setq rainbow-identifiers-faces-to-override '(lsp-face-semhl-member
+                                               lsp-face-semhl-parameter
+                                               lsp-face-semhl-variable))
+
+(use-package highlight-indent-guides
+  :hook ((prog-mode conf-mode) . highlight-indent-guides-mode)
+  :init
+  (setq highlight-indent-guides-method 'column
+        highlight-indent-guides-suppress-auto-error t)
+  :config
+  ;; (highlight-indent-guides-mode)
+
+  (defun +indent-guides-init-faces-h (&rest _)
+    (when (display-graphic-p)
+      (highlight-indent-guides-auto-set-faces))))
+
+;; Disable line numbers for some modes
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                eshell-mode-hook))
+    (add-hook mode (lambda () (highlight-indent-guides-mode nil))))
+
+(defun split-goto-h ()
+  "Split horizontaly and goto created window"
+  (interactive)
+  (evil-window-split)
+  (evil-window-down 1))
+
+(defun split-goto-v ()
+  (interactive)
+  "Split verticaly and goto created window"
+  (evil-window-vsplit)
+  (evil-window-right 1))
+
+;; Evil
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  ;:hook (evil-mode . pii/evil-hook)
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
 (defun pii/org-font-setup ()
   (font-lock-add-keywords 'org-mode
@@ -454,7 +358,8 @@
      (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
      (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
      (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
-     ;(set-face-attribute 'org-level-3 nil :foreground "green"))
+
+;; Org
 
 (defun pii/org-mode-setup ()
    (org-indent-mode)
@@ -470,11 +375,6 @@
    :config
    (setq org-ellipsis " ▾")
    (pii/org-font-setup))
-
-(use-package org-bullets
-   :hook (org-mode . org-bullets-mode)
-   :custom
-   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 (with-eval-after-load 'org
    (org-babel-do-load-languages
@@ -508,6 +408,11 @@
   (setq org-roam-v2-ack t)
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
+
+(use-package org-bullets
+   :hook (org-mode . org-bullets-mode)
+   :custom
+   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 (defun pii/org-mode-visual-fill ()
   (setq visual-fill-column-width 140
@@ -615,38 +520,122 @@
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode))
 
-(use-package rainbow-identifiers)
+;; Projectile
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom (projectile-completion-system 'ivy)
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :init ())
 
- (setq rainbow-identifiers-cie-l*a*b*-lightness 80)
- (setq rainbow-identifiers-cie-l*a*b*-saturation 80)
- (setq rainbow-identifiers-cie-l*a*b*-color-count 9)
+(use-package counsel-projectile
+  :config (counsel-projectile-mode))
 
-(setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face)
-  (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
-  (setq rainbow-identifiers-faces-to-override '(lsp-face-semhl-member
-                                               lsp-face-semhl-parameter
-                                               lsp-face-semhl-variable))
+(setq auth-sources '("~/.authinfo.gpg"))
+(use-package forge)
 
-(use-package vterm
-  :ensure t)
+(use-package magit
+  :commands (magit-status magit-get-current-branch)
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(use-package highlight-indent-guides
-  :hook ((prog-mode conf-mode) . highlight-indent-guides-mode)
-  :init
-  (setq highlight-indent-guides-method 'column
-        highlight-indent-guides-suppress-auto-error t)
+;; Ivy
+(use-package ivy
+  :diminish
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("C-l" . ivy-immediate-done)
+         ("TAB" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-alt-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
   :config
-  ;; (highlight-indent-guides-mode)
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-wrap t))
 
-  (defun +indent-guides-init-faces-h (&rest _)
-    (when (display-graphic-p)
-      (highlight-indent-guides-auto-set-faces))))
+(use-package ivy-prescient
+  :after counsel
+  :custom
+  (ivy-prescient-enable-filtering nil)
+  :config
+  ;; Uncomment the following line to have sorting remembered across sessions!
+  (prescient-persist-mode 1)
+  (ivy-prescient-mode 1))
 
-;; Disable line numbers for some modes
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-                eshell-mode-hook))
-    (add-hook mode (lambda () (highlight-indent-guides-mode nil))))
+;; Ivy which
+(use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
+
+;; Counsel
+(use-package counsel
+  :init (counsel-mode 1)
+  :bind (("C-c b" . counsel-bookmark)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history))
+  :config
+  (setq ivy-initial-inputs-alist nil))
+
+(global-set-key (kbd "C-x b") 'counsel-switch-buffer)
+
+(use-package avy
+  :bind (("M-s" . avy-goto-word-1)))
+
+(use-package ace-window
+  :config
+  ;;(general-define-key "C-o" 'ace-buffer)
+  (setq aw-keys '(?h ?t ?n ?s)))
+
+;; Helpful
+(use-package helpful
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . counsel-describe-key))
+
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer))
+
+(use-package dired-single
+  :commands (dired dired-jump))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-open
+  :commands (dired dired-jump)
+  :config
+  ;; Doesn't work as expected!
+  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+  (setq dired-open-extensions '(("png" . "feh")
+                                  ("mkv" . "mpv"))))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+      "H" 'dired-hide-dotfiles-mode))
+
+(use-package hydra)
 
 (use-package no-littering)
 
@@ -654,6 +643,9 @@
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+(use-package vterm
+  :ensure t)
 
 (defun pii/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))
