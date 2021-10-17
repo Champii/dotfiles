@@ -11,15 +11,13 @@
 (menu-bar-mode -1)
 
 ;; No borders on windows
-(set-fringe-mode 0)
+(set-fringe-mode 4)
 
 (global-auto-revert-mode t)
 
 (setq display-line-numbers-type 'relative)
 
 (global-hl-line-mode)
-
-(global-set-key (kbd "C-c C-c") 'evil-escape)
 
 (server-start)
 
@@ -40,6 +38,9 @@
 
 ;; Make ESQ quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; Exit from anywhere
+(global-set-key (kbd "C-c C-c") 'evil-escape)
 
 ;; Package manager
 (require 'package)
@@ -124,6 +125,39 @@
   ;; If there is more than one, they won't work right.
  )
 
+(defun split-goto-h ()
+  "Split horizontaly and goto created window"
+  (interactive)
+  (evil-window-split)
+  (evil-window-down 1))
+
+(defun split-goto-v ()
+  (interactive)
+  "Split verticaly and goto created window"
+  (evil-window-vsplit)
+  (evil-window-right 1))
+
+;; Evil
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  ;:hook (evil-mode . pii/evil-hook)
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
+
 (use-package key-chord)
 
 (defun pii/evil-save-go-normal ()
@@ -143,6 +177,7 @@
   (pii/leader-keys
     ;; Basics
     "RET" '(counsel-bookmark :which-key "Bookmarks")
+    "TAB" '(ace-window :which-key "Window select")
     "." '(find-file :which-key "Open file")
     "," '(counsel-switch-buffer :which-key "Switch buffer")
 
@@ -156,6 +191,7 @@
     "gv" '(evil-window-split :which-key "Window horizontal split")
     "gh" '(evil-window-vsplit :which-key "Window vertical split")
     "gg" '(magit :which-key "Magit")
+    "gh" '(hydra-git-gutter/git-gutter:next-hunk :which-key "Git Hunks")
 
     "e" '(:ignore t :which-key "Eval")
     "eb" '(eval-buffer :witch-key "Eval Buffer")
@@ -197,10 +233,10 @@
   (define-key evil-normal-state-map (kbd "gb") 'split-goto-v)
   (define-key evil-normal-state-map (kbd "gp") 'lsp-ui-doc-show)
 
-  (define-key evil-normal-state-map (kbd "<f13>-h") 'evil-window-left)
-  (define-key evil-normal-state-map (kbd "<f13>-j") 'evil-window-down)
-  (define-key evil-normal-state-map (kbd "<f13>-k") 'evil-window-up)
-  (define-key evil-normal-state-map (kbd "<f13>-l") 'evil-window-right)
+  (define-key evil-normal-state-map (kbd "<f13> h") 'evil-window-left)
+  (define-key evil-normal-state-map (kbd "<f13> j") 'evil-window-down)
+  (define-key evil-normal-state-map (kbd "<f13> k") 'evil-window-up)
+  (define-key evil-normal-state-map (kbd "<f13> l") 'evil-window-right)
 
   (define-key evil-normal-state-map (kbd "S-<f13> h") 'windmove-swap-states-left)
   (define-key evil-normal-state-map (kbd "S-<f13> j") 'windmove-swap-states-down)
@@ -299,39 +335,6 @@
                 eshell-mode-hook))
     (add-hook mode (lambda () (highlight-indent-guides-mode nil))))
 
-(defun split-goto-h ()
-  "Split horizontaly and goto created window"
-  (interactive)
-  (evil-window-split)
-  (evil-window-down 1))
-
-(defun split-goto-v ()
-  (interactive)
-  "Split verticaly and goto created window"
-  (evil-window-vsplit)
-  (evil-window-right 1))
-
-;; Evil
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  ;:hook (evil-mode . pii/evil-hook)
-  :config
-  (evil-mode 1))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-
-(use-package evil-surround
-  :ensure t
-  :config
-  (global-evil-surround-mode 1))
-
 (defun pii/org-font-setup ()
   (font-lock-add-keywords 'org-mode
                            '(("^ *\\([-]\\) "
@@ -422,7 +425,10 @@
 (use-package visual-fill-column
   :hook (org-mode . pii/org-mode-visual-fill))
 
-(use-package flycheck :ensure)
+(use-package flycheck
+  :ensure
+  :config
+  (setq flycheck-indication-mode 'right-fringe))
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
@@ -539,6 +545,63 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+;;; Git Gutter
+;;Git gutter is great for giving visual feedback on changes, but it doesn't play well
+;;with org-mode using org-indent. So I don't use it globally.
+(use-package git-gutter
+  :defer t
+  :init
+  :config
+  (setq git-gutter:update-interval 1
+        git-gutter:window-width 2
+        git-gutter:ask-p nil)
+  (global-git-gutter-mode +1)
+  (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
+                                        :hint nil)
+    "
+ Git gutter:
+   _j_: next hunk        _s_tage hunk     _q_uit
+   _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
+   ^ ^                   _p_opup hunk
+   _h_: first hunk
+   _l_: last hunk        set start _R_evision
+ "
+    ("j" git-gutter:next-hunk)
+    ("k" git-gutter:previous-hunk)
+    ("h" (progn (goto-char (point-min))
+                (git-gutter:next-hunk 1)))
+    ("l" (progn (goto-char (point-min))
+                (git-gutter:previous-hunk 1)))
+    ("s" git-gutter:stage-hunk)
+    ("r" git-gutter:revert-hunk)
+    ("p" git-gutter:popup-hunk)
+    ("R" git-gutter:set-start-revision)
+    ("q" nil :color blue)
+    ("Q" (progn (git-gutter-mode -1)
+                ;; git-gutter-fringe doesn't seem to
+                ;; clear the markup right away
+                (sit-for 0.1)
+                (git-gutter:clear))
+     :color blue)))
+
+(use-package git-gutter-fringe
+  :after git-gutter
+  :demand fringe-helper
+  :config
+  ;; subtle diff indicators in the fringe
+  ;; places the git gutter outside the margins.
+  (setq-default fringes-outside-margins t)
+  ;; thin fringe bitmaps
+  (define-fringe-bitmap 'git-gutter-fr:added
+    [224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224]
+    nil nil 'center)
+  (define-fringe-bitmap 'git-gutter-fr:modified
+    [224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224 224]
+    nil nil 'center)
+  (define-fringe-bitmap 'git-gutter-fr:deleted
+    [0 0 0 0 0 0 0 0 0 0 0 0 0 128 192 224 240 248]
+    nil nil 'center))
+
 ;; Ivy
 (use-package ivy
   :diminish
@@ -591,8 +654,22 @@
 
 (use-package ace-window
   :config
-  ;;(general-define-key "C-o" 'ace-buffer)
-  (setq aw-keys '(?h ?t ?n ?s)))
+  (setq aw-keys '(?a ?d ?f ?g ?j ?k ?l))
+  (general-define-key "M-o" 'ace-window))
+
+(defvar aw-dispatch-alist
+  '((?x aw-delete-window "Delete Window")
+	(?s aw-swap-window "Swap Windows")
+	(?m aw-move-window "Move Window")
+	(?c aw-copy-window "Copy Window")
+	(?b aw-switch-buffer-in-window "Select Buffer")
+	(?p aw-flip-window)
+	(?u aw-switch-buffer-other-window "Switch Buffer Other Window")
+	(?c aw-split-window-fair "Split Fair Window")
+	(?v aw-split-window-vert "Split Vert Window")
+	(?h aw-split-window-horz "Split Horz Window")
+	(?X delete-other-windows "Delete Other Windows")
+	(?? aw-show-dispatch-help)))
 
 ;; Helpful
 (use-package helpful
@@ -643,6 +720,35 @@
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+(use-package beacon
+  :config
+  (beacon-mode 1))
+
+(use-package dimmer
+  :config
+  (dimmer-configure-which-key)
+  (dimmer-configure-magit)
+  (dimmer-configure-org)
+  (dimmer-mode t))
+
+(use-package drag-stuff
+  :config
+  (drag-stuff-global-mode 1)
+  (drag-stuff-define-keys)
+  (global-set-key (kbd "M-j") 'drag-stuff-down)
+  (global-set-key (kbd "M-k") 'drag-stuff-up)
+  (drag-stuff-mode t))
+
+(use-package aggressive-indent
+  :config
+  (global-aggressive-indent-mode 1)
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
+
+(use-package multiple-cursors
+  :config
+  (setq mc/always-repeat-command t)
+  (global-set-key (kbd "M-d") 'mc/mark-next-like-this-word))
 
 (use-package vterm
   :ensure t)
