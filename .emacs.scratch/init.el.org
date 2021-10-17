@@ -524,8 +524,8 @@ A little help for the miserable
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
-    :custom ((doom-modeline-height 10)
-             (doom-modeline-unicode-fallback t)))
+    :custom ((doom-modeline-height 6)
+             (doom-modeline-unicode-fallback t))) 
 
 #+end_src
 

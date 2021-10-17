@@ -330,7 +330,7 @@
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 10)
+  :custom ((doom-modeline-height 6)
            (doom-modeline-unicode-fallback t)))
 
 (add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
