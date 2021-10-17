@@ -26,6 +26,42 @@
 
 #+end_src
 
+**** Scratch message
+
+#+begin_src emacs-lisp
+
+    (setq initial-scratch-message
+          "
+  ;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+  ;;
+  ;;
+  ;;
+  ;; ::::::::: ::::::::::: :::::::::::      ::::    ::::      :::      ::::::::   ::::::::
+  ;; :+:    :+:    :+:         :+:          +:+:+: :+:+:+   :+: :+:   :+:    :+: :+:    :+:
+  ;; +:+    +:+    +:+         +:+          +:+ +:+:+ +:+  +:+   +:+  +:+        +:+
+  ;; +#++:++#+     +#+         +#+          +#+  +:+  +#+ +#++:++#++: +#+        +#++:++#++
+  ;; +#+           +#+         +#+          +#+       +#+ +#+     +#+ +#+               +#+
+  ;; #+#           #+#         #+#          #+#       #+# #+#     #+# #+#    #+# #+#    #+#
+  ;; ###       ########### ###########      ###       ### ###     ###  ########   ########
+  ;;
+  ;;
+  ;;
+  ;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+  ;;
+  ;;                                 $> The Code is nigh _
+  ;;
+  ;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+  ;;
+  ;;
+  ;;              The Leader Key is SPC, press it to discover what's possible
+  ;;                               (Don't forget to remember)
+  ;;
+  ;;
+
+  ")
+
+#+end_src
+
 **** Clean UI
 
 Basically removing all the cluter from menubar, toolbar and such
@@ -38,7 +74,7 @@ Basically removing all the cluter from menubar, toolbar and such
   (menu-bar-mode -1)
 
   ;; No borders on windows
-  (set-fringe-mode 4)
+  (set-fringe-mode 8)
 
 #+end_src
 
@@ -81,6 +117,14 @@ Force files to revert when changed on disk
 #+begin_src emacs-lisp
 
   (setq global-visual-line-mode nil)
+
+#+end_src
+
+**** Don't blink
+
+#+begin_src emacs-lisp
+
+  (setq blink-cursor-mode nil)
 
 #+end_src
 
@@ -333,10 +377,12 @@ Define the whole SPC-* keybinding thing
       :prefix "SPC"
       :global-prefix "C-SPC")
 
+    ;; TODO: put this elsewhere for clarity
     (pii/leader-keys
       ;; Basics
       "RET" '(counsel-bookmark :which-key "Bookmarks")
       "TAB" '(ace-window :which-key "Window select")
+      "SPC" '(counsel-projectile :which-key "Jump to project file") ;; Bug: hangs in large project files
       "." '(find-file :which-key "Open file")
       "," '(counsel-switch-buffer :which-key "Switch buffer")
 
@@ -369,6 +415,14 @@ Define the whole SPC-* keybinding thing
       "wj" '(evil-window-down :which-key "Go to down window")
       "wk" '(evil-window-up :which-key "Go to up window")
       "wd" '(evil-window-delete :which-key "Close current window")
+      "wb" '(split-goto-v :which-key "Split Vert")
+      "wv" '(split-goto-h :which-key "Split Hori")
+
+      "n" '(:ignore t :which-key "Org")
+      "nc" '(org-roam-capture :which-key "Org Capture")
+      "nt" '(org-roam-dailies-capture-today :which-key "Org Today")
+      "nT" '(org-roam-dailies-capture-tomorrow :which-key "Org Tomorrow")
+      "ny" '(org-roam-dailies-capture-yesterday :which-key "Org Yesterday")
 
       "q" '(:ignore t :which-key "Session")
       "qq" '(save-buffers-kill-terminal :which-key "Session")
@@ -482,7 +536,7 @@ Using a custom crafted theme from *doom-1337*
 #+begin_src emacs-lisp
 
   (add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
-  
+
   ;; Doom-themes
   (use-package doom-themes
     :config
@@ -583,7 +637,7 @@ Using a custom crafted theme from *doom-1337*
        (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
        (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
        (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
- 
+
 #+end_src
 
 ****** Setup mode fn
@@ -948,6 +1002,19 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
+***** Block nav
+
+#+begin_src emacs-lisp
+
+  (use-package block-nav
+    :config
+    (define-key evil-normal-state-map (kbd "J") 'block-nav-next-block)
+    (define-key evil-normal-state-map (kbd "K") 'block-nav-previous-block)
+    (define-key evil-normal-state-map (kbd "L") 'block-nav-next-indentation-level)
+    (define-key evil-normal-state-map (kbd "H") 'block-nav-previous-indentation-level))
+
+#+end_src
+
 **** Emacs Utils
 
 ***** Ivy
@@ -983,7 +1050,7 @@ Using a custom crafted theme from *doom-1337*
 ****** Ivy Precient
 
 #+begin_src emacs-lisp
-  
+
   (use-package ivy-prescient
     :after counsel
     :custom
@@ -1031,7 +1098,7 @@ Easy movement through text
 
   (use-package avy
     :bind (("M-s" . avy-goto-word-1)))
-  
+
 #+end_src
 
 ***** Ace window
@@ -1055,17 +1122,17 @@ This is also bound to SPC-TAB
 
 (defvar aw-dispatch-alist
   '((?x aw-delete-window "Delete Window")
-	(?s aw-swap-window "Swap Windows")
-	(?m aw-move-window "Move Window")
-	(?c aw-copy-window "Copy Window")
-	(?b aw-switch-buffer-in-window "Select Buffer")
-	(?p aw-flip-window)
-	(?u aw-switch-buffer-other-window "Switch Buffer Other Window")
-	(?c aw-split-window-fair "Split Fair Window")
-	(?v aw-split-window-vert "Split Vert Window")
-	(?h aw-split-window-horz "Split Horz Window")
-	(?X delete-other-windows "Delete Other Windows")
-	(?? aw-show-dispatch-help)))
+        (?s aw-swap-window "Swap Windows")
+        (?m aw-move-window "Move Window")
+        (?c aw-copy-window "Copy Window")
+        (?b aw-switch-buffer-in-window "Select Buffer")
+        (?p aw-flip-window)
+        (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
+        (?c aw-split-window-fair "Split Fair Window")
+        (?v aw-split-window-vert "Split Vert Window")
+        (?h aw-split-window-horz "Split Horz Window")
+        (?X delete-other-windows "Delete Other Windows")
+        (?? aw-show-dispatch-help)))
 
 #+end_src
 
@@ -1170,8 +1237,11 @@ This is also bound to SPC-TAB
 #+begin_example emacs-lisp
 
   (use-package undo-tree
+    :defer t
+    :after evil
     :config
-    (global-undo-tree-mode) 
+    (setq undo-tree-auto-save-history t)
+    (global-undo-tree-mode)
     (evil-set-undo-system 'undo-tree))
 
 #+end_example
@@ -1270,7 +1340,7 @@ Restore the GC
 #+begin_src emacs-lisp
 
   (setq gc-cons-threshold (* 2 1000 1000))
-  
+
 #+end_src
 
 * Todo
@@ -1278,11 +1348,11 @@ Restore the GC
 
 ** Prio
 
-- Investigate [[https://emacsredux.com/tags/#crux][Crux]] 
+- Investigate [[https://emacsredux.com/tags/#crux][Crux]]
 - Floating windows
 - quick binding for linestart and lineend
 - Git gutterr
-  
+
 
 
 ** Not prio
@@ -1293,4 +1363,3 @@ Restore the GC
 - Workspace unified motions
 - Irc
 - Mail
-

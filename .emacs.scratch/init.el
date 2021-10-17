@@ -5,13 +5,43 @@
 
 (setq inhibit-startup-message t)
 
+(setq initial-scratch-message
+        "
+;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+;;
+;;
+;;
+;; ::::::::: ::::::::::: :::::::::::      ::::    ::::      :::      ::::::::   ::::::::
+;; :+:    :+:    :+:         :+:          +:+:+: :+:+:+   :+: :+:   :+:    :+: :+:    :+:
+;; +:+    +:+    +:+         +:+          +:+ +:+:+ +:+  +:+   +:+  +:+        +:+
+;; +#++:++#+     +#+         +#+          +#+  +:+  +#+ +#++:++#++: +#+        +#++:++#++
+;; +#+           +#+         +#+          +#+       +#+ +#+     +#+ +#+               +#+
+;; #+#           #+#         #+#          #+#       #+# #+#     #+# #+#    #+# #+#    #+#
+;; ###       ########### ###########      ###       ### ###     ###  ########   ########
+;;
+;;
+;;
+;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+;;
+;;                                 $> The Code is nigh _
+;;
+;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
+;;
+;;
+;;              The Leader Key is SPC, press it to discover what's possible
+;;                               (Don't forget to remember)
+;;
+;;
+
+")
+
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (menu-bar-mode -1)
 
 ;; No borders on windows
-(set-fringe-mode 4)
+(set-fringe-mode 8)
 
 (global-auto-revert-mode t)
 
@@ -22,6 +52,8 @@
 (server-start)
 
 (setq global-visual-line-mode nil)
+
+(setq blink-cursor-mode nil)
 
 ;; The default is 800 kilobytes.  Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
@@ -174,10 +206,12 @@
     :prefix "SPC"
     :global-prefix "C-SPC")
 
+  ;; TODO: put this elsewhere for clarity
   (pii/leader-keys
     ;; Basics
     "RET" '(counsel-bookmark :which-key "Bookmarks")
     "TAB" '(ace-window :which-key "Window select")
+    "SPC" '(counsel-projectile :which-key "Jump to project file") ;; Bug: hangs in large project files
     "." '(find-file :which-key "Open file")
     "," '(counsel-switch-buffer :which-key "Switch buffer")
 
@@ -210,6 +244,14 @@
     "wj" '(evil-window-down :which-key "Go to down window")
     "wk" '(evil-window-up :which-key "Go to up window")
     "wd" '(evil-window-delete :which-key "Close current window")
+    "wb" '(split-goto-v :which-key "Split Vert")
+    "wv" '(split-goto-h :which-key "Split Hori")
+
+    "n" '(:ignore t :which-key "Org")
+    "nc" '(org-roam-capture :which-key "Org Capture")
+    "nt" '(org-roam-dailies-capture-today :which-key "Org Today")
+    "nT" '(org-roam-dailies-capture-tomorrow :which-key "Org Tomorrow")
+    "ny" '(org-roam-dailies-capture-yesterday :which-key "Org Yesterday")
 
     "q" '(:ignore t :which-key "Session")
     "qq" '(save-buffers-kill-terminal :which-key "Session")
@@ -602,6 +644,13 @@
     [0 0 0 0 0 0 0 0 0 0 0 0 0 128 192 224 240 248]
     nil nil 'center))
 
+(use-package block-nav
+  :config
+  (define-key evil-normal-state-map (kbd "J") 'block-nav-next-block)
+  (define-key evil-normal-state-map (kbd "K") 'block-nav-previous-block)
+  (define-key evil-normal-state-map (kbd "L") 'block-nav-next-indentation-level)
+  (define-key evil-normal-state-map (kbd "H") 'block-nav-previous-indentation-level))
+
 ;; Ivy
 (use-package ivy
   :diminish
@@ -659,17 +708,17 @@
 
 (defvar aw-dispatch-alist
   '((?x aw-delete-window "Delete Window")
-	(?s aw-swap-window "Swap Windows")
-	(?m aw-move-window "Move Window")
-	(?c aw-copy-window "Copy Window")
-	(?b aw-switch-buffer-in-window "Select Buffer")
-	(?p aw-flip-window)
-	(?u aw-switch-buffer-other-window "Switch Buffer Other Window")
-	(?c aw-split-window-fair "Split Fair Window")
-	(?v aw-split-window-vert "Split Vert Window")
-	(?h aw-split-window-horz "Split Horz Window")
-	(?X delete-other-windows "Delete Other Windows")
-	(?? aw-show-dispatch-help)))
+        (?s aw-swap-window "Swap Windows")
+        (?m aw-move-window "Move Window")
+        (?c aw-copy-window "Copy Window")
+        (?b aw-switch-buffer-in-window "Select Buffer")
+        (?p aw-flip-window)
+        (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
+        (?c aw-split-window-fair "Split Fair Window")
+        (?v aw-split-window-vert "Split Vert Window")
+        (?h aw-split-window-horz "Split Horz Window")
+        (?X delete-other-windows "Delete Other Windows")
+        (?? aw-show-dispatch-help)))
 
 ;; Helpful
 (use-package helpful
