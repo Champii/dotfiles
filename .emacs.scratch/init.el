@@ -122,7 +122,7 @@
 '(jdee-db-spec-breakpoint-face-colors (cons "#282a36" "#848688"))
 '(objed-cursor-color "#ff5c57")
 '(package-selected-packages
-'(ace-window avy company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
+'(embark marginalia ace-window avy company-box dired-hide-dotfiles dired-open all-the-icons-dired dired-single org-bullets forge evil-magit magit counsel-projectile projectile hydra evil-collection evil general doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline diminish ivy use-package))
 '(pdf-view-midnight-colors (cons "#f9f9f9" "#141414"))
 '(rustic-ansi-faces
   ["#141414" "#ff5c57" "#5af78e" "#f3f99d" "#57c7ff" "#ff6ac1" "#9aedfe" "#f9f9f9"])
@@ -248,7 +248,10 @@
     "wv" '(split-goto-h :which-key "Split Hori")
 
     "n" '(:ignore t :which-key "Org")
+    "nr" '(org-roam-buffer-toggle :which-key "Toggle Org Roam Buffer")
+    "nf" '(org-roam-node-find :which-key "Open Org Roam File")
     "nc" '(org-roam-capture :which-key "Org Capture")
+    "nin" '(org-roam-node-insert :which-key "Insert link to node")
     "nt" '(org-roam-dailies-capture-today :which-key "Org Today")
     "nT" '(org-roam-dailies-capture-tomorrow :which-key "Org Tomorrow")
     "ny" '(org-roam-dailies-capture-yesterday :which-key "Org Yesterday")
@@ -275,15 +278,15 @@
   (define-key evil-normal-state-map (kbd "gb") 'split-goto-v)
   (define-key evil-normal-state-map (kbd "gp") 'lsp-ui-doc-show)
 
-  (define-key evil-normal-state-map (kbd "<f13> h") 'evil-window-left)
-  (define-key evil-normal-state-map (kbd "<f13> j") 'evil-window-down)
-  (define-key evil-normal-state-map (kbd "<f13> k") 'evil-window-up)
-  (define-key evil-normal-state-map (kbd "<f13> l") 'evil-window-right)
+  ;; (define-key evil-normal-state-map (kbd "<f13> h") 'evil-window-left)
+  ;; (define-key evil-normal-state-map (kbd "<f13> j") 'evil-window-down)
+  ;; (define-key evil-normal-state-map (kbd "<f13> k") 'evil-window-up)
+  ;; (define-key evil-normal-state-map (kbd "<f13> l") 'evil-window-right)
 
-  (define-key evil-normal-state-map (kbd "S-<f13> h") 'windmove-swap-states-left)
-  (define-key evil-normal-state-map (kbd "S-<f13> j") 'windmove-swap-states-down)
-  (define-key evil-normal-state-map (kbd "S-<f13> k") 'windmove-swap-states-up)
-  (define-key evil-normal-state-map (kbd "S-<f13> l") 'windmove-swap-states-right)
+  ;; (define-key evil-normal-state-map (kbd "S-<f13> h") 'windmove-swap-states-left)
+  ;; (define-key evil-normal-state-map (kbd "S-<f13> j") 'windmove-swap-states-down)
+  ;; (define-key evil-normal-state-map (kbd "S-<f13> k") 'windmove-swap-states-up)
+  ;; (define-key evil-normal-state-map (kbd "S-<f13> l") 'windmove-swap-states-right)
 
   (define-key evil-normal-state-map (kbd "[e") 'flycheck-previous-error)
   (define-key evil-normal-state-map (kbd "]e") 'flycheck-next-error)
@@ -799,8 +802,38 @@
   (setq mc/always-repeat-command t)
   (global-set-key (kbd "M-d") 'mc/mark-next-like-this-word))
 
+(use-package marginalia
+  :config
+  (marginalia-mode))
+
+(use-package embark
+  :bind
+   (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
 (use-package vterm
   :ensure t)
+
+(defun pii/wm-integration (command)
+  (pcase command
+    ((rx bos "focus")
+      (windmove-do-window-select
+      (intern (elt (split-string command) 1))))
+    (- (error command))))
 
 (defun pii/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))

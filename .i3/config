@@ -85,10 +85,15 @@ workspace 3:www output DP-2
 bindsym Ctrl+$mod+l workspace next
 bindsym Ctrl+$mod+h workspace prev
 
-bindsym $mod+h focus left
-bindsym $mod+j focus down
-bindsym $mod+k focus up
-bindsym $mod+l focus right
+# bindsym $mod+h focus left
+# bindsym $mod+j focus down
+# bindsym $mod+k focus up
+# bindsym $mod+l focus right
+
+bindsym $mod+h exec "~/.bin/i3-msg-proxy focus left"
+bindsym $mod+j exec "~/.bin/i3-msg-proxy focus down"
+bindsym $mod+k exec "~/.bin/i3-msg-proxy focus up"
+bindsym $mod+l exec "~/.bin/i3-msg-proxy focus right"
 
 #bindsym $mod+Left focus left
 #bindsym $mod+Down focus down
