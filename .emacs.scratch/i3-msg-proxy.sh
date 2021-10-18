@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Proxy the `i3-msg` command to the focused window.
+# Check ~/.i3/config and ~/.doom.scratch/init.el.org
 
 # Get the class name of the focused window
 focused_window="$(xdotool getactivewindow getwindowclassname)"

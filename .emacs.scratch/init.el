@@ -5,6 +5,8 @@
 
 (setq inhibit-startup-message t)
 
+(desktop-save-mode 1)
+
 (setq initial-scratch-message
         "
 ;;  +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++ +#++:++#++:++
@@ -237,6 +239,7 @@
 
     "o" '(:ignore t :which-key "Open")
     "ot" '(vterm-other-window :which-key "VTerm")
+    "ob" '(vterm-other-window :which-key "VTerm")
 
     "w" '(:ignore t :which-key "Windows")
     "wl" '(evil-window-right :which-key "Go to right window")
@@ -252,6 +255,7 @@
     "nf" '(org-roam-node-find :which-key "Open Org Roam File")
     "nc" '(org-roam-capture :which-key "Org Capture")
     "nin" '(org-roam-node-insert :which-key "Insert link to node")
+    "nil" '(org-insert-link :which-key "Insert link")
     "nt" '(org-roam-dailies-capture-today :which-key "Org Today")
     "nT" '(org-roam-dailies-capture-tomorrow :which-key "Org Tomorrow")
     "ny" '(org-roam-dailies-capture-yesterday :which-key "Org Yesterday")
@@ -283,10 +287,12 @@
   ;; (define-key evil-normal-state-map (kbd "<f13> k") 'evil-window-up)
   ;; (define-key evil-normal-state-map (kbd "<f13> l") 'evil-window-right)
 
-  ;; (define-key evil-normal-state-map (kbd "S-<f13> h") 'windmove-swap-states-left)
-  ;; (define-key evil-normal-state-map (kbd "S-<f13> j") 'windmove-swap-states-down)
-  ;; (define-key evil-normal-state-map (kbd "S-<f13> k") 'windmove-swap-states-up)
-  ;; (define-key evil-normal-state-map (kbd "S-<f13> l") 'windmove-swap-states-right)
+  (define-key evil-normal-state-map (kbd "S-<f13> h") 'windmove-swap-states-left)
+  (define-key evil-normal-state-map (kbd "S-<f13> j") 'windmove-swap-states-down)
+  (define-key evil-normal-state-map (kbd "S-<f13> k") 'windmove-swap-states-up)
+  (define-key evil-normal-state-map (kbd "S-<f13> l") 'windmove-swap-states-right)
+
+  ;; (define-key evil-normal-state-map (kbd "<f13> q") 'pii/increase-window-width)
 
   (define-key evil-normal-state-map (kbd "[e") 'flycheck-previous-error)
   (define-key evil-normal-state-map (kbd "]e") 'flycheck-next-error)
@@ -316,6 +322,9 @@
   (define-key evil-normal-state-map (kbd "M-<f13> k") 'pii/increase-window-height)
   (define-key evil-normal-state-map (kbd "M-<f13> l") 'pii/increase-window-width)
 
+
+
+
  (global-set-key (kbd "M-o") 'ace-window)
 
   (key-chord-mode 1))
@@ -334,7 +343,7 @@
   :ensure t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 6)
-           (doom-modeline-unicode-fallback t)))
+            (doom-modeline-unicode-fallback t)))
 
 (add-to-list 'custom-theme-load-path "~/.emacs.scratch/")
 
@@ -830,9 +839,46 @@
 
 (defun pii/wm-integration (command)
   (pcase command
-    ((rx bos "focus")
+    ((rx bos "focus") ;; $mod+hjkl
       (windmove-do-window-select
       (intern (elt (split-string command) 1))))
+    ((rx bos "move") ;; $mod+hjkl
+      (pcase (elt (split-string command) 1)
+        ((rx bos "left")  ;; $mod+h
+          (windmove-swap-states-left))
+        ((rx bos "down")  ;; $mod+h
+          (windmove-swap-states-down))
+        ((rx bos "up")  ;; $mod+h
+          (windmove-swap-states-up))
+        ((rx bos "right")  ;; $mod+h
+          (windmove-swap-states-right))
+       (- (error command))))
+    ((rx bos "kill")  ;; $mod+q
+      (evil-window-delete))
+    ((rx bos "split")  
+      (pcase (elt (split-string command) 1)
+        ((rx bos "h")  ;; $mod+h
+          (split-goto-h))
+        ((rx bos "v")  ;; $mod+v
+          (split-goto-v)) 
+       (- (error command))))
+    ((rx bos "resize")  
+      (pcase (elt (split-string command) 1)
+        ((rx bos "shrink")  ;; $mod+h
+          (pcase (elt (split-string command) 2)
+            ((rx bos "width")  ;; $mod+h
+              (pii/decrease-window-width))
+            ((rx bos "height")  ;; $mod+h
+              (pii/decrease-window-height))
+            (- (error command))))
+        ((rx bos "grow")  ;; $mod+h
+          (pcase (elt (split-string command) 2)
+            ((rx bos "width")  ;; $mod+h
+              (pii/increase-window-width))
+            ((rx bos "height")  ;; $mod+h
+              (pii/increase-window-height))
+            (- (error command))))
+       (- (error command))))
     (- (error command))))
 
 (defun pii/org-babel-tangle-config ()

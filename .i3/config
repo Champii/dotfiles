@@ -90,6 +90,8 @@ bindsym Ctrl+$mod+h workspace prev
 # bindsym $mod+k focus up
 # bindsym $mod+l focus right
 
+# Emacs integration
+# Check ~/.doom.scratch/init.el and ~/.doom.scratch/i3-msg-proxy.sh
 bindsym $mod+h exec "~/.bin/i3-msg-proxy focus left"
 bindsym $mod+j exec "~/.bin/i3-msg-proxy focus down"
 bindsym $mod+k exec "~/.bin/i3-msg-proxy focus up"
@@ -100,10 +102,10 @@ bindsym $mod+l exec "~/.bin/i3-msg-proxy focus right"
 #bindsym $mod+Up focus up
 #bindsym $mod+Right focus right
 
-bindsym $mod+Shift+h move left
-bindsym $mod+Shift+j move down
-bindsym $mod+Shift+k move up
-bindsym $mod+Shift+l move right
+bindsym $mod+Shift+h exec "~/.bin/i3-msg-proxy move left"
+bindsym $mod+Shift+j exec "~/.bin/i3-msg-proxy move down"
+bindsym $mod+Shift+k exec "~/.bin/i3-msg-proxy move up"
+bindsym $mod+Shift+l exec "~/.bin/i3-msg-proxy move right"
 
 #bindsym $mod+Shift+Left move left
 #bindsym $mod+Shift+Down move down
@@ -117,17 +119,18 @@ bindsym $mod+Shift+t focus mode_toggle
 bindsym $mod+a focus parent
 
 # split in horizontal orientation and spawn a term
-bindsym $mod+x split h, exec konsole
+bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split v, exec konsole'"
+bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split h, exec konsole'"
+# bindsym $mod+x split h, exec konsole
 
 # split in vertical orientation and spawn a term
-bindsym $mod+z split v, exec konsole
+# bindsym $mod+z split v, exec konsole
 
-# split in horizontal orientation and spawn a vim
+# split in horizontal orientation
 bindsym $mod+Shift+x split h
 
-# split in vertical orientation and spawn a vim
+# split in vertical orientation
 bindsym $mod+Shift+z split v
-
 
 # change split in horizontal orientation
 #bindsym $mod+h split h
@@ -146,10 +149,15 @@ bindsym $mod+Shift+space floating toggle
 #bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
 #bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
 
-bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
-bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
-bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
-bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
+# bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
+# bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
+# bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
+# bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
+
+bindsym $mod+Mod1+h exec "~/.bin/i3-msg-proxy 'resize shrink width 1 px or 1 ppt'"
+bindsym $mod+Mod1+j exec "~/.bin/i3-msg-proxy 'resize grow height 1 px or 1 ppt'"
+bindsym $mod+Mod1+k exec "~/.bin/i3-msg-proxy 'resize shrink height 1 px or 1 ppt'"
+bindsym $mod+Mod1+l exec "~/.bin/i3-msg-proxy 'resize grow width 1 px or 1 ppt'"
 
 bindsym $mod+Shift+c reload
 
@@ -225,10 +233,13 @@ exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
 exec_always xrandr --output DP-2 --auto --right-of HDMI-1
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
-bindsym $mod+n exec --no-startup-id raiseorlaunch -s emacs
+# bindsym $mod+n exec --no-startup-id raiseorlaunch -s -- emacsclient -c
 bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
 # bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
+
+bindsym $mod+Shift+b exec qutebrowser
+bindsym $mod+n exec emacsclient -c
 
 default_border pixel 1
 default_floating_border pixel 1
@@ -247,7 +258,7 @@ workspace_auto_back_and_forth yes
 bindsym $mod+Return exec konsole
 
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+Shift+q "exec ~/.bin/i3-msg-proxy kill"
 
 
 # enter fullscreen mode for the focused container
