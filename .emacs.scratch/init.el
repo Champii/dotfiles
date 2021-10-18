@@ -238,7 +238,7 @@
     "cm" '(lsp-ui-imenu :which-key "Side imenu")
 
     "o" '(:ignore t :which-key "Open")
-    "ot" '(vterm-other-window :which-key "VTerm")
+    "ot" '(pii/toggle-vterm :which-key "VTerm")
     "ob" '(vterm-other-window :which-key "VTerm")
 
     "w" '(:ignore t :which-key "Windows")
@@ -512,6 +512,7 @@
   (lsp-enable-which-key-integration t))
 
 (use-package lsp-ui
+  :after lsp
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'at-point)
@@ -550,6 +551,8 @@
   ;; comment to disable rustfmt on save
   (setq rustic-format-on-save nil)
   (setq rustic-lsp-format t)
+  (display-buffer "*rustic-compilation*"
+                  '(display-buffer-in-side-window . ((side . right)))
   (add-hook 'rustic-mode-hook 'pii/rustic-mode-hook))
 
 (defun pii/rustic-mode-hook ()
@@ -835,7 +838,20 @@
                  (window-parameters (mode-line-format . none)))))
 
 (use-package vterm
-  :ensure t)
+  :ensure t
+  :config
+
+  (defun pii/toggle-vterm ()
+    (interactive)
+    (let ((buffer-name (format "*vterm*" "")))
+      (if-let (win (get-buffer-window buffer-name))
+          (delete-window win)
+        (let ((buffer (get-buffer-create buffer-name)))
+          (with-current-buffer buffer
+            (unless (eq major-mode 'vterm-mode)
+              (vterm-mode)))
+          (pop-to-buffer buffer '(display-buffer-in-side-window . ((side . bottom))))))))
+  (define-key vterm-mode-map (kbd "C-c C-d") 'pii/toggle-vterm))
 
 (defun pii/wm-integration (command)
   (pcase command

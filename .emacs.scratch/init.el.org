@@ -1,3 +1,6 @@
+:PROPERTIES:
+:ID:       eac88fdd-2f80-4f3b-b9dc-9afefc81fdfc
+:END:
 #+title: Emacs configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el
 #+filetags: Config, Emacs
@@ -13,13 +16,11 @@
 
 #+end_src
 
-* Configuration
+* Basic UI
 
-** Basic UI
+** Sensible default
 
-*** Sensible default
-
-**** No startup message
+*** No startup message
 
 #+begin_src emacs-lisp
 
@@ -27,7 +28,7 @@
 
 #+end_src
 
-**** Save-Restore
+*** Save-Restore
 
 #+begin_src emacs-lisp
 
@@ -35,7 +36,7 @@
 
 #+end_src
 
-**** Scratch message
+*** Scratch message
 
 #+begin_src emacs-lisp
 
@@ -71,7 +72,7 @@
 
 #+end_src
 
-**** Clean UI
+*** Clean UI
 
 Basically removing all the cluter from menubar, toolbar and such
 
@@ -87,7 +88,7 @@ Basically removing all the cluter from menubar, toolbar and such
 
 #+end_src
 
-**** Auto revert mode
+*** Auto revert mode
 
 Force files to revert when changed on disk
 
@@ -97,7 +98,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Relative line number
+*** Relative line number
 
 #+begin_src emacs-lisp
 
@@ -105,7 +106,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Highlight current line
+*** Highlight current line
 
 #+begin_src emacs-lisp
 
@@ -113,7 +114,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Start the server
+*** Start the server
 
 #+begin_src emacs-lisp
 
@@ -121,7 +122,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Global visual line mode
+*** Global visual line mode
 
 #+begin_src emacs-lisp
 
@@ -129,7 +130,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Don't blink
+*** Don't blink
 
 #+begin_src emacs-lisp
 
@@ -137,7 +138,7 @@ Force files to revert when changed on disk
 
 #+end_src
 
-**** Disable the GC
+*** Disable the GC
 
 It is reactivated at the end of phase
 
@@ -148,7 +149,7 @@ It is reactivated at the end of phase
 
 #+end_src
 
-**** Display startup time
+*** Display startup time
 
 #+begin_src emacs-lisp
 
@@ -163,7 +164,7 @@ It is reactivated at the end of phase
 
 #+end_src
 
-*** Font
+** Font
 
 #+begin_src emacs-lisp
 
@@ -171,7 +172,7 @@ It is reactivated at the end of phase
 
 #+end_src
 
-*** Basic keybindings
+** Basic keybindings
 
 #+begin_src emacs-lisp
 
@@ -183,9 +184,9 @@ It is reactivated at the end of phase
 
 #+end_src
 
-** Package Manager
+* Package Manager
 
-*** Setup
+** Setup
 
 #+begin_src emacs-lisp
 
@@ -208,7 +209,7 @@ It is reactivated at the end of phase
 
 #+end_src
 
-*** Auto update
+** Auto update
 
 #+begin_src emacs-lisp
 
@@ -224,7 +225,7 @@ It is reactivated at the end of phase
 
 #+end_src
 
-*** Custom variables
+** Custom variables
 
 Still have to find a way to automate this to be updated when init.el is
 
@@ -288,13 +289,13 @@ Still have to find a way to automate this to be updated when init.el is
 
 #+end_src
 
-*** Packages
+** Packages
+
+*** Evil
 
 **** Evil
 
-***** Evil
-
-****** Define split-goto functions
+***** Define split-goto functions
 
 Setup functions that split the window and immediately jump to it
 
@@ -314,7 +315,7 @@ Setup functions that split the window and immediately jump to it
 
 #+end_src
 
-****** Actual Evil package
+***** Actual Evil package
 
 We deactivate the C-i jump because it messes with the TAB in org mode (go figure)
 
@@ -333,7 +334,7 @@ We deactivate the C-i jump because it messes with the TAB in org mode (go figure
 
 #+end_src
 
-***** Evil collection
+**** Evil collection
 
 #+begin_src emacs-lisp
   (use-package evil-collection
@@ -343,7 +344,7 @@ We deactivate the C-i jump because it messes with the TAB in org mode (go figure
 
 #+end_src
 
-***** Evil Surround
+**** Evil Surround
 
 Change the surroundings
 
@@ -356,9 +357,9 @@ Change the surroundings
 
 #+end_src
 
-**** Keys
+*** Keys
 
-***** Key Chord
+**** Key Chord
 
 #+begin_src emacs-lisp
 
@@ -366,7 +367,7 @@ Change the surroundings
 
 #+end_src
 
-***** General (Keybindings)
+**** General (Keybindings)
 
 Define the whole SPC-* keybinding thing
 
@@ -416,7 +417,7 @@ Define the whole SPC-* keybinding thing
       "cm" '(lsp-ui-imenu :which-key "Side imenu")
 
       "o" '(:ignore t :which-key "Open")
-      "ot" '(vterm-other-window :which-key "VTerm")
+      "ot" '(pii/toggle-vterm :which-key "VTerm")
       "ob" '(vterm-other-window :which-key "VTerm")
 
       "w" '(:ignore t :which-key "Windows")
@@ -509,7 +510,7 @@ Define the whole SPC-* keybinding thing
 
 #+end_src
 
-***** Which Key
+**** Which Key
 
 A little help for the miserable
 
@@ -524,11 +525,11 @@ A little help for the miserable
 
 #+end_src
 
-**** Theme
+*** Theme
 
-***** Modeline
+**** Modeline
 
-****** All the icons
+***** All the icons
 
 #+begin_src emacs-lisp
 
@@ -537,7 +538,7 @@ A little help for the miserable
 
 #+end_src
 
-****** Doom modeline
+***** Doom modeline
 
 #+begin_src emacs-lisp
   (use-package doom-modeline
@@ -548,7 +549,7 @@ A little help for the miserable
 
 #+end_src
 
-***** Doom Themes
+**** Doom Themes
 
 Using a custom crafted theme from *doom-1337*
 
@@ -566,7 +567,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Rainbow Delimiters
+**** Rainbow Delimiters
 
 /Lisp users salivating/
 
@@ -578,7 +579,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Rainbow Identifiers
+**** Rainbow Identifiers
 
 /Java users killing themselves/
 
@@ -598,7 +599,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Indent guide
+**** Indent guide
 
 #+begin_src emacs-lisp
 
@@ -622,11 +623,11 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
+*** Org
+
 **** Org
 
-***** Org
-
-****** Font setup fn
+***** Font setup fn
 
 #+begin_src emacs-lisp
 
@@ -659,7 +660,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Setup mode fn
+***** Setup mode fn
 
 #+begin_src emacs-lisp
 
@@ -676,7 +677,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Org
+***** Org
 
 #+begin_src emacs-lisp
   (use-package org
@@ -687,7 +688,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Babel languages
+***** Babel languages
 
 #+begin_src emacs-lisp
   (with-eval-after-load 'org
@@ -700,7 +701,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Templates
+***** Templates
 
 #+begin_src emacs-lisp
   (with-eval-after-load 'org
@@ -713,7 +714,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Org Roam
+**** Org Roam
 
 #+begin_src emacs-lisp
 
@@ -736,7 +737,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Org bullets
+**** Org bullets
 
 #+begin_src emacs-lisp
   (use-package org-bullets
@@ -746,7 +747,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Visual Fill Column
+**** Visual Fill Column
 
 #+begin_src emacs-lisp
 
@@ -760,9 +761,9 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-**** Code
+*** Code
 
-***** Flycheck
+**** Flycheck
 
 #+begin_src emacs-lisp
 
@@ -773,9 +774,9 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** LSP
+**** LSP
 
-****** Mode
+***** Mode
 
 #+begin_src emacs-lisp
 
@@ -808,11 +809,12 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** LSP UI
+***** LSP UI
 
 #+begin_src emacs-lisp
 
   (use-package lsp-ui
+    :after lsp
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'at-point)
@@ -827,7 +829,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** LSP Ivy
+***** LSP Ivy
 
 #+begin_src emacs-lisp
 
@@ -836,7 +838,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Evil Nerd Commenter
+**** Evil Nerd Commenter
 
 #+begin_src emacs-lisp
 
@@ -845,7 +847,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Rustic
+**** Rustic
 
 #+begin_src emacs-lisp
 
@@ -869,6 +871,8 @@ Using a custom crafted theme from *doom-1337*
     ;; comment to disable rustfmt on save
     (setq rustic-format-on-save nil)
     (setq rustic-lsp-format t)
+    (display-buffer "*rustic-compilation*"
+                    '(display-buffer-in-side-window . ((side . right)))
     (add-hook 'rustic-mode-hook 'pii/rustic-mode-hook))
 
   (defun pii/rustic-mode-hook ()
@@ -880,7 +884,7 @@ Using a custom crafted theme from *doom-1337*
       (setq-local buffer-save-without-query t)))
 #+end_src
 
-***** Company
+**** Company
 
 #+begin_src emacs-lisp
 
@@ -900,7 +904,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Yasnippet
+**** TODO Yasnippet
 
 #+begin_src emacs-lisp
 
@@ -912,7 +916,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Projectile
+**** Projectile
 
 #+begin_src emacs-lisp
 
@@ -929,7 +933,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Forge
+**** Forge
 
 #+begin_src emacs-lisp
 
@@ -938,7 +942,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Magit
+**** Magit
 
 #+begin_src emacs-lisp
 
@@ -949,9 +953,9 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Git gutter
+**** Git gutter
 
-****** Mode
+***** Mode
 
 #+begin_src emacs-lisp
 
@@ -996,7 +1000,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Git gutter fringe
+***** Git gutter fringe
 
 #+begin_src emacs-lisp
   (use-package git-gutter-fringe
@@ -1021,7 +1025,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Block nav
+**** Block nav
 
 #+begin_src emacs-lisp
 
@@ -1034,11 +1038,11 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-**** Emacs Utils
+*** Emacs Utils
 
-***** Ivy
+**** Ivy
 
-****** Mode
+***** Mode
 
 #+begin_src emacs-lisp
 
@@ -1066,7 +1070,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Ivy Precient
+***** Ivy Precient
 
 #+begin_src emacs-lisp
 
@@ -1081,7 +1085,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-****** Ivy Rich
+***** Ivy Rich
 
 #+begin_src emacs-lisp
 
@@ -1092,7 +1096,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Counsel
+**** Counsel
 
 #+begin_src emacs-lisp
 
@@ -1109,7 +1113,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-***** Avy
+**** Avy
 
 Easy movement through text
 
@@ -1120,9 +1124,9 @@ Easy movement through text
 
 #+end_src
 
-***** Ace window
+**** Ace window
 
-****** Mode
+***** Mode
 
 This is also bound to SPC-TAB
 
@@ -1135,7 +1139,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-****** Dispatch alist
+***** Dispatch alist
 
 #+begin_src emacs-lisp
 
@@ -1155,7 +1159,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Helpful
+**** Helpful
 
 #+begin_src emacs-lisp
 
@@ -1172,9 +1176,9 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Dired
+**** Dired
 
-****** Mode
+***** Mode
 
 #+begin_src emacs-lisp
 
@@ -1190,7 +1194,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-****** Dired single
+***** Dired single
 
 #+begin_src emacs-lisp
   (use-package dired-single
@@ -1198,7 +1202,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-****** All the icons dired
+***** All the icons dired
 
 #+begin_src emacs-lisp
   (use-package all-the-icons-dired
@@ -1206,7 +1210,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-****** Dired open
+***** Dired open
 
 #+begin_src emacs-lisp
   (use-package dired-open
@@ -1219,7 +1223,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-****** Hide dotfiles
+***** Hide dotfiles
 
 #+begin_src emacs-lisp
   (use-package dired-hide-dotfiles
@@ -1230,7 +1234,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Hydra
+**** Hydra
 
 #+begin_src emacs-lisp
 
@@ -1238,7 +1242,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** No littering
+**** No littering
 
 #+begin_src emacs-lisp
 
@@ -1251,7 +1255,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Undo Tree
+**** Undo Tree
 
 #+begin_example emacs-lisp
 
@@ -1265,7 +1269,7 @@ This is also bound to SPC-TAB
 
 #+end_example
 
-***** Beacon
+**** Beacon
 
 #+begin_src emacs-lisp
 
@@ -1275,7 +1279,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Dimmer
+**** Dimmer
 
 #+begin_src emacs-lisp
 
@@ -1288,7 +1292,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Drag-Stuff
+**** Drag-Stuff
 
 #+begin_src emacs-lisp
 
@@ -1302,7 +1306,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** Aggressive Indent
+**** Aggressive Indent
 
 #+begin_src emacs-lisp
 
@@ -1313,7 +1317,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-***** TODO Multiple cursors
+**** TODO Multiple cursors
 
 This is broken, it always ask to repeat multiple command
 
@@ -1326,7 +1330,7 @@ This is broken, it always ask to repeat multiple command
 
 #+end_src
 
-***** Embark
+**** TODO Embark
 
 https://github.com/oantolin/embark/
 
@@ -1363,18 +1367,31 @@ Usecases:
 
 #+end_src
 
-**** Term
+*** Term
 
-***** VTerm
+**** VTerm
 
 #+begin_src emacs-lisp
 
   (use-package vterm
-    :ensure t)
+    :ensure t
+    :config
+
+    (defun pii/toggle-vterm ()
+      (interactive)
+      (let ((buffer-name (format "*vterm*" "")))
+        (if-let (win (get-buffer-window buffer-name))
+            (delete-window win)
+          (let ((buffer (get-buffer-create buffer-name)))
+            (with-current-buffer buffer
+              (unless (eq major-mode 'vterm-mode)
+                (vterm-mode)))
+            (pop-to-buffer buffer '(display-buffer-in-side-window . ((side . bottom))))))))
+    (define-key vterm-mode-map (kbd "C-c C-d") 'pii/toggle-vterm))
 
 #+end_src
 
-** I3 Integration
+* I3 Integration
 
 Check [[file:~/.i3/config][I3Config]] and [[file:i3-msg-proxy.sh][i3-msg-proxy.sh]] 
 
@@ -1426,7 +1443,7 @@ Check [[file:~/.i3/config][I3Config]] and [[file:i3-msg-proxy.sh][i3-msg-proxy.s
 
 #+end_src
 
-** Auto-tangle
+* Auto-tangle
 
 #+begin_src emacs-lisp
 
@@ -1441,7 +1458,7 @@ Check [[file:~/.i3/config][I3Config]] and [[file:i3-msg-proxy.sh][i3-msg-proxy.s
 
 #+end_src
 
-** Performances
+* Performances
 
 Restore the GC
 
@@ -1453,21 +1470,18 @@ Restore the GC
 
 * Todo
 
-
 ** Prio
 
-- Investigate [[https://emacsredux.com/tags/#crux][Crux]]
+- Workspaces
+- Org tasks, agenda etc
 - Floating windows
 - quick binding for linestart and lineend
-- Git gutterr
 
 
 
 ** Not prio
 
-- Set vterm defaults
-- Workspaces
-- Org tasks, agenda etc
-- Workspace unified motions
+- Investigate [[https://emacsredux.com/tags/#crux][Crux]]
 - Irc
 - Mail
+
