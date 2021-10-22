@@ -42,7 +42,7 @@
 (tooltip-mode -1)
 (menu-bar-mode -1)
 
-;; No borders on windows
+;; Small borders on windows
 (set-fringe-mode 8)
 
 (global-auto-revert-mode t)
@@ -54,6 +54,8 @@
 (server-start)
 
 (setq global-visual-line-mode nil)
+
+(set-default 'truncate-lines t)
 
 (setq blink-cursor-mode nil)
 
@@ -236,6 +238,9 @@
     "c" '(:ignore t :which-key "Code")
     "ca" '(lsp-execute-code-action :which-key "Apply code actions")
     "cm" '(lsp-ui-imenu :which-key "Side imenu")
+    "cb" '(rustic-cargo-build :which-key "Cargo Build")
+    "cr" '(rustic-cargo-run :which-key "Cargo Run")
+    "ct" '(rustic-cargo-test :which-key "Cargo Test")
 
     "o" '(:ignore t :which-key "Open")
     "ot" '(pii/toggle-vterm :which-key "VTerm")
@@ -553,7 +558,7 @@
   (setq rustic-lsp-format t)
   (display-buffer "*rustic-compilation*"
                   '(display-buffer-in-side-window . ((side . right)))
-  (add-hook 'rustic-mode-hook 'pii/rustic-mode-hook))
+  (add-hook 'rustic-mode-hook 'pii/rustic-mode-hook)))
 
 (defun pii/rustic-mode-hook ()
   ;; so that run C-c C-c C-r works without having to confirm, but don't try to
