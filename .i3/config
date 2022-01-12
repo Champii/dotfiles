@@ -46,7 +46,7 @@ bar {
     }
 }
 
-bindsym $mod+space exec dmenu_run -l 3   -p Open --nb "#232427" --sb "#990000"
+bindsym $mod+space exec dmenu_run -l 3   -p Open -nb "#232427" -sb "#990000"
 
 bindsym $mod+Shift+s move scratchpad
 
@@ -119,8 +119,8 @@ bindsym $mod+Shift+t focus mode_toggle
 bindsym $mod+a focus parent
 
 # split in horizontal orientation and spawn a term
-bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split v, exec konsole'"
-bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split h, exec konsole'"
+bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split h, exec konsole'"
+bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split v, exec konsole'"
 # bindsym $mod+x split h, exec konsole
 
 # split in vertical orientation and spawn a term
@@ -168,6 +168,7 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 smart_borders on
 
 gaps outer 0
+# gaps inner 12
 
 # Necessary for i3-gaps to work properly (pixel can be any value)
 for_window [class="^.*"] border pixel 1
@@ -229,8 +230,9 @@ bindsym XF86MonBrightnessDown exec intelbacklight -dec 200 # decrease screen bri
 bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
 
-exec_always xrandr --output HDMI-1 --auto --right-of eDP-1
-exec_always xrandr --output DP-2 --auto --right-of HDMI-1
+exec_always xrandr --output DVI-D-0 --auto 
+exec_always xrandr --output HDMI-A-0 --auto --right-of DVI-D-0
+exec_always xrandr --output HDMI-A-1 --auto --right-of HDMI-A-0
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 # bindsym $mod+n exec --no-startup-id raiseorlaunch -s -- emacsclient -c
@@ -244,7 +246,7 @@ bindsym $mod+n exec emacsclient -c
 default_border pixel 1
 default_floating_border pixel 1
 
-exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "light-locker-command -l" \
+exec --no-startup-id xautolock -detectsleep -secure -time 30 -locker "betterlockscreen -l blur" \
     -notify 20 -notifier "notify-send -u critical -t 10000 -- 'LOCKING screen in 20 seconds'"
 
 ### TO DISPATCH
@@ -293,7 +295,7 @@ for_window [title="Emacs Everywhere"] floating enable
 exec --no-startup-id feh --bg-scale ~/wallpapers/sun.png
 
 # Lock
-bindsym Control+Mod1+l exec light-locker-command -l
+bindsym Control+Mod1+l exec betterlockscreen -l blur
 
 # Compositor
 exec --no-startup-id picom

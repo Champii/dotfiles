@@ -1,0 +1,21 @@
+@document.meta
+    title: TODO
+    description:
+    authors: champii
+    categories:
+    created: 2022-01-10
+    version: 0.0.8
+@end
+
+* TODO config
+  - <spc>` previous buf
+  - <spc><spc> files in project
+  - <spc>qq quit
+  - mini
+  - multi cursor
+  - inline lsp diag
+  - config reload
+  - Auto fold
+
+
+

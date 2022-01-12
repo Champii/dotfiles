@@ -15,6 +15,8 @@ export PATH="$PATH:$HOME/.bin"
 export PATH="$HOME/prog/git-fuzzy/bin:$PATH"
 export PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
+export PATH=$PATH:/home/champii/.safe/cli
+
 
 # Lastdir
 touch /tmp/lastdir.tmp

@@ -684,6 +684,7 @@ Using a custom crafted theme from *doom-1337*
      (visual-line-mode 0)
      (display-line-numbers-mode 0)
      (highlight-indent-guides-mode nil)
+     (setq org-todo-keywords '((sequence "TODO" "FIXME" "DONE")))
      (setq evil-auto-indent nil))
 
 #+end_src
@@ -964,7 +965,7 @@ Using a custom crafted theme from *doom-1337*
 
 #+end_src
 
-**** Git gutter
+**** FIXME Git gutter
 
 ***** Mode
 
@@ -1046,6 +1047,24 @@ Using a custom crafted theme from *doom-1337*
     (define-key evil-normal-state-map (kbd "K") 'block-nav-previous-block)
     (define-key evil-normal-state-map (kbd "L") 'block-nav-next-indentation-level)
     (define-key evil-normal-state-map (kbd "H") 'block-nav-previous-indentation-level))
+
+#+end_src
+
+**** Perspective
+
+#+begin_src emacs-lisp
+
+    (use-package perspective
+      :hook persp-mode)
+
+#+end_src
+
+**** Persp-Projectile
+
+#+begin_src emacs-lisp
+
+    (use-package persp-projectile
+      :after perspective)
 
 #+end_src
 
@@ -1266,7 +1285,7 @@ This is also bound to SPC-TAB
 
 #+end_src
 
-**** Undo Tree
+**** FIXME Undo Tree
 
 #+begin_example emacs-lisp
 
@@ -1428,9 +1447,9 @@ Check [[file:~/.i3/config][I3Config]] and [[file:i3-msg-proxy.sh][i3-msg-proxy.s
         (evil-window-delete))
       ((rx bos "split")  
         (pcase (elt (split-string command) 1)
-          ((rx bos "h")  ;; $mod+h
+          ((rx bos "v")  ;; $mod+h
             (split-goto-h))
-          ((rx bos "v")  ;; $mod+v
+          ((rx bos "h")  ;; $mod+v
             (split-goto-v)) 
          (- (error command))))
       ((rx bos "resize")  
@@ -1487,8 +1506,6 @@ Restore the GC
 - Org tasks, agenda etc
 - Floating windows
 - quick binding for linestart and lineend
-
-
 
 ** Not prio
 

@@ -18,3 +18,4 @@ esac
 
 # fallback to i3
 i3-msg $@
+

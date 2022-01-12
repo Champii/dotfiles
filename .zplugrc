@@ -71,7 +71,7 @@ zplug "hcgraf/zsh-sudo"
 
 zplug "le0me55i/zsh-systemd"
 
-zplug "sobolevn/wakatime-zsh-plugin"
+# zplug "sobolevn/wakatime-zsh-plugin"
 
 # zplug "sinetoami/web-search"
 

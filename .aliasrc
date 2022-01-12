@@ -21,10 +21,16 @@ alias cp="xcp"
 alias du="dust"
 
 # Yay
-alias yi="yay -S"
-alias yu="yay -Syu"
-alias ys="yay -Ss"
-alias yr="yay -Rsc"
+# alias yi="yay -S"
+# alias yu="yay -Syu"
+# alias ys="yay -Ss"
+# alias yr="yay -Rsc"
+
+# Paru
+alias yi="paru -S"
+alias yu="paru -Syu"
+alias ys="paru"
+alias yr="paru -Rsc"
 
 # Ping
 alias ping="cping -LT"

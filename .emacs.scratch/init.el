@@ -430,6 +430,7 @@
    (visual-line-mode 0)
    (display-line-numbers-mode 0)
    (highlight-indent-guides-mode nil)
+   (setq org-todo-keywords '((sequence "TODO" "FIXME" "DONE")))
    (setq evil-auto-indent nil))
 
 (use-package org
@@ -671,6 +672,12 @@
   (define-key evil-normal-state-map (kbd "L") 'block-nav-next-indentation-level)
   (define-key evil-normal-state-map (kbd "H") 'block-nav-previous-indentation-level))
 
+(use-package perspective
+  :hook persp-mode)
+
+(use-package persp-projectile
+  :after perspective)
+
 ;; Ivy
 (use-package ivy
   :diminish
@@ -878,9 +885,9 @@
       (evil-window-delete))
     ((rx bos "split")  
       (pcase (elt (split-string command) 1)
-        ((rx bos "h")  ;; $mod+h
+        ((rx bos "v")  ;; $mod+h
           (split-goto-h))
-        ((rx bos "v")  ;; $mod+v
+        ((rx bos "h")  ;; $mod+v
           (split-goto-v)) 
        (- (error command))))
     ((rx bos "resize")  

@@ -83,7 +83,7 @@ Can be an integer to determine the exact padding."
 
    ;; face categories -- required for all themes
    (highlight      red)
-   (vertical-bar   base2)
+   (vertical-bar   (doom-darken base3 0.5))
    (selection      base5)
    (builtin        dark-blue)
    (comments       base6)
