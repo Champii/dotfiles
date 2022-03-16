@@ -28,7 +28,7 @@ M.config = {
     -- false : Disable format on save
     -- true  : Enable format on save
     -- @default = false
-    fmt_on_save = false,
+    fmt_on_save = true,
 
     -- Disable Vim macros
     -- false : Enable Vim macros
@@ -235,7 +235,7 @@ M.config = {
 
     -- sequences used for escaping insert mode
     -- @default = { 'jk', 'kj' }
-    escape_sequences = { "jk", "kj" },
+    escape_sequences = { "jk" },
 
     -- Disable or enable Doom autocommands, this can break some configuration options (they will stop working)
     -- e.g. preserve_edit_pos or autosave
@@ -247,7 +247,7 @@ M.config = {
 
     -- Enable LSP diagnostics virtual text
     -- @default = false
-    enable_lsp_virtual_text = false,
+    enable_lsp_virtual_text = true,
 
     -- Use floating windows for plugins manager (packer) operations
     -- @default = false
@@ -285,7 +285,7 @@ M.config = {
     -- Set the Terminal height
     -- Applies to all directions except window
     -- @default = 20
-    terminal_height = 15,
+    terminal_height = 10,
 
     -- Conceal level
     -- Set Neovim conceal level
@@ -393,8 +393,8 @@ M.config = {
     -- @default = doom emacs' default dashboard colors
     dashboard_custom_colors = {
       header_color = "#586268",
-      center_color = "#51afef",
-      shortcut_color = "#a9a1e1",
+      center_color = "#FC9354",
+      shortcut_color = "#586268",
       footer_color = "#586268",
     },
 
@@ -471,9 +471,19 @@ M.config = {
     --   {
     --      ['shiftwidth'] = 4
     --   }
-    options = {},
+    options = {
+    	--[[ ['foldmethod'] = 'indent',
+    	['foldopen'] = 'all',
+    	['foldclose'] = 'all',
+    	['foldnestmax'] = 2, ]]
+    	-- ['g:rustfmt_autosave'] = 1,
+    	-- ['rust_fold'] = 2,
+    	-- ['foldminlines'] = 7,
+    },
   },
+
 }
+-- vim.diagnostic.config({ virtual_text = { spacing = 100 }, update_in_insert = false, })
 
 return M
 

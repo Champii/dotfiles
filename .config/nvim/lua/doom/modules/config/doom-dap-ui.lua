@@ -45,4 +45,5 @@ return function()
       max_width = nil, -- Floats will be treated as percentage of your screen.
     },
   })
+
 end

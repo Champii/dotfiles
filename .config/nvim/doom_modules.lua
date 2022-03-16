@@ -29,7 +29,7 @@ M.modules = {
   },
   doom = {
     "compiler",        -- Compile (and run) your code with just pressing three keys!
-    -- "contrib",         -- Special plugins intended for Doom Nvim contributors (lua docs, etc)
+    "contrib",         -- Special plugins intended for Doom Nvim contributors (lua docs, etc)
     "neorg",              -- Life Organization Tool, used by Doom Nvim user manual
     "runner",          -- Open a REPL for the current language or run the current file
   },
@@ -44,7 +44,7 @@ M.modules = {
     "kommentary",         -- Comments plugin
     "linter",          -- Asynchronous linter, see errors in your code on the fly
     "lsp",                -- Language Server Protocols
-    -- "minimap",         -- Code minimap, requires github.com/wfxr/code-minimap
+    "minimap",         -- Code minimap, requires github.com/wfxr/code-minimap
     -- "ranger",          -- Ranger File Browser, requires ranger file browser
     "snippets",           -- Code snippets
     "symbols",         -- LSP symbols and tags
@@ -73,7 +73,7 @@ M.modules = {
     -- "go",              -- Hello, gopher
     "haskell",         -- Because Functional programming is fun, isn't it?
     -- "java",            -- Java support
-    "rust +lsp",       -- Let's get rusty!
+    "rust +lsp +debug",       -- Let's get rusty!
     -- "scala",           -- Java, but good
 
     "comment",         -- Better annotations and comments

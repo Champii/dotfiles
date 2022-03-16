@@ -198,6 +198,15 @@ mappings.map(
   "save_zx",
   "Save current buffer"
 )
+mappings.map(
+  "i",
+  "zx",
+  "<esc>:w<CR>",
+  opts,
+  "Window",
+  "save_normal_zx",
+  "Save current buffer and exit to normal mode"
+)
 -- a mapping for splitting horizontally with gb
 mappings.map(
   "n",
@@ -219,13 +228,23 @@ mappings.map(
   "split_vertical",
   "Split window vertically"
 )
--- a mapping for closing a window with gc
+-- a mapping for closing a window with gx
 mappings.map(
   "n",
-  "gc",
+  "gx",
   ":close<CR>",
   opts,
   "Window",
   "close_window",
   "Close current window"
+)
+
+mapping.map(
+  "n",
+  "gd",
+  "<cmd>FzfLua lsp_references<CR>",
+  opts,
+  "Lsp",
+  "lsp_references",
+  "Find references"
 )

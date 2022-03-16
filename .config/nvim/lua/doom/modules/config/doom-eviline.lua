@@ -1,7 +1,7 @@
 return function()
   local utils = require("doom.utils")
   local config = require("doom.core.config").config
-  local colors = require("galaxyline.themes.colors").get_color
+  local colors2 = require("galaxyline.themes.colors").get_color
 
   local gl = require("galaxyline")
   local lsp = require("galaxyline.providers.lsp")
@@ -9,6 +9,16 @@ return function()
   local condition = require("galaxyline.condition")
 
   local gls = gl.section
+
+  local new_bg = "#101010"
+
+  local function colors(name)
+    if name == "bg" then
+      return new_bg
+    end
+
+    return colors2(name)
+  end
 
   gl.short_line_list = {
     "NvimTree",
@@ -33,6 +43,8 @@ return function()
     local buftype = buffer.get_buffer_filetype()
     return buftype ~= "DASHBOARD"
   end
+
+  vim.api.nvim_command('autocmd WinLeave * lua require("galaxyline").load_galaxyline()')
   -- }}}
 
   -- Left side
@@ -41,7 +53,7 @@ return function()
       provider = function()
         return "▊ "
       end,
-      highlight = { colors("blue"), colors("bg") },
+      highlight = { colors("orange"), colors("bg") },
     },
   }
   gls.left[2] = {
@@ -82,11 +94,13 @@ return function()
       provider = "FileSize",
       condition = condition.buffer_not_empty and condition.hide_in_width,
       highlight = {
-        colors("fg"),
+        colors("green"),
         colors("bg"),
       },
+      -- separator = " ",
+      --
       separator = " ",
-      separator_highlight = { colors("bg"), colors("bg") },
+      separator_highlight = { colors("green"), colors("bg") },
     },
   }
   gls.left[4] = {
@@ -103,7 +117,7 @@ return function()
     FileName = {
       provider = config.doom.statusline_show_file_path and "FilePath" or "FileName",
       condition = condition.buffer_not_empty and is_not_dashboard,
-      highlight = { colors("fg"), colors("bg"), "bold" },
+      highlight = { colors("yellow"), colors("bg"), "bold" },
       separator = " ",
       separator_highlight = { colors("bg"), colors("bg") },
     },
@@ -113,17 +127,17 @@ return function()
       provider = function()
         local line = vim.fn.line(".")
         local column = vim.fn.col(".")
-        return string.format("%3d : %2d  ", line, column)
+        return string.format("%3d:%2d  ", line, column)
       end,
       condition = is_not_dashboard,
-      highlight = { colors("fg_alt"), colors("bg") },
+      highlight = { colors("magenta"), colors("bg") },
     },
   }
   gls.left[7] = {
     LinePercent = {
       provider = "LinePercent",
       condition = is_not_dashboard,
-      highlight = { colors("fg_alt"), colors("bg") },
+      highlight = { colors("blue"), colors("bg") },
       separator = "  ",
       separator_highlight = { colors("bg"), colors("bg") },
     },
@@ -159,7 +173,7 @@ return function()
     FileFormat = {
       provider = "FileFormat",
       condition = condition.hide_in_width and is_not_dashboard,
-      highlight = { colors("fg"), colors("bg") },
+      highlight = { colors("red"), colors("bg") },
       separator = "  ",
       separator_highlight = { colors("bg"), colors("bg") },
     },
@@ -169,7 +183,7 @@ return function()
     FileEncode = {
       provider = "FileEncode",
       condition = condition.hide_in_width and is_not_dashboard,
-      highlight = { colors("fg"), colors("bg") },
+      highlight = { colors("orange"), colors("bg") },
       separator = " ",
       separator_highlight = { colors("bg"), colors("bg") },
     },
@@ -258,7 +272,7 @@ return function()
           return "DOOM v" .. utils.doom_version .. " "
         end,
         condition = is_dashboard,
-        highlight = { colors("blue"), colors("bg"), "bold" },
+        highlight = { colors("green"), colors("bg"), "bold" },
         separator = "  ",
         separator_highlight = {
           colors("bg"),
@@ -272,7 +286,7 @@ return function()
       provider = function()
         return " ▊"
       end,
-      highlight = { colors("blue"), colors("bg") },
+      highlight = { colors("orange"), colors("bg") },
     },
   }
 

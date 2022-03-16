@@ -17,15 +17,15 @@ local M = {}
 M.source = debug.getinfo(1, "S").source:sub(2)
 
 M.plugins = {
-	{
+	--[[ {
 		'sunjon/shade.nvim',
 		config = function()
 			require'shade'.setup({
-  			overlay_opacity = 50,
+  			overlay_opacity = 70,
   			opacity_step = 1,
 			})
 		end
-	},
+	}, ]]
 	{
 		'petertriho/nvim-scrollbar',
 		config = function()
@@ -36,13 +36,13 @@ M.plugins = {
 			})
 		end
 	},
-	{
+	--[[ {
 		'nyngwang/NeoRoot.lua',
 		config = function()
 			-- require'neo-root'.setup()
 		end
-	},
-	{
+	}, ]]
+	--[[ {
 		'simrat39/rust-tools.nvim',
 		config = function()
 			require'rust-tools'.setup({
@@ -78,11 +78,11 @@ M.plugins = {
   			severity_sort = false,
 			})
 			vim.o.updatetime = 250
-			vim.cmd [[autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]]
+			-- vim.cmd [[autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]]
 			-- vim.diagnostic.show()
 			-- vim.lsp.buf.signature_help()
-		end
-	},
+		--[[ end
+	}, ]]
 	{
   	'ahmedkhalf/project.nvim',
   	-- after = "telescope",
@@ -158,6 +158,7 @@ run = function() vim.fn['firenvim#install'](0) end
     	{'nvim-lua/plenary.nvim'},
   	}
 	},
+
 	{
 		"luukvbaal/stabilize.nvim",
 		config = function() require("stabilize").setup() end
@@ -168,9 +169,83 @@ run = function() vim.fn['firenvim#install'](0) end
 	{
 		'mbbill/undotree'
 	},
+	{
+    'j-hui/fidget.nvim',
+    config = function()
+local mappings = require('doom.utils.mappings')
+mappings.map(
+  "n",
+  "K",
+  ":lua vim.lsp.buf.hover()<CR>",
+  {},
+  "LSP",
+  "hover_doc",
+  "Hover documentation"
+)
+			require('fidget').setup()
+		end
+	},
+	--[[ {
+		'rust-lang/rust.vim',
+		config = function()
+			vim.cmd('let g:rustfmt_autosave = 1')
+			-- require('rust.vim').setup()
+		end
+	}, ]]
+	{
+		"junegunn/fzf",
+	},
+	{
+		"ibhagwan/fzf-lua",
+		requires = { 'kyazdani42/nvim-web-devicons' },
+		config = function()
+			local actions = require "fzf-lua.actions"
+
+			require('fzf-lua').setup({
+    		winopts = {
+      		-- split         = "botright new",-- open in a split instead?
+					border = false,
+					-- win_row = 1,
+					height = 0.2,
+					width = 0.6,
+					row = 0.8,
+					col = 0.5,
+					preview = {
+						default = 'bat',
+						-- border = 'noborder',
+						vertical = "down:80%",
+						horizontal = "right:40%",
+					},
+  				on_create = function()
+  					-- vim.cmd("resize 20")
+
+    				-- called once upon creation of the fzf main window
+    				-- can be used to add custom fzf-lua mappings, e.g:
+    				--   vim.api.nvim_buf_set_keymap(0, "t", "<C-j>", "<Down>",
+    				--     { silent = true, noremap = true })
+  				end,
+    		},
+				-- actions = {
+					-- files = {
+						-- ["default"]     = actions.buf_edit,
+					-- },
+				-- },
+			})
+		end
+	},
+	--[[ {
+    	"nvim-neorg/neorg",
+    	-- tag = "latest", (see below)
+    	config = function()
+        	require('neorg').setup {
+            	-- ... -- check out setup part...
+        	}
+    	end,
+    	requires = "nvim-lua/plenary.nvim"
+	}, ]]
+
 }
 
 return M
 
 -- vim: sw=2 sts=2 ts=2 noexpandtab
-

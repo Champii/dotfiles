@@ -70,7 +70,7 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(set-face-attribute 'default nil :font "xos4 Terminess Powerline-9" :height 50)
+(set-face-attribute 'default nil :font "Hack" :height 90)
 
 ;; Make ESQ quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)

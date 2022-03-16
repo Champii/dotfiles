@@ -12,7 +12,8 @@ local lsp_opts = vim.tbl_extend("force", opts, { expr = true })
 mappings.map(
   "n",
   "gd",
-  ":lua vim.lsp.buf.definition()<CR>",
+  "<cmd>FzfLua lsp_definitions<CR>",
+  -- ":lua vim.lsp.buf.definition()<CR>",
   opts,
   "LSP",
   "jump_to_definition",
@@ -22,7 +23,7 @@ mappings.map(
 mappings.map(
   "n",
   "gr",
-  ":lua vim.lsp.buf.references()<CR>",
+  "<cmd>FzfLua lsp_references<CR>",
   opts,
   "LSP",
   "goto_reference",
@@ -32,7 +33,7 @@ mappings.map(
 mappings.map(
   "n",
   "gi",
-  ":lua vim.lsp.buf.implementation()<CR>",
+  "<cmd>FzfLua lsp_implementations<CR>",
   opts,
   "LSP",
   "goto_implementation",

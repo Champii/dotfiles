@@ -176,7 +176,7 @@ It is reactivated at the end of phase
 
 #+begin_src emacs-lisp
 
-  (set-face-attribute 'default nil :font "xos4 Terminess Powerline-9" :height 50)
+  (set-face-attribute 'default nil :font "Hack" :height 90)
 
 #+end_src
 

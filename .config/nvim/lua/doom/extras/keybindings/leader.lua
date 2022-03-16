@@ -61,6 +61,15 @@ mappings.map(
 )
 mappings.map(
   "n",
+  "<leader><leader>",
+  "<cmd>FzfLua files<CR>",
+  opts,
+  "Editor",
+  "file_browser_fuzzy",
+  "Find file from PWD"
+)
+mappings.map(
+  "n",
   "<leader>.",
   "<cmd>Telescope file_browser<CR>",
   opts,
@@ -71,7 +80,7 @@ mappings.map(
 mappings.map(
   "n",
   "<leader>,",
-  "<cmd>Telescope buffers show_all_buffers=true<CR>",
+  "<cmd>FzfLua buffers<CR>",
   opts,
   "Movement",
   "switch_buffers",
@@ -80,7 +89,7 @@ mappings.map(
 mappings.map(
   "n",
   "<leader>/",
-  "<cmd>Telescope live_grep<CR>",
+  "<cmd>FzfLua live_grep<CR>",
   opts,
   "Editor",
   "live_grep",
@@ -322,7 +331,7 @@ mappings.map(
 mappings.map(
   "n",
   "<leader>ff",
-  "<cmd>Telescope find_files<CR>",
+  "<cmd>FzfLua files<CR>",
   opts,
   "Editor",
   "find_files_alt",
@@ -332,7 +341,7 @@ mappings.map(
 mappings.map(
   "n",
   "<leader>fr",
-  "<cmd>Telescope oldfiles<CR>",
+  "<cmd>FzfLua oldfiles<CR>",
   opts,
   "Editor",
   "recent_files",
@@ -741,6 +750,57 @@ mappings.map(
   "Compile and run project"
 )
 
+mappings.map(
+  "n",
+  "<leader>cs",
+  "<cmd>FzfLua lsp_document_symbols<CR>",
+  opts,
+  "Editor",
+  "lsp_document_symbols",
+  "Show LSP document symbols"
+)
+
+
+mappings.map(
+  "n",
+  "<leader>cS",
+  "<cmd>FzfLua lsp_live_workspace_symbols<CR>",
+  opts,
+  "Editor",
+  "lsp_live_workspace_symbols",
+  "Show LSP live workspace symbols"
+)
+
+mappings.map(
+  "n",
+  "<leader>cX",
+  "<cmd>FzfLua lsp_workspace_diagnostics<CR>",
+  opts,
+  "Editor",
+  "lsp_workspace_diagnostics",
+  "Show LSP workspace diagnostics"
+)
+
+mappings.map(
+  "n",
+  "<leader>cx",
+  "<cmd>FzfLua lsp_document_diagnostics<CR>",
+  opts,
+  "Editor",
+  "lsp_document_diagnostics",
+  "Show LSP document diagnostics"
+)
+
+mappings.map(
+  "n",
+  "<leader><Tab>",
+  "<cmd>FzfLua resume<CR>",
+  opts,
+  "Editor",
+  "fzf_resume",
+  "Resume fzf"
+)
+
 -- debugging
 mappings.map(
   "n",
@@ -793,7 +853,7 @@ mappings.map("n", "<leader>cli", "<cmd>LspInfo<CR>", opts, "LSP", "lsp_info", "L
 mappings.map(
   "n",
   "<leader>ca",
-  "<cmd>lua vim.lsp.buf.code_action()<CR>",
+  ":CodeActionMenu<CR>",
   opts,
   "LSP",
   "code_action_alt2",
@@ -869,3 +929,5 @@ mappings.map("n", "<leader>h", ":Man ", { silent = false }, "Man page", "man_pag
 -- projects
 mappings.map("n", "<leader>pp", ":Telescope projects<cr>", opts, "Project", "open_project", "Open Project")
 
+-- neogit
+mappings.map("n", "<leader>gg", ":Neogit<cr>", opts, "Git", "open_neogit", "Open Neogit")
