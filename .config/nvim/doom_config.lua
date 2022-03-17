@@ -351,7 +351,7 @@ M.config = {
       terminal_colors = true,
       -- If the Neovim instance should be transparent
       -- @default = false
-      transparent_background = false,
+      transparent_background = true,
     },
 
     -- Set gui fonts here
@@ -440,7 +440,14 @@ M.config = {
     --     ':Lspsaga ...' is the command to be executed
     --     options is a Lua table containing the mapping options, e.g.
     --     { silent = true }, see ':h map-arguments'.
-    mappings = {},
+    mappings = {
+    	-- // FIXME: already used for moving to down window
+    	{'n', '<C-J>', 'a<CR><Esc>k$', {}},
+    	{'n', '<CR>', 'o<Esc>k', {}},
+    	{'n', '<Backspace>', 'O<Esc>j', {}},
+    	{'n', '\\', '^', {}},
+    	{'n', '|', '$', {}},
+    },
 
     -- Set custom commands
     -- @default = {}
@@ -472,6 +479,7 @@ M.config = {
     --      ['shiftwidth'] = 4
     --   }
     options = {
+    	['pumblend'] = 30,
     	--[[ ['foldmethod'] = 'indent',
     	['foldopen'] = 'all',
     	['foldclose'] = 'all',

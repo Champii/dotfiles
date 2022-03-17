@@ -207,7 +207,7 @@ mappings.map(
 					border = false,
 					-- win_row = 1,
 					height = 0.2,
-					width = 0.6,
+					width = 0.8,
 					row = 0.8,
 					col = 0.5,
 					preview = {
