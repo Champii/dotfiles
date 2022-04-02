@@ -320,7 +320,8 @@ bindsym $mod+e exec emacsclient --eval "(emacs-everywhere)"
 
 
 # Screenshot
-bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/pictures/'
+# bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/pictures/'
+bindsym Print exec flameshot gui
 
 bindsym --release $mod+h exec --no-startup-id "i3-vim-nav h"
 bindsym --release $mod+j exec --no-startup-id "i3-vim-nav j"
