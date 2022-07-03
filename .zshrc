@@ -2,7 +2,7 @@
 # Dont edit by hand if you intend to regenerate it
 # Consult .zshrc.org
 
-export EDITOR="emacsclient -nw"
+export EDITOR="nvim"
 
 # Go Path
 export GOROOT=/usr/local/go

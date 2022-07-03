@@ -230,9 +230,9 @@ bindsym XF86MonBrightnessDown exec intelbacklight -dec 200 # decrease screen bri
 bindsym Shift+XF86MonBrightnessUp exec intelbacklight -set 1500 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec intelbacklight -set 1 # decrease screen brightness
 
-exec_always xrandr --output DVI-D-0 --auto 
-exec_always xrandr --output HDMI-A-0 --auto --right-of DVI-D-0
+exec_always xrandr --output HDMI-A-0 --auto
 exec_always xrandr --output HDMI-A-1 --auto --right-of HDMI-A-0
+exec_always xrandr --output DVI-D-0 --auto --right-of HDMI-A-1
 
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
 # bindsym $mod+n exec --no-startup-id raiseorlaunch -s -- emacsclient -c
