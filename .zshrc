@@ -11,6 +11,8 @@ export EDITOR="nvim"
 
 # ctrl + a/e to go to beginning/end of line
 bindkey -e
+bindkey ";5C" forward-word
+bindkey ";5D" backward-word
 
 # Go Path
 export GOROOT=/usr/local/go
@@ -27,8 +29,7 @@ export PATH=$PATH:/home/champii/.safe/cli
 export PATH=$PATH:/home/champii/.local/share/gem/ruby/3.0.0/bin
 export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
 
-# OpenAI Key
-export OPENAI_API_KEY="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"
+source .secret_zsh
 
 $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
