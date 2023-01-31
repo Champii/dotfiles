@@ -43,7 +43,7 @@ cd `cat /tmp/lastdir.tmp`
 
 # Plugins
 if [[ -z $ANYRC_DANYRCD  ]] then ANYRC_DANYRCD=$HOME fi
-#source "$HOME/.zprezto/init.zsh"
+source "$HOME/.zprezto/init.zsh"
 source $ANYRC_DANYRCD/.zplugrc
 source $ANYRC_DANYRCD/.aliasrc
 
@@ -76,3 +76,4 @@ export PATH="$HOME/.poetry/bin:$PATH"
 [ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
 
 if [ -e /home/champii/.nix-profile/etc/profile.d/nix.sh ]; then . /home/champii/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+

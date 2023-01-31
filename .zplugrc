@@ -77,8 +77,8 @@ zplug "le0me55i/zsh-systemd"
 
 zplug "bryanculver/opus.plugin.zsh"
 
-
 zplug "zsh-users/zsh-autosuggestions"
+zplug "ericbn/zsh-history-substring-search"
 # bindkey -v
 # zplug "softmoth/zsh-vim-mode"
 
@@ -97,8 +97,6 @@ fi
 zplug load 
 
 # CONFIG
-# bindkey '\eOA' history-substring-search-up
-# bindkey '\eOB' history-substring-search-down
 bindkey '\eOA' history-substring-search-up
 bindkey '\eOB' history-substring-search-down
 
