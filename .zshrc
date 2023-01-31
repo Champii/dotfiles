@@ -28,8 +28,9 @@ export PATH="$HOME/.poetry/bin:$PATH"
 export PATH=$PATH:/home/champii/.safe/cli
 export PATH=$PATH:/home/champii/.local/share/gem/ruby/3.0.0/bin
 export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
+export GOROOT=/usr/lib/go
 
-source .secret_zsh
+source ~/.secrets_zsh
 
 $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
