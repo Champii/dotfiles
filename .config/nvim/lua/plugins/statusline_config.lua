@@ -1,8 +1,8 @@
-local colors2 = require("galaxyline.themes.colors").get_color
+local colors2 = require("galaxyline.theme").default
 
 local gl = require("galaxyline")
-local lsp = require("galaxyline.providers.lsp")
-local buffer = require("galaxyline.providers.buffer")
+local lsp = require("galaxyline.provider_lsp")
+local buffer = require("galaxyline.provider_buffer")
 local condition = require("galaxyline.condition")
 
 local gls = gl.section
@@ -14,7 +14,7 @@ local function colors(name)
 	return new_bg
     end
 
-    return colors2(name)
+    return colors2[name]
 end
 
 gl.short_line_list = {
@@ -79,7 +79,7 @@ gls.left[2] = {
 		t = colors("red"),
 	    }
 	    if mode_color[vim.fn.mode()] ~= nil then
-		vim.api.nvim_command("hi GalaxyViMode guifg=" .. mode_color[vim.fn.mode()]())
+                vim.api.nvim_command('hi GalaxyViMode guifg='..mode_color[vim.fn.mode()])
 	    end
 	    return "  "
 	end,
@@ -105,7 +105,7 @@ gls.left[4] = {
 	provider = "FileIcon",
 	condition = condition.buffer_not_empty and is_not_dashboard,
 	highlight = {
-	    require("galaxyline.providers.fileinfo").get_file_icon_color,
+	    require("galaxyline.provider_fileinfo").get_file_icon_color,
 	    colors("bg"),
 	},
     },
