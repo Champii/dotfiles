@@ -24,7 +24,7 @@ zplug "arzzen/calc.plugin.zsh"
 
 zplug "zpm-zsh/colorize"
 
-zplug "psprint/zsh-cmd-architect"
+#zplug "psprint/zsh-cmd-architect"
 
 # zplug "mollifier/anyframe"
 

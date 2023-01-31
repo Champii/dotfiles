@@ -2,7 +2,15 @@
 # Dont edit by hand if you intend to regenerate it
 # Consult .zshrc.org
 
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
+
 export EDITOR="nvim"
+
+# ctrl + a/e to go to beginning/end of line
+bindkey -e
 
 # Go Path
 export GOROOT=/usr/local/go
@@ -19,6 +27,9 @@ export PATH=$PATH:/home/champii/.safe/cli
 export PATH=$PATH:/home/champii/.local/share/gem/ruby/3.0.0/bin
 export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
 
+# OpenAI Key
+export OPENAI_API_KEY="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"
+
 $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
 
@@ -30,7 +41,7 @@ cd `cat /tmp/lastdir.tmp`
 
 # Plugins
 if [[ -z $ANYRC_DANYRCD  ]] then ANYRC_DANYRCD=$HOME fi
-source "$HOME/.zprezto/init.zsh"
+#source "$HOME/.zprezto/init.zsh"
 source $ANYRC_DANYRCD/.zplugrc
 source $ANYRC_DANYRCD/.aliasrc
 
@@ -61,3 +72,5 @@ eval "$(starship init zsh)"
 
 export PATH="$HOME/.poetry/bin:$PATH"
 [ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
+
+if [ -e /home/champii/.nix-profile/etc/profile.d/nix.sh ]; then . /home/champii/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
