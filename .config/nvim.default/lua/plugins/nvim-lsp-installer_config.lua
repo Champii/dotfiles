@@ -1,4 +1,4 @@
-local lsp_installer = require("nvim-lsp-installer")
+--[[ local lsp_installer = require("nvim-lsp-installer")
 
 lsp_installer.on_server_ready(function(server)
   local opts = {}
@@ -6,6 +6,14 @@ lsp_installer.on_server_ready(function(server)
   server:setup(opts)
 
   require "lspconfig".rust_analyzer.setup { on_attach = require "lsp-format".on_attach }
+    require "lspconfig".sumneko_lua.setup { on_attach = require "lsp-format".on_attach }
 
-end)
-
+end) ]]
+require("lspconfig").sumneko_lua.setup {
+    -- format on save
+    on_attach = require("lsp-format").on_attach,
+}
+require("lspconfig").rust_analyzer.setup {
+    -- format on save
+    on_attach = require("lsp-format").on_attach,
+}
