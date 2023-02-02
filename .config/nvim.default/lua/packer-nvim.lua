@@ -7,7 +7,7 @@ return require('packer').startup(function(use)
         use 'j-hui/fidget.nvim'
         use 'ibhagwan/fzf-lua'
         use 'junegunn/fzf.vim'
-        use { 'glepnir/galaxyline.nvim', branch = 'main', config = function() require('statusline_config') end }
+        use { 'glepnir/galaxyline.nvim', branch = 'main' }
         use 'lewis6991/gitsigns.nvim'
         use 'b3nj5m1n/kommentary'
         use 'ggandor/lightspeed.nvim'
@@ -59,4 +59,15 @@ return require('packer').startup(function(use)
         use 'jackMort/ChatGPT.nvim'
         use 'nvim-lua/plenary.nvim'
         use 'nvim-telescope/telescope.nvim'
+        use {
+          "folke/trouble.nvim",
+          requires = "nvim-tree/nvim-web-devicons",
+          config = function()
+            require("trouble").setup {
+              -- your configuration comes here
+              -- or leave it empty to use the default settings
+              -- refer to the configuration section below
+            }
+          end
+        }
 end)

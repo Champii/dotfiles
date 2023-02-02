@@ -31,6 +31,7 @@ map("n", "<C-S-l>", "<C-w><", opts)
 
 -- Fzf
 map('n', '<Leader><Leader>', '<cmd>FzfLua files<CR>', opts)
+map('n', '<Leader>.', '<cmd>FzfLua files cwd=%:p:h<CR>', opts)
 map('n', '<Leader>,', '<cmd>FzfLua buffers<CR>', opts)
 map('n', '<Leader>fr', '<cmd>FzfLua oldfiles<CR>', opts)
 map('n', '<Leader>/', '<cmd>FzfLua live_grep<CR>', opts)
@@ -74,6 +75,9 @@ map("n", "<leader>qd", '<cmd>lua require("persistence").stop()<cr>', opts)
 -- Terminals
 map('n', '<Leader>ot', ':ToggleTerm<CR>', opts)
 map('n', '<Leader>to', ':ToggleTerm<CR>', opts)
+
+-- PWD
+map('n', '<Leader>cd', '<cmd>cd %:p:h<CR>', opts)
 
 -- LSP
 ---- lsp rename
