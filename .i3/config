@@ -119,12 +119,12 @@ bindsym $mod+Shift+t focus mode_toggle
 bindsym $mod+a focus parent
 
 # split in horizontal orientation and spawn a term
-bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split h, exec konsole'"
-bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split v, exec konsole'"
-# bindsym $mod+x split h, exec konsole
+bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split h, exec wezterm'"
+bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split v, exec wezterm'"
+# bindsym $mod+x split h, exec wezterm
 
 # split in vertical orientation and spawn a term
-# bindsym $mod+z split v, exec konsole
+# bindsym $mod+z split v, exec wezterm
 
 # split in horizontal orientation
 bindsym $mod+Shift+x split h
@@ -257,7 +257,7 @@ popup_during_fullscreen smart
 workspace_auto_back_and_forth yes
 
 # start a terminal
-bindsym $mod+Return exec konsole
+bindsym $mod+Return exec wezterm
 
 # kill focused window
 bindsym $mod+Shift+q "exec ~/.bin/i3-msg-proxy kill"
@@ -278,7 +278,7 @@ bindsym $mod+Ctrl+e layout toggle split
 
 # WMFocus
 # bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
-bindsym $mod+d exec --no-startup-id konsole --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
+bindsym $mod+d exec --no-startup-id wezterm --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
 for_window [title="~ : i3-dmenu-deskto"] floating enable
 for_window [title="Emacs Everywhere"] floating enable
 # for_window [title="scratchpad"] move scratchpad
@@ -333,12 +333,12 @@ assign [title="^first"] number 1
 assign [class="emacs"] number 2
 assign [class="brave-browser"] number 3
 
-exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
+exec --no-startup-id wezterm -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
 # exec --no-startup-id emacs
 
 # for_window [title="emacs@arch"] move scratchpad
 
-# exec --no-startup-id konsole -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
+# exec --no-startup-id wezterm -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
 # exec --no-startup-id emacs
 # exec --no-startup-id brave
 

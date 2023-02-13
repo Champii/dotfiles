@@ -27,12 +27,12 @@ export PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH=$PATH:/home/champii/.safe/cli
 export PATH=$PATH:/home/champii/.local/share/gem/ruby/3.0.0/bin
-export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
+# export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
 export GOROOT=/usr/lib/go
 
 source ~/.secrets_zsh
 
-$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+# $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
 
 # Lastdir
@@ -75,5 +75,5 @@ eval "$(starship init zsh)"
 export PATH="$HOME/.poetry/bin:$PATH"
 [ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
 
-if [ -e /home/champii/.nix-profile/etc/profile.d/nix.sh ]; then . /home/champii/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+# if [ -e /home/champii/.nix-profile/etc/profile.d/nix.sh ]; then . /home/champii/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 
