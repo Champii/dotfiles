@@ -4,15 +4,11 @@ source ~/.zplug/init.zsh
 
 
 zplug "tymm/zsh-directory-history"
-zplug "lukechilds/zsh-nvm"
+# zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
 
-# zplug "mafredri/zsh-async", from:"github", use:"async.zsh"
-
-# AUTO_LS_COMMANDS=(custom-ls custom-git)
-# AUTO_LS_NEWLINE=false
-# zplug "desyncr/auto-ls", from:"github", use:"auto-ls.plugin.zsh"
+# zplug "mafredri/zsh-async", from:"github", use:"async.zsh", defer:3
 
 #zplug "nocttuam/autodotenv", from:"github"
 
@@ -25,13 +21,6 @@ zplug "arzzen/calc.plugin.zsh"
 zplug "zpm-zsh/colorize"
 
 #zplug "psprint/zsh-cmd-architect"
-
-# zplug "mollifier/anyframe"
-
-# zplug "vifon/deer", use:deer
-# zle -N deer
-# bindkey '\ek' deer
-
 
 # zplug "vladmyr/dotfiles-plugin"
 
@@ -53,8 +42,6 @@ zplug 'ytet5uy4/fzf-widgets'
 
 # zplug 'wyntau/fzf-zsh'
 
-# zplug 'oldratlee/hacker-quotes'
-
 zplug 'micrenda/zsh-nohup', defer:2
 
 zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
@@ -63,7 +50,7 @@ zplug 'chipsenkbeil/zsh-notes', from:github, as:plugin
 
 # zplug "damofthemoon/zsh-quotify"
 
-zplug "RobSis/zsh-reentry-hook" #// BROKEN, HANG THE SHELL
+# zplug "RobSis/zsh-reentry-hook" #// BROKEN, HANG THE SHELL
 
 zplug "gko/ssh-connect", use:"ssh-connect.sh"
 
@@ -71,27 +58,21 @@ zplug "hcgraf/zsh-sudo"
 
 zplug "le0me55i/zsh-systemd"
 
-# zplug "sobolevn/wakatime-zsh-plugin"
-
-# zplug "sinetoami/web-search"
-
 zplug "bryanculver/opus.plugin.zsh"
 
 zplug "zsh-users/zsh-autosuggestions"
 zplug "ericbn/zsh-history-substring-search"
-# bindkey -v
-# zplug "softmoth/zsh-vim-mode"
 
 zplug "olets/zsh-abbr"
 
 
 # Install plugins if there are plugins that have not been installed
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
-fi
+# if ! zplug check --verbose; then
+#     printf "Install? [y/N]: "
+#     if read -q; then
+#         echo; zplug install
+#     fi
+# fi
 
 # Then, source plugins and add commands to $PATH
 zplug load 

@@ -25,3 +25,34 @@ require('plugins.chat-gpt_config')
 require('plugins.code_fixer_test')
 
 require('plugins.statusline_config')
+
+-- require('plugins.rainbow_ident_test')
+
+--[[ local queries = require("nvim-treesitter.query")
+require("nvim-treesitter").define_modules({
+    rainbow_ident = {
+        module_path = "plugins.rainbow_ident_test",
+        is_supported = function(lang)
+            return queries.get_query(lang, "parens") ~= nil
+        end,
+        extended_mode = true,
+        colors = {
+            "#cc241d",
+            "#a89984",
+            "#b16286",
+            "#d79921",
+            "#689d6a",
+            "#d65d0e",
+            "#458588",
+        },
+        termcolors = {
+            "Red",
+            "Green",
+            "Yellow",
+            "Blue",
+            "Magenta",
+            "Cyan",
+            "White",
+        },
+    },
+}) ]]

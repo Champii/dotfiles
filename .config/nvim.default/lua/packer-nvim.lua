@@ -89,4 +89,5 @@ return require('packer').startup(function(use)
         config = function() require('mason-lspconfig').setup {} end
     }
     use "rktjmp/highlight-current-n.nvim"
+    use { 'michaelb/sniprun', run = 'bash ./install.sh' }
 end)

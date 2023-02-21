@@ -13,7 +13,13 @@ require("lspconfig").sumneko_lua.setup {
     -- format on save
     on_attach = require("lsp-format").on_attach,
 }
+
 require("lspconfig").rust_analyzer.setup {
+    -- format on save
+    on_attach = require("lsp-format").on_attach,
+}
+
+require("lspconfig").omnisharp.setup {
     -- format on save
     on_attach = require("lsp-format").on_attach,
 }
