@@ -1,5 +1,5 @@
 [theme]
-name = "slick"
+theme = "slick"
 [theme.overrides]
 idle_bg = "#1e2122"
 idle_fg = "#abcdef"
@@ -13,25 +13,31 @@ critical_bg = "#FF1111"
 critical_fg = "#000000"
 
 [icons]
-name = "awesome"
+icons = "awesome4"
 
 [[block]]
 block = "focused_window"
-max_width = 100
-show_marks = "all"
+# max_width = 100
+# show_marks = "all"
 
 [[block]]
 block = "pacman"
 interval = 600
-format = "{pacman} + {aur} = {both} updates available"
-format_singular = "{both} update available"
-format_up_to_date = ""
+format = " $icon $pacman updates available "
+format_singular = " $icon $pacman update available "
+format_up_to_date = " $icon up to date "
 critical_updates_regex = "(linux |linux-lts|linux-zen)"
 # aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
 aur_command = "pikaur -Qua"
 
 [[block]]
-block = "networkmanager"
+block = "net"
+device = "^wlan0$"
+# format = " $icon {$signal_strength $ssid $frequency|Wired connection} via $device $bitrate"
+
+
+# [[block]]
+# block = "networkmanager"
 
 #[[block]]
 #block = "net"
@@ -56,9 +62,9 @@ block = "networkmanager"
 [[block]]
 block = "disk_space"
 path = "/"
-alias = "/"
+# alias = "/"
 info_type = "available"
-unit = "GB"
+alert_unit = "GB"
 interval = 20
 warning = 10.0
 alert = 5.0
@@ -67,18 +73,18 @@ alert = 5.0
 [[block]]
 block = "disk_space"
 path = "/home"
-alias = "/home"
+# alias = "/home"
 info_type = "available"
-unit = "GB"
+alert_unit = "GB"
 interval = 20
 warning = 10.0
 alert = 5.0
 
 [[block]]
 block = "memory"
-display_type = "memory"
+# display_type = "memory"
 # format_mem = "{Mup}%"
-format_swap = "{SUp}%"
+# format_swap = "{SUp}%"
 warning_mem = 60.0
 critical_mem = 80.0
 
@@ -91,16 +97,16 @@ critical = 7.00
 [[block]]
 block = "cpu"
 interval = 1
-info = 10
-warning = 20
-format = "{barchart} {utilization}% {frequency}GHz"
+# info = 10
+# warning = 20
+format = " $icon $barchart $utilization $frequency "
 
 [[block]]
 block = "temperature"
 # collapsed = false
 interval = 10
-format = "{min}° min, {max}° max, {average}° avg"
-chip = "k10temp-pci-*"
+# format = " $min min, $max max, $average avg "
+chip = "coretemp-isa-0000"
 idle = 40
 good = 60
 info = 80
@@ -121,9 +127,9 @@ block = "backlight"
 [[block]]
 block = "time"
 interval = 60
-format = "%a %d/%m %R"
+format = " $icon $timestamp.datetime(f:'%a %d/%m %R', l:fr_FR) "
 
 [[block]]
 block = "battery"
 interval = 10
-format = "{percentage}% {time}"
+format = " $percentage $time "
