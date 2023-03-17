@@ -4,7 +4,7 @@ source ~/.zplug/init.zsh
 
 
 zplug "tymm/zsh-directory-history"
-# zplug "lukechilds/zsh-nvm"
+zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
 
