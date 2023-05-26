@@ -32,7 +32,7 @@ export PATH=$PATH:/home/champii/prog/roc/roc
 export GOROOT=/usr/lib/go
 
 # new cargo register index 
-export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+# export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 
 source ~/.secrets_zsh
 
