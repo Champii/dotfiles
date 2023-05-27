@@ -27,10 +27,10 @@ alias du="dust"
 # alias yr="yay -Rsc"
 
 # Paru
-alias yi="paru -S"
-alias yu="paru -Syu"
-alias ys="paru"
-alias yr="paru -Rsc"
+alias yi="yay -S"
+alias yu="yay -Syu"
+alias ys="yay"
+alias yr="yay -Rsc"
 
 # Ping
 alias ping="cping -LT"
