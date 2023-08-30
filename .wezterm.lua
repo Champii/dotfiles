@@ -1,3 +1,5 @@
+local wezterm = require 'wezterm'
+local act = wezterm.action
 local dimmer = { brightness = 0.02 }
 
 return {
@@ -30,13 +32,11 @@ return {
             },
             width = '100%',
             repeat_x = 'NoRepeat',
-
             -- position the spins starting at the bottom, and repeating every
             -- two screens.
             vertical_align = 'Bottom',
             repeat_y_size = '200%',
             hsb = dimmer,
-
             -- The parallax factor is higher than the background layer, so this
             -- one will appear to be closer when we scroll
             attachment = { Parallax = 0.2 },
@@ -47,7 +47,6 @@ return {
             },
             width = '100%',
             repeat_x = 'NoRepeat',
-
             -- start at 10% of the screen and repeat every 2 screens
             vertical_offset = '10%',
             repeat_y_size = '200%',
@@ -60,7 +59,6 @@ return {
             },
             width = '100%',
             repeat_x = 'NoRepeat',
-
             vertical_offset = '30%',
             repeat_y_size = '200%',
             hsb = dimmer,
@@ -72,7 +70,6 @@ return {
             },
             width = '100%',
             repeat_x = 'NoRepeat',
-
             vertical_offset = '50%',
             repeat_y_size = '150%',
             hsb = dimmer,
@@ -91,4 +88,10 @@ return {
     hide_tab_bar_if_only_one_tab = true,
     adjust_window_size_when_changing_font_size = false,
     font_size = 8.0,
+    keys = {
+        -- CTRL-SHIFT-l activates the debug overlay
+        { key = 'D', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
+        { key = 'L', mods = 'CTRL', action = wezterm.action.DisableDefaultAssignment }, -- disable CTRL+SHIFT+L as debug overlay
+        { key = 'K', mods = 'CTRL', action = wezterm.action.DisableDefaultAssignment }, -- disable CTRL+SHIFT+K as clearscrollback=scrollbackOnly
+    },
 }

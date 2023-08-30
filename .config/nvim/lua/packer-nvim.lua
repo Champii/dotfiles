@@ -1,67 +1,81 @@
 -- Only required if you have packer configured as `opt`
 -- vim.cmd [[packadd packer.nvim]]
 
-return require('packer').startup(function(use)
-    use 'wbthomason/packer.nvim'
-    -- use 'glepnir/dashboard-nvim'
-    use 'j-hui/fidget.nvim'
-    use 'ibhagwan/fzf-lua'
-    use 'junegunn/fzf.vim'
-    use { 'glepnir/galaxyline.nvim', branch = 'main' }
-    use 'lewis6991/gitsigns.nvim'
-    use 'b3nj5m1n/kommentary'
-    use 'ggandor/lightspeed.nvim'
-    use 'lukas-reineke/lsp-format.nvim'
-    use 'ray-x/lsp_signature.nvim'
-    use 'L3MON4D3/LuaSnip'
-    use 'nvim-neo-tree/neo-tree.nvim'
-    use 'TimUntersberger/neogit'
-    use 'MunifTanjim/nui.nvim'
-    use 'windwp/nvim-autopairs'
-    -- use 'williamboman/nvim-lsp-installer'
-    use 'neovim/nvim-lspconfig'
-    use 'nvim-treesitter/nvim-treesitter'
-    use 'nvim-treesitter/nvim-treesitter-context'
-    -- use 'nvim-treesitter/nvim-treesitter-refactor'
-    use 'nvim-treesitter/nvim-treesitter-textobjects'
-    use 'p00f/nvim-ts-rainbow'
-    use 'nvim-tree/nvim-web-devicons'
-    use 'folke/persistence.nvim'
-    use 'nvim-lua/popup.nvim'
-    use 'ahmedkhalf/project.nvim'
-    use 'luukvbaal/stabilize.nvim'
-    use 'lambdalisue/suda.vim'
-    use 'akinsho/toggleterm.nvim'
-    use 'mbbill/undotree'
-    -- use 'glepnir/vim-nix'
-    use 'folke/which-key.nvim'
-    use 'hrsh7th/nvim-cmp'
-    -- # use 'glepnir/copilot-lua'
-    use 'github/copilot.vim'
-    use 'hrsh7th/cmp-buffer'
-    use 'hrsh7th/cmp-nvim-lsp'
-    use 'hrsh7th/cmp-nvim-lua'
-    use 'saadparwaiz1/cmp_luasnip'
-    use 'hrsh7th/cmp-path'
-    use 'ray-x/cmp-treesitter'
-    -- # use 'glepnir/copilot-cmp'
-    use 'm-demare/hlargs.nvim'
-    use 'famiu/bufdelete.nvim'
-    use 'lukas-reineke/indent-blankline.nvim'
-    use 'stevearc/dressing.nvim'
-    -- use 'glepnir/vim-gluon'
-    -- use 'glepnir/orgmode'
-    -- use 'glepnir/nvim-dap'
-    -- use 'glepnir/nvim-dap-ui'
-    -- use 'glepnir/nvim-dap-virtual-text'
-    -- use 'glepnir/dap-buddy'
-    -- use 'glepnir/firenvim'
-    use 'jackMort/ChatGPT.nvim'
-    use 'nvim-lua/plenary.nvim'
-    use 'nvim-telescope/telescope.nvim'
-    use {
+-- Lazy init
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+local plugins = {
+    'wbthomason/packer.nvim',
+    -- 'glepnir/dashboard-nvim',
+    'j-hui/fidget.nvim',
+    'ibhagwan/fzf-lua',
+    'junegunn/fzf.vim',
+    { 'glepnir/galaxyline.nvim', branch = 'main' },
+    'lewis6991/gitsigns.nvim',
+    'b3nj5m1n/kommentary',
+    'ggandor/lightspeed.nvim',
+    'lukas-reineke/lsp-format.nvim',
+    'ray-x/lsp_signature.nvim',
+    'L3MON4D3/LuaSnip',
+    'nvim-neo-tree/neo-tree.nvim',
+    'TimUntersberger/neogit',
+    'MunifTanjim/nui.nvim',
+    'windwp/nvim-autopairs',
+    -- 'williamboman/nvim-lsp-installer',
+    'neovim/nvim-lspconfig',
+    'nvim-treesitter/nvim-treesitter',
+    'nvim-treesitter/nvim-treesitter-context',
+    -- 'nvim-treesitter/nvim-treesitter-refactor',
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    'p00f/nvim-ts-rainbow',
+    'nvim-tree/nvim-web-devicons',
+    'folke/persistence.nvim',
+    'nvim-lua/popup.nvim',
+    'ahmedkhalf/project.nvim',
+    'luukvbaal/stabilize.nvim',
+    'lambdalisue/suda.vim',
+    'akinsho/toggleterm.nvim',
+    'mbbill/undotree',
+    -- 'glepnir/vim-nix',
+    'folke/which-key.nvim',
+    'hrsh7th/nvim-cmp',
+    -- # 'glepnir/copilot-lua',
+    'github/copilot.vim',
+    'hrsh7th/cmp-buffer',
+    'hrsh7th/cmp-nvim-lsp',
+    'hrsh7th/cmp-nvim-lua',
+    'saadparwaiz1/cmp_luasnip',
+    'hrsh7th/cmp-path',
+    'ray-x/cmp-treesitter',
+    -- # 'glepnir/copilot-cmp',
+    'm-demare/hlargs.nvim',
+    'famiu/bufdelete.nvim',
+    'lukas-reineke/indent-blankline.nvim',
+    'stevearc/dressing.nvim',
+    -- 'glepnir/vim-gluon',
+    -- 'glepnir/orgmode',
+    -- 'glepnir/nvim-dap',
+    -- 'glepnir/nvim-dap-ui',
+    -- 'glepnir/nvim-dap-virtual-text',
+    -- 'glepnir/dap-buddy',
+    -- 'glepnir/firenvim',
+    'jackMort/ChatGPT.nvim',
+    'nvim-lua/plenary.nvim',
+    'nvim-telescope/telescope.nvim',
+    {
         "folke/trouble.nvim",
-        requires = "nvim-tree/nvim-web-devicons",
+        dependencies = "nvim-tree/nvim-web-devicons",
         config = function()
             require("trouble").setup {
                 -- your configuration comes here
@@ -69,33 +83,33 @@ return require('packer').startup(function(use)
                 -- refer to the configuration section below
             }
         end
-    }
-    use {
+    },
+    {
         'rmagatti/goto-preview',
         config = function()
             require('goto-preview').setup {}
         end
-    }
-    use {
+    },
+    {
         "rcarriga/nvim-notify",
         config = function() require("notify").setup {} end
-    }
-    use "jose-elias-alvarez/null-ls.nvim"
-    use {
+    },
+    "jose-elias-alvarez/null-ls.nvim",
+    {
         "williamboman/mason.nvim",
         config = function() require('mason').setup {} end
-    }
-    use {
+    },
+    {
         "williamboman/mason-lspconfig.nvim",
         config = function() require('mason-lspconfig').setup {} end
-    }
-    use "rktjmp/highlight-current-n.nvim"
-    use { 'michaelb/sniprun', run = 'bash ./install.sh' }
-    use "nvim-treesitter/playground"
-    use{
+    },
+    "rktjmp/highlight-current-n.nvim",
+    { 'michaelb/sniprun', run = 'bash ./install.sh' },
+    "nvim-treesitter/playground",
+    {
         "aserowy/tmux.nvim",
         config = function() return require("tmux").setup() end
-    }
+    },
+}
 
-
-end)
+require("lazy").setup(plugins)
