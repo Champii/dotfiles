@@ -28,7 +28,9 @@ export PATH="$HOME/.poetry/bin:$PATH"
 export PATH=$PATH:/home/champii/.safe/cli
 export PATH=$PATH:/home/champii/.local/share/gem/ruby/3.0.0/bin
 export PATH=$PATH:/home/champii/prog/roc/roc
+export PATH=$PATH:/home/champii/.local/share/bob/nvim-bin
 # export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}
+
 export GOROOT=/usr/lib/go
 
 # new cargo register index 

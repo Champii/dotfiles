@@ -8,6 +8,7 @@ return {
     color_scheme = "Brogrammer",
     -- color_scheme = "Elementary",
     -- color_scheme = "Hybrid",
+    enable_kitty_keyboard = true,
     background = {
         -- This is the deepest/back-most layer. It will be rendered first
         {

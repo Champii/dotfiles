@@ -9,17 +9,26 @@ lsp_installer.on_server_ready(function(server)
     require "lspconfig".sumneko_lua.setup { on_attach = require "lsp-format".on_attach }
 
 end) ]]
-require("lspconfig").lua_ls.setup {
+--[[ require("lspconfig").lua_ls.setup {
     -- format on save
     on_attach = require("lsp-format").on_attach,
-}
+} ]]
 
-require("lspconfig").rust_analyzer.setup {
+--[[ require("lspconfig").rust_analyzer.setup {
     -- format on save
     on_attach = require("lsp-format").on_attach,
+    settings = {
+        ["rust-analyzer"] = {
+            inlayHints = {
+                typeHints = {
+                    enabled = true,
+                },
+            },
+        },
+    },
 }
 
 require("lspconfig").omnisharp.setup {
     -- format on save
     on_attach = require("lsp-format").on_attach,
-}
+} ]]

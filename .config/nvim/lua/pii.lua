@@ -1,4 +1,4 @@
 require('packer-nvim')
 require('plugins')
 require('keybindings')
-require('fix_treesitter')
+-- require('fix_treesitter')

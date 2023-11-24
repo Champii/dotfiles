@@ -85,6 +85,7 @@ map('n', '<Leader>cr', ':lua vim.lsp.buf.rename()<CR>', opts)
 
 -- NeoTree
 map('n', '<Leader>tn', ':Neotree toggle<CR>', opts)
+map('n', '<Leader>tf', ':Neotree focus<CR>', opts)
 
 -- Quit
 map('n', '<Leader>qq', ':qa<CR>', opts)

@@ -4,14 +4,14 @@
 -- Lazy init
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", -- latest stable release
+        lazypath,
+    })
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -21,7 +21,7 @@ local plugins = {
     'j-hui/fidget.nvim',
     'ibhagwan/fzf-lua',
     'junegunn/fzf.vim',
-    { 'glepnir/galaxyline.nvim', branch = 'main' },
+    { 'glepnir/galaxyline.nvim',             branch = 'main' },
     'lewis6991/gitsigns.nvim',
     'b3nj5m1n/kommentary',
     'ggandor/lightspeed.nvim',
@@ -33,12 +33,12 @@ local plugins = {
     'MunifTanjim/nui.nvim',
     'windwp/nvim-autopairs',
     -- 'williamboman/nvim-lsp-installer',
-    'neovim/nvim-lspconfig',
     'nvim-treesitter/nvim-treesitter',
     'nvim-treesitter/nvim-treesitter-context',
     -- 'nvim-treesitter/nvim-treesitter-refactor',
     'nvim-treesitter/nvim-treesitter-textobjects',
-    'p00f/nvim-ts-rainbow',
+    -- 'p00f/nvim-ts-rainbow',
+    'hiphish/rainbow-delimiters.nvim',
     'nvim-tree/nvim-web-devicons',
     'folke/persistence.nvim',
     'nvim-lua/popup.nvim',
@@ -61,7 +61,8 @@ local plugins = {
     -- # 'glepnir/copilot-cmp',
     'm-demare/hlargs.nvim',
     'famiu/bufdelete.nvim',
-    'lukas-reineke/indent-blankline.nvim',
+    -- 'lukas-reineke/indent-blankline.nvim',
+    { "lukas-reineke/indent-blankline.nvim", main = "ibl",   opts = {} },
     'stevearc/dressing.nvim',
     -- 'glepnir/vim-gluon',
     -- 'glepnir/orgmode',
@@ -96,13 +97,51 @@ local plugins = {
     },
     "jose-elias-alvarez/null-ls.nvim",
     {
+        'lvimuser/lsp-inlayhints.nvim',
+        branch = 'anticonceal',
+        config = function()
+            require("lsp-inlayhints").setup {}
+        end
+    },
+    {
         "williamboman/mason.nvim",
         config = function() require('mason').setup {} end
     },
     {
         "williamboman/mason-lspconfig.nvim",
-        config = function() require('mason-lspconfig').setup {} end
+        config = function()
+            require('mason-lspconfig').setup {}
+            require('mason-lspconfig').setup_handlers {
+                function(server_name) -- default handler (optional)
+                    require("lspconfig")[server_name].setup {
+                        on_attach = require("lsp-format").on_attach,
+                    }
+                end,
+                ["rust_analyzer"] = function() -- rust-analyzer handler
+                    require("lspconfig").rust_analyzer.setup {
+                        on_attach = function(c, b)
+                            require "lsp-format".on_attach(c, b)
+                            require("lsp-inlayhints").on_attach(c, b)
+                        end,
+                    }
+                    --[[ require("lspconfig").rust_analyzer.setup {
+                        on_attach = require("lsp-format").on_attach,
+                        settings = {
+                            ["rust-analyzer"] = {
+                                inlayHints = {
+                                    typeHints = {
+                                        enabled = true,
+                                    },
+                                },
+                            },
+                        },
+                    } ]]
+                end,
+            }
+        end
     },
+    'neovim/nvim-lspconfig',
+    'simrat39/rust-tools.nvim',
     "rktjmp/highlight-current-n.nvim",
     { 'michaelb/sniprun', run = 'bash ./install.sh' },
     "nvim-treesitter/playground",
@@ -110,6 +149,17 @@ local plugins = {
         "aserowy/tmux.nvim",
         config = function() return require("tmux").setup() end
     },
+    {
+        's1n7ax/nvim-window-picker',
+        name = 'window-picker',
+        event = 'VeryLazy',
+        version = '2.*',
+        config = function()
+            require 'window-picker'.setup({
+                hint = 'floating-big-letter',
+            })
+        end,
+    }
 }
 
 require("lazy").setup(plugins)
