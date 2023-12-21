@@ -52,7 +52,7 @@ local heavy_red                          = '#e61f44'
 local green                              = '#4baf1b'
 local blue                               = '#5eadfc'
 local blue_dark                          = '#1674d3'
-local yellow                             = '#cfcfbf'
+local yellow                             = '#fdfd00'
 local yellow_light                       = '#ced331'
 local orange                             = '#ff7000'
 local orange_light                       = '#ff8800'
@@ -69,8 +69,9 @@ local white                              = '#ffffff'
 
 local green_blue                         = '#35cdaf'
 local orange_dark                        = '#a1561c'
-local beige                              = '#b78181'
+local beige                              = '#a7a7a7'
 local purple_light                       = '#cf81cf'
+local purple_dark                        = '#b83fff'
 
 local black                              = '#000000'
 
@@ -98,6 +99,7 @@ local editor_syntax = {
     IncSearch                = { bg = yellow, fg = bg },
     Substitute               = { bg = blue, fg = bg },
     LineNr                   = { fg = grey_light },
+    LspInlayHint             = { fg = grey, bg = bg },
     CursorLineNr             = { fg = grey_lighter },
     MatchParen               = { bold = true, undercurl = true },
     Normal                   = { fg = beige, bg = bg },
@@ -288,7 +290,7 @@ local plugin_syntax = {
     ['@type']                  = { fg = green },
     ['@type.builtin']          = { fg = orange },
     ['@type.definition']       = { fg = yellow_light },
-    ['@type.qualifier']        = { fg = green },
+    ['@type.qualifier']        = { fg = red },
 
     ['@tag']                   = { fg = blue_dark },
     ['@tag.delimiter']         = { fg = cyan },
@@ -306,25 +308,25 @@ local plugin_syntax = {
 
 
     -- TODO: maybe implement this at some point, disable for now
-    ['@lsp.type.class']         = {},
-    ['@lsp.type.decorator']     = {},
-    ['@lsp.type.enumMember']    = {},
-    ['@lsp.type.function']      = { fg = blue },
-    ['@lsp.type.interface']     = { fg = cyan },
-    ['@lsp.type.struct']        = { fg = green },
-    ['@lsp.type.enum']          = { fg = yellow_light },
-    ['@lsp.type.typeParameter'] = { fg = orange },
-    ['@lsp.type.keyword']       = {},
-    ['@lsp.type.label']         = {},
-    ['@lsp.type.macro']         = {},
-    ['@lsp.type.method']        = { fg = blue_dark },
-    ['@lsp.type.builtinType']   = { fg = orange },
-    ['@lsp.type.typeAlias']     = { fg = orange },
-    ['@lsp.type.namespace']     = {},
-    ['@lsp.type.parameter']     = {},
-    ['@lsp.type.property']      = {},
-    ['@lsp.type.type']          = {},
-    ['@lsp.type.variable']      = {},
+    ['@lsp.type.class']           = {},
+    ['@lsp.type.decorator']       = {},
+    ['@lsp.type.enumMember']      = {},
+    ['@lsp.type.function']        = { fg = blue },
+    ['@lsp.type.interface']       = { fg = purple_dark },
+    ['@lsp.type.struct']          = { fg = green },
+    ['@lsp.type.enum']            = { fg = yellow_light },
+    ['@lsp.type.typeParameter']   = { fg = orange },
+    ['@lsp.type.keyword']         = {},
+    ['@lsp.type.label']           = {},
+    ['@lsp.type.macro']           = {},
+    ['@lsp.type.method']          = { fg = blue_dark },
+    ['@lsp.type.builtinType']     = { fg = orange },
+    ['@lsp.type.selfTypeKeyword'] = { fg = orange },
+    ['@lsp.type.namespace']       = {},
+    ['@lsp.type.parameter']       = { fg = yellow },
+    ['@lsp.type.property']        = { fg = green_blue },
+    ['@lsp.type.type']            = {},
+    ['@lsp.type.variable']        = {},
 
 
     -- nvim-cmp

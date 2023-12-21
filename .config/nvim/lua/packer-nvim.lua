@@ -123,6 +123,16 @@ local plugins = {
                             require "lsp-format".on_attach(c, b)
                             require("lsp-inlayhints").on_attach(c, b)
                         end,
+                        settings = {
+                            ["rust-analyzer"] = {
+                                cargo = {
+                                    features = "all",
+                                },
+                                procMacro = {
+                                    enable = true,
+                                },
+                            },
+                        },
                     }
                     --[[ require("lspconfig").rust_analyzer.setup {
                         on_attach = require("lsp-format").on_attach,
@@ -158,6 +168,14 @@ local plugins = {
             require 'window-picker'.setup({
                 hint = 'floating-big-letter',
             })
+        end,
+    },
+    {
+        'saecki/crates.nvim',
+        tag = 'stable',
+        dependencies = { 'nvim-lua/plenary.nvim' },
+        config = function()
+            require('crates').setup()
         end,
     }
 }

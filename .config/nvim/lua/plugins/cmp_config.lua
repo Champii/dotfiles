@@ -134,6 +134,7 @@ cmp.setup({
         -- { name = "nvim_lua" },
         -- { name = "treesitter" },
         { name = "path" },
+        { name = "crates" },
         -- { name = "buffer" },
     },
     sorting = {

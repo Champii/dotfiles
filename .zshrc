@@ -93,3 +93,11 @@ if [ -f '/home/champii/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . 
 if [ -f '/home/champii/.zellij_completion' ]; then . '/home/champii/.zellij_completion'; fi
 
 
+
+# pnpm
+export PNPM_HOME="/home/champii/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
