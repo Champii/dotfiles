@@ -7,6 +7,7 @@ use crate::{
 pub enum ParseError {
     UnexpectedToken(Token),
     UnexpectedEof,
+    LeftoverTokens(Vec<Token>),
 }
 
 pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token], ParseError> {
@@ -31,6 +32,14 @@ impl Parsable for Program {
                 break;
             }
 
+            while tokens
+                .get(0)
+                .map(|t| t.token_type == TokenType::Eol)
+                .unwrap_or(false)
+            {
+                tokens = &tokens[1..];
+            }
+
             let Ok((statement, new_tokens)) = TopLevel::parse(tokens) else {
                 break;
             };
@@ -40,7 +49,11 @@ impl Parsable for Program {
             statements.push(statement);
         }
 
-        expect_token(tokens, TokenType::Eof)?;
+        let remaining_tokens = expect_token(tokens, TokenType::Eof)?;
+
+        if !remaining_tokens.is_empty() {
+            return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()));
+        }
 
         Ok((Program { statements }, tokens))
     }
@@ -151,12 +164,6 @@ impl Parsable for Vec<Statement> {
             remaining_tokens = new_remaining_tokens;
 
             items.push(item);
-
-            let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) else {
-                break;
-            };
-
-            remaining_tokens = new_remaining_tokens;
         }
 
         Ok((items, remaining_tokens))
@@ -166,6 +173,8 @@ impl Parsable for Vec<Statement> {
 impl Parsable for Statement {
     fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
         let (expression, new_tokens) = Expression::parse(tokens)?;
+        let new_tokens = expect_token(new_tokens, TokenType::Eol)?;
+
         Ok((Statement::Expression(expression), new_tokens))
     }
 }
