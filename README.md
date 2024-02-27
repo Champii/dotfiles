@@ -1,43 +1,5 @@
 # Desired features
 
-## Reference/Dereference
-
-```haskell
-main = ->
-  a = 5
-  b = &a
-  add a, b
-
-add = a, &b -> a + *b
-```
-## Unsafe pointer arithmetic
-
-```haskell
-main = ->
-  unsafe
-    a: *Int8 = 0
-    # very unsafe
-    *a
-```
-
-## Pattern matching
-
-```haskell
-main = ->
-  a = (10, "hello")
-  match a
-    (0, "world") => "something"
-    (a, str) if a > 5 => str
-    _ => "otherwise"
-```
-## Destructuring
-
-```haskell
-fn_return_tuple = -> (10, "a string")
-main = ->
-  (num, str) = fn_return_tuple!
-```
-
 ## Automatic single argument (it)
 
 ```haskell
@@ -119,6 +81,46 @@ main = ->
   hello = Hello::new "World"
   hello.display!
 ```
+
+## Reference/Dereference
+
+```haskell
+main = ->
+  a = 5
+  b = &a
+  add a, b
+
+add = a, &b -> a + *b
+```
+## Unsafe pointer arithmetic
+
+```haskell
+main = ->
+  unsafe
+    a: *Int8 = 0
+    # very unsafe
+    *a
+```
+
+## Pattern matching
+
+```haskell
+main = ->
+  a = (10, "hello")
+  match a
+    (0, "world") => "something"
+    (a, str) if a > 5 => str
+    _ => "otherwise"
+```
+
+## Destructuring
+
+```haskell
+fn_return_tuple = -> (10, "a string")
+main = ->
+  (num, str) = fn_return_tuple!
+```
+
 ## Enums
 
 ```haskell
@@ -147,3 +149,24 @@ macro generate
 
 $generate hello, String
 ```
+
+## Modules and dependancies
+
+`Rock.toml`  
+```toml
+name = "my_awesome_package"
+
+#[dependencies]
+my_dep = [ path = "../my_dep" ]
+```
+
+`lib.rk`  
+```haskell
+> my_dep::SomeType
+
+struct MyStruct
+  my_field: SomeType
+
+< MyStruct
+```
+

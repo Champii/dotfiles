@@ -55,7 +55,12 @@ impl Parsable for Program {
             return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()));
         }
 
-        Ok((Program { top_levels: statements }, tokens))
+        Ok((
+            Program {
+                top_levels: statements,
+            },
+            tokens,
+        ))
     }
 }
 
