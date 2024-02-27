@@ -136,3 +136,14 @@ impl Show Error
 
 main = -> Error::SomeErrorWithContext "Hello" .print!
 ```
+
+## Macros
+
+```haskell
+macro generate
+  $name:ident, $type:ty =>
+    struct Generated
+      $name: $type
+
+$generate hello, String
+```
