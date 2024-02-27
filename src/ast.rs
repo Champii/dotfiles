@@ -2,7 +2,7 @@ use crate::span::Span;
 
 #[derive(Debug)]
 pub struct Program {
-    pub statements: Vec<TopLevel>,
+    pub top_levels: Vec<TopLevel>,
 }
 
 #[derive(Debug)]

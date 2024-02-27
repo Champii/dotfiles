@@ -1,8 +1,35 @@
 # Desired features
 
 ## Reference/Dereference
+
+```haskell
+main = ->
+  a = 5
+  b = &a
+  add a, b
+
+add = a, &b -> a + *b
+```
 ## Unsafe pointer arithmetic
+
+```haskell
+main = ->
+  unsafe
+    a: *Int8 = 0
+    # very unsafe
+    *a
+```
+
 ## Pattern matching
+
+```haskell
+main = ->
+  a = (10, "hello")
+  match a
+    (0, "world") => "something"
+    (a, str) if a > 5 => str
+    _ => "otherwise"
+```
 ## Destructuring
 
 ```haskell
@@ -52,7 +79,7 @@ main = -> plus2 2
 ```haskell
 add = x -> x + 2
 mul = x -> x * 2
-add_mul = add . mul
+add_mul = mul . add
 ```
 
 ## Custom operators
