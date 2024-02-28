@@ -1,16 +1,16 @@
 mod ast;
 mod lexer;
 mod parser;
-mod span;
-mod token;
 
 use lexer::Lexer;
 use parser::Parsable;
 
 fn main() {
     let file = r#"
-main = x -> x + 1
-toto = -> 2
+macro createfn
+  $name:ident, $arg1:ident =>
+    $name = $arg1 -> $arg1
+$createfn tata, y
 "#;
     let mut lexer = Lexer::new(file).unwrap();
 

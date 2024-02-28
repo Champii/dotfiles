@@ -1,4 +1,4 @@
-use crate::span::Span;
+use crate::lexer::Span;
 
 #[derive(Debug, Clone)]
 pub struct Token {
@@ -16,7 +16,9 @@ pub enum TokenType {
     OpenParen,
     CloseParen,
     Arrow,
+    FatArrow,
     Coma,
+    Colon,
     Indent(u8),
     Eol,
     Eof,

@@ -1,22 +1,9 @@
 use crate::{
     ast::*,
-    token::{Token, TokenType},
+    lexer::{Token, TokenType},
 };
 
-#[derive(Debug)]
-pub enum ParseError {
-    UnexpectedToken(Token),
-    UnexpectedEof,
-    LeftoverTokens(Vec<Token>),
-}
-
-pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token], ParseError> {
-    let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
-    if token.token_type != token_type {
-        return Err(ParseError::UnexpectedToken(token.clone()));
-    }
-    Ok(tokens[1..].into())
-}
+use super::util::{consume_tokens_until, expect_token, parse_vec_of, ParseError};
 
 pub trait Parsable: Sized {
     fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError>;
@@ -66,9 +53,59 @@ impl Parsable for Program {
 
 impl Parsable for TopLevel {
     fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let (statement, new_tokens) = FunctionDecl::parse(tokens)?;
+        if let Ok((function_decl, new_tokens)) = FunctionDecl::parse(tokens) {
+            Ok((TopLevel::FunctionDecl(function_decl), new_tokens))
+        } else if let Ok((macro_decl, new_tokens)) = MacroDecl::parse(tokens) {
+            Ok((TopLevel::MacroDecl(macro_decl), new_tokens))
+        } else if let Ok((macro_invoc, new_tokens)) = MacroInvoc::parse(tokens) {
+            Ok((TopLevel::MacroInvoc(macro_invoc), new_tokens))
+        } else {
+            Err(ParseError::UnexpectedToken(tokens[0].clone()))
+        }
+    }
+}
 
-        Ok((TopLevel::FunctionDecl(statement), new_tokens))
+impl Parsable for MacroDecl {
+    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+        let remaining_tokens = expect_token(tokens, TokenType::Keyword("macro".to_string()))?;
+
+        let (name, mut remaining_tokens) = Ident::parse(remaining_tokens)?;
+        remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        let (entries, remaining_tokens) = parse_vec_of::<MacroEntry>(remaining_tokens, None)?;
+
+        Ok((MacroDecl { name, entries }, remaining_tokens))
+    }
+}
+
+impl Parsable for MacroEntry {
+    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+        let mut remaining_tokens = tokens;
+
+        remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(2))?;
+
+        let (defs, mut remaining_tokens) =
+            consume_tokens_until(remaining_tokens, TokenType::FatArrow);
+
+        remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
+        remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+        remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(4))?;
+
+        let (block, remaining_tokens) = consume_tokens_until(remaining_tokens, TokenType::Eol);
+
+        Ok((MacroEntry { defs, block }, remaining_tokens))
+    }
+}
+
+impl Parsable for MacroInvoc {
+    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+        let remaining_tokens = expect_token(tokens, TokenType::Operator("$".to_string()))?;
+
+        let (name, remaining_tokens) = Ident::parse(remaining_tokens)?;
+
+        let (args, remaining_tokens) = consume_tokens_until(remaining_tokens, TokenType::Eol);
+
+        Ok((MacroInvoc { name, args }, remaining_tokens))
     }
 }
 
@@ -77,7 +114,9 @@ impl Parsable for FunctionDecl {
         let (name, mut remaining_tokens) = Ident::parse(tokens)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
 
-        let (parameters, mut remaining_tokens) = Vec::<Ident>::parse(remaining_tokens)?;
+        let (parameters, mut remaining_tokens) =
+            parse_vec_of::<Ident>(remaining_tokens, Some(TokenType::Coma))?;
+
         remaining_tokens = expect_token(remaining_tokens, TokenType::Arrow)?;
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens)?;
@@ -110,68 +149,11 @@ impl Parsable for Ident {
     }
 }
 
-impl Parsable for Vec<Ident> {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let mut remaining_tokens = tokens;
-        let mut items = Vec::new();
-
-        loop {
-            if remaining_tokens.is_empty() {
-                break;
-            }
-
-            let Ok((item, new_remaining_tokens)) = Ident::parse(remaining_tokens) else {
-                break;
-            };
-
-            remaining_tokens = new_remaining_tokens;
-
-            items.push(item);
-
-            let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Coma) else {
-                break;
-            };
-
-            remaining_tokens = new_remaining_tokens;
-        }
-
-        Ok((items, remaining_tokens))
-    }
-}
-
 impl Parsable for Block {
     fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let (statements, new_tokens) = Vec::<Statement>::parse(tokens)?;
+        let (statements, new_tokens) = parse_vec_of::<Statement>(tokens, None)?;
 
-        Ok((
-            Block {
-                expressions: statements,
-            },
-            new_tokens,
-        ))
-    }
-}
-
-impl Parsable for Vec<Statement> {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let mut remaining_tokens = tokens;
-        let mut items = Vec::new();
-
-        loop {
-            if remaining_tokens.is_empty() {
-                break;
-            }
-
-            let Ok((item, new_remaining_tokens)) = Statement::parse(remaining_tokens) else {
-                break;
-            };
-
-            remaining_tokens = new_remaining_tokens;
-
-            items.push(item);
-        }
-
-        Ok((items, remaining_tokens))
+        Ok((Block { statements }, new_tokens))
     }
 }
 

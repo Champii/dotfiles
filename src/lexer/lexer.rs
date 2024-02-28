@@ -1,8 +1,8 @@
-use crate::span::Span;
-use crate::token::{Token, TokenType};
+use crate::lexer::span::Span;
+use crate::lexer::{Token, TokenType};
 
-pub const KEYWORDS: [&str; 1] = ["if"];
-pub const OPERATORS_CHARS: [char; 8] = ['+', '-', '*', '/', '=', '!', '<', '>'];
+pub const KEYWORDS: [&str; 2] = ["if", "macro"];
+pub const OPERATORS_CHARS: [char; 9] = ['+', '-', '*', '/', '=', '!', '<', '>', '$'];
 
 #[derive(Debug)]
 pub enum LexerError {
@@ -41,10 +41,12 @@ impl Lexer {
             '\n' => self.token(TokenType::Eol, 1),
             c if c.is_whitespace() && self.prev_char() == '\n' => self.indent(),
             '-' if self.peek(1) == '>' => self.token(TokenType::Arrow, 2),
+            '=' if self.peek(1) == '>' => self.token(TokenType::FatArrow, 2),
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
             ',' => self.token(TokenType::Coma, 1),
+            ':' => self.token(TokenType::Colon, 1),
             c if c.is_alphabetic() => self.ident_or_keyword(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
