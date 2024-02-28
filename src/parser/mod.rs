@@ -1,5 +1,6 @@
 mod items;
 mod parsable;
+mod parse_ctx;
 mod util;
 
 use std::path::PathBuf;
@@ -17,5 +18,9 @@ pub fn parse_file(file: PathBuf) -> Result<Program, ParseError> {
         .collect()
         .map_err(ParseError::Lexer)?;
 
-    Program::parse(&tokens).map(|(program, _)| program)
+    println!("{:#?}", tokens);
+
+    let mut parse_ctx = parse_ctx::ParseCtx::new();
+
+    Program::parse(&tokens, &mut parse_ctx).map(|(program, _)| program)
 }

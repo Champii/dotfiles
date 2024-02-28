@@ -3,25 +3,33 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
+        parse_ctx::ParseCtx,
         util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
     },
 };
 
 impl Parsable for MacroDecl {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("macro".to_string()))?;
 
-        let (name, mut remaining_tokens) = Ident::parse(remaining_tokens)?;
+        let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (entries, remaining_tokens) = parse_vec_of::<MacroEntry>(remaining_tokens, None)?;
+        let (entries, remaining_tokens) =
+            parse_vec_of::<MacroEntry>(remaining_tokens, None, parse_ctx)?;
 
         Ok((MacroDecl { name, entries }, remaining_tokens))
     }
 }
 
 impl Parsable for MacroEntry {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let mut remaining_tokens = tokens;
 
         remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(2))?;
@@ -40,13 +48,27 @@ impl Parsable for MacroEntry {
 }
 
 impl Parsable for MacroInvoc {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let remaining_tokens = expect_token(tokens, TokenType::Operator("$".to_string()))?;
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        if let Some(token) = tokens.get(0) {
+            if let TokenType::MacroInvoc(ident) = &token.token_type {
+                let (args, remaining_tokens) = consume_tokens_until(&tokens[1..], TokenType::Eol);
 
-        let (name, remaining_tokens) = Ident::parse(remaining_tokens)?;
+                return Ok((
+                    MacroInvoc {
+                        name: Ident {
+                            name: ident.clone(),
+                            span: token.span.clone(),
+                        },
+                        args,
+                    },
+                    remaining_tokens,
+                ));
+            }
+        }
 
-        let (args, remaining_tokens) = consume_tokens_until(remaining_tokens, TokenType::Eol);
-
-        Ok((MacroInvoc { name, args }, remaining_tokens))
+        Err(ParseError::UnexpectedEof)
     }
 }

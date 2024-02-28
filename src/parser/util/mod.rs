@@ -1,4 +1,4 @@
-use super::Parsable;
+use super::{parse_ctx::ParseCtx, Parsable};
 use crate::lexer::{Token, TokenType};
 
 mod parse_error;
@@ -14,10 +14,11 @@ pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token],
 }
 
 /// Parse a vector of items of type T: Parsable from the input tokens.
-pub fn parse_vec_of<T: Parsable>(
-    tokens: &[Token],
+pub fn parse_vec_of<'a, T: Parsable>(
+    tokens: &'a [Token],
     delim: Option<TokenType>,
-) -> Result<(Vec<T>, &[Token]), ParseError> {
+    parse_ctx: &mut ParseCtx,
+) -> Result<(Vec<T>, &'a [Token]), ParseError> {
     let mut remaining_tokens = tokens;
     let mut items = Vec::new();
 
@@ -26,7 +27,7 @@ pub fn parse_vec_of<T: Parsable>(
             break;
         }
 
-        let Ok((item, new_remaining_tokens)) = T::parse(remaining_tokens) else {
+        let Ok((item, new_remaining_tokens)) = T::parse(remaining_tokens, parse_ctx) else {
             break;
         };
 

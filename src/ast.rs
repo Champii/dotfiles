@@ -63,6 +63,7 @@ pub enum UnaryExpr {
 pub enum PrimaryExpr {
     Ident(Ident),
     Literal(Literal),
+    MacroInvoc(MacroInvoc),
 }
 
 #[derive(Debug)]

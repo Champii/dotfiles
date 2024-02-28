@@ -1,11 +1,14 @@
 use crate::{
     ast::Ident,
     lexer::{Token, TokenType},
-    parser::{parsable::Parsable, util::ParseError},
+    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
 };
 
 impl Parsable for Ident {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
 
         match &token.token_type {

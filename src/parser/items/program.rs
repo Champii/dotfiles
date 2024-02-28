@@ -2,13 +2,17 @@ use crate::{
     ast::{Program, TopLevel},
     lexer::{Token, TokenType},
     parser::{
+        parse_ctx::ParseCtx,
         util::{expect_token, ParseError},
         Parsable,
     },
 };
 
 impl Parsable for Program {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let mut statements = Vec::new();
         let mut tokens = tokens;
 
@@ -25,7 +29,7 @@ impl Parsable for Program {
                 tokens = &tokens[1..];
             }
 
-            let Ok((statement, new_tokens)) = TopLevel::parse(tokens) else {
+            let Ok((statement, new_tokens)) = TopLevel::parse(tokens, parse_ctx) else {
                 break;
             };
 

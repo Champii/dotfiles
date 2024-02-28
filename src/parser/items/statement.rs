@@ -1,29 +1,43 @@
 use crate::{
-    ast::{Expression, Ident, Literal, Number, Operator, PrimaryExpr, Statement, UnaryExpr},
+    ast::{
+        Expression, Ident, Literal, MacroInvoc, Number, Operator, PrimaryExpr, Statement, UnaryExpr,
+    },
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
+        parse_ctx::ParseCtx,
         util::{expect_token, ParseError},
     },
 };
 
 impl Parsable for Statement {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let (expression, new_tokens) = Expression::parse(tokens)?;
-        let new_tokens = expect_token(new_tokens, TokenType::Eol)?;
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let remaining_tokens = if parse_ctx.indent_level > 0 {
+            expect_token(tokens, TokenType::Indent(parse_ctx.indent_level))?
+        } else {
+            tokens
+        };
+        let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        Ok((Statement::Expression(expression), new_tokens))
+        Ok((Statement::Expression(expression), remaining_tokens))
     }
 }
 
 impl Parsable for Expression {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
-        let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens)?;
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens, parse_ctx)?;
 
         let token = remaining_tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
         if let TokenType::Operator(_) = token.token_type {
-            let (operator, remaining_tokens) = Operator::parse(remaining_tokens)?;
-            let (expression, remaining_tokens) = Expression::parse(remaining_tokens)?;
+            let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
+            let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
             Ok((
                 Expression::BinopExpr(unary_expr, operator, Box::new(expression)),
@@ -36,19 +50,22 @@ impl Parsable for Expression {
 }
 
 impl Parsable for UnaryExpr {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
 
         if let TokenType::Operator(_) = token.token_type {
-            let (operator, remaining_tokens) = Operator::parse(tokens)?;
-            let (unary_expr, remaining_tokens) = UnaryExpr::parse(remaining_tokens)?;
+            let (operator, remaining_tokens) = Operator::parse(tokens, parse_ctx)?;
+            let (unary_expr, remaining_tokens) = UnaryExpr::parse(remaining_tokens, parse_ctx)?;
 
             Ok((
                 UnaryExpr::UnaryExpr(operator, Box::new(unary_expr)),
                 remaining_tokens,
             ))
         } else {
-            let (primary_expr, remaining_tokens) = PrimaryExpr::parse(tokens)?;
+            let (primary_expr, remaining_tokens) = PrimaryExpr::parse(tokens, parse_ctx)?;
 
             Ok((UnaryExpr::PrimaryExpr(primary_expr), remaining_tokens))
         }
@@ -56,7 +73,10 @@ impl Parsable for UnaryExpr {
 }
 
 impl Parsable for PrimaryExpr {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
 
         match &token.token_type {
@@ -67,6 +87,10 @@ impl Parsable for PrimaryExpr {
                 }),
                 &tokens[1..],
             )),
+            TokenType::MacroInvoc(_) => {
+                let (macro_invoc, remaining_tokens) = MacroInvoc::parse(tokens, parse_ctx)?;
+                Ok((PrimaryExpr::MacroInvoc(macro_invoc), remaining_tokens))
+            }
             TokenType::Number(value) => Ok((
                 PrimaryExpr::Literal(Literal::Number(Number {
                     value: value.clone(),
@@ -80,7 +104,10 @@ impl Parsable for PrimaryExpr {
 }
 
 impl Parsable for Number {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
 
         match &token.token_type {
@@ -97,7 +124,10 @@ impl Parsable for Number {
 }
 
 impl Parsable for Operator {
-    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
 
         match &token.token_type {

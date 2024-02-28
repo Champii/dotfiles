@@ -12,6 +12,7 @@ pub enum TokenType {
     Number(String),
     Operator(String),
     Keyword(String),
+    MacroInvoc(String),
     Equal,
     OpenParen,
     CloseParen,
