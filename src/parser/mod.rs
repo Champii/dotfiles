@@ -2,12 +2,20 @@ mod items;
 mod parsable;
 mod util;
 
+use std::path::PathBuf;
+
+use crate::ast::Program;
 use parsable::Parsable;
+use util::ParseError;
 
-use crate::{ast::Program, lexer::Token};
+pub fn parse_file(file: PathBuf) -> Result<Program, ParseError> {
+    let file = std::fs::read_to_string(file.clone())
+        .map_err(|_e| ParseError::UnknownFile(file.to_str().unwrap().to_string()))?;
 
-use self::util::ParseError;
+    let tokens = crate::lexer::Lexer::new(&file)
+        .map_err(ParseError::Lexer)?
+        .collect()
+        .map_err(ParseError::Lexer)?;
 
-pub fn parse_root(tokens: &[Token]) -> Result<Program, ParseError> {
-    Program::parse(tokens).map(|(program, _)| program)
+    Program::parse(&tokens).map(|(program, _)| program)
 }

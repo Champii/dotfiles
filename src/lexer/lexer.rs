@@ -1,5 +1,4 @@
-use crate::lexer::span::Span;
-use crate::lexer::{Token, TokenType};
+use crate::lexer::{span::Span, Token, TokenType};
 
 pub const KEYWORDS: [&str; 2] = ["if", "macro"];
 pub const OPERATORS_CHARS: [char; 9] = ['+', '-', '*', '/', '=', '!', '<', '>', '$'];
