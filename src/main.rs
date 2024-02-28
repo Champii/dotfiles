@@ -3,7 +3,6 @@ mod lexer;
 mod parser;
 
 use lexer::Lexer;
-use parser::Parsable;
 
 fn main() {
     let file = r#"
@@ -18,7 +17,7 @@ $createfn tata, y
 
     println!("{:#?}", tokens);
 
-    let program = ast::Program::parse(&tokens).unwrap().0;
+    let program = parser::parse_root(&tokens).unwrap();
 
     println!("{:#?}", program);
 }

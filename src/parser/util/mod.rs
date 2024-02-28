@@ -1,5 +1,5 @@
+use super::Parsable;
 use crate::lexer::{Token, TokenType};
-use crate::parser::Parsable;
 
 mod parse_error;
 pub use parse_error::ParseError;

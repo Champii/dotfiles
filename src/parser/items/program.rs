@@ -1,0 +1,50 @@
+use crate::{
+    ast::{Program, TopLevel},
+    lexer::{Token, TokenType},
+    parser::{
+        util::{expect_token, ParseError},
+        Parsable,
+    },
+};
+
+impl Parsable for Program {
+    fn parse(tokens: &[Token]) -> Result<(Self, &[Token]), ParseError> {
+        let mut statements = Vec::new();
+        let mut tokens = tokens;
+
+        loop {
+            if tokens.is_empty() {
+                break;
+            }
+
+            while tokens
+                .get(0)
+                .map(|t| t.token_type == TokenType::Eol)
+                .unwrap_or(false)
+            {
+                tokens = &tokens[1..];
+            }
+
+            let Ok((statement, new_tokens)) = TopLevel::parse(tokens) else {
+                break;
+            };
+
+            tokens = new_tokens;
+
+            statements.push(statement);
+        }
+
+        let remaining_tokens = expect_token(tokens, TokenType::Eof)?;
+
+        if !remaining_tokens.is_empty() {
+            return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()));
+        }
+
+        Ok((
+            Program {
+                top_levels: statements,
+            },
+            tokens,
+        ))
+    }
+}
