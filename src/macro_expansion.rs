@@ -41,6 +41,10 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> TopLevel {
 
     let mut correspondances = HashMap::new();
 
+    if defs.len() != args.len() {
+        panic!("Invalid number of arguments")
+    }
+
     for (i, def) in defs.iter().enumerate() {
         if let MacroFragment::Ident(ident) = def {
             correspondances.insert(ident.name.clone(), args[i].clone());

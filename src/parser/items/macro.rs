@@ -23,7 +23,6 @@ impl Parsable for MacroDecl {
         let (defs, mut remaining_tokens) =
             consume_tokens_until(remaining_tokens, TokenType::FatArrow);
 
-        println!("ORIGINAL_DEFS {:#?}", defs);
         let mut new_defs = Vec::new();
 
         let mut skip_until = 0;
@@ -37,7 +36,6 @@ impl Parsable for MacroDecl {
                     return Err(ParseError::UnexpectedToken(defs[i + 1].clone()));
                 }
 
-                println!("IDENT TOKEN {:#?}", defs[i + 2]);
                 if defs[i + 2].token_type == TokenType::Ident("ident".to_string()) {
                     new_defs.push(MacroFragment::Ident(Ident {
                         name: name.clone(),
