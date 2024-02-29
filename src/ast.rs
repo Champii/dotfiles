@@ -5,8 +5,19 @@ pub struct Program {
     pub top_levels: Vec<TopLevel>,
 }
 
+impl Program {
+    pub fn top_level_from_ident(&self, ident: &str) -> Option<&TopLevel> {
+        self.top_levels.iter().find(|tl| tl.ident.name == ident)
+    }
+}
+
 #[derive(Debug)]
-pub enum TopLevel {
+pub struct TopLevel {
+    pub ident: Ident,
+    pub kind: TopLevelKind,
+}
+#[derive(Debug)]
+pub enum TopLevelKind {
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),
@@ -15,19 +26,20 @@ pub enum TopLevel {
 #[derive(Debug)]
 pub struct MacroDecl {
     pub name: Ident,
-    pub entries: Vec<MacroEntry>,
+    pub defs: Vec<MacroFragment>,
+    pub block: Vec<Token>,
+}
+
+#[derive(Debug)]
+pub enum MacroFragment {
+    Ident(Ident),
+    Token(Token),
 }
 
 #[derive(Debug)]
 pub struct MacroInvoc {
     pub name: Ident,
     pub args: Vec<Token>,
-}
-
-#[derive(Debug)]
-pub struct MacroEntry {
-    pub defs: Vec<Token>,
-    pub block: Vec<Token>,
 }
 
 #[derive(Debug)]
@@ -71,7 +83,7 @@ pub enum Literal {
     Number(Number),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ident {
     pub name: String,
     pub span: Span,

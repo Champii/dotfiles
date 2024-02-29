@@ -6,7 +6,8 @@ mod util;
 use std::path::PathBuf;
 
 use crate::ast::Program;
-use parsable::Parsable;
+pub use parsable::Parsable;
+pub use parse_ctx::ParseCtx;
 use util::ParseError;
 
 pub fn parse_file(file: PathBuf) -> Result<Program, ParseError> {
