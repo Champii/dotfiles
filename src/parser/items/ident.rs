@@ -19,7 +19,10 @@ impl Parsable for Ident {
                 },
                 &tokens[1..],
             )),
-            _ => Err(ParseError::UnexpectedToken(token.clone())),
+            _ => Err(ParseError::UnexpectedToken(
+                token.clone(),
+                vec![TokenType::Ident("".to_string())],
+            )),
         }
     }
 }

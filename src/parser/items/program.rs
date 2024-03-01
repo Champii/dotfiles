@@ -17,7 +17,7 @@ impl Parsable for Program {
         let mut tokens = tokens;
 
         loop {
-            if tokens.is_empty() {
+            if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
                 break;
             }
 
@@ -29,9 +29,7 @@ impl Parsable for Program {
                 tokens = &tokens[1..];
             }
 
-            let Ok((statement, new_tokens)) = TopLevel::parse(tokens, parse_ctx) else {
-                break;
-            };
+            let (statement, new_tokens) = TopLevel::parse(tokens, parse_ctx)?;
 
             tokens = new_tokens;
 

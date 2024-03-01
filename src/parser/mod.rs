@@ -8,13 +8,13 @@ use std::path::PathBuf;
 use crate::ast::Program;
 pub use parsable::Parsable;
 pub use parse_ctx::ParseCtx;
-use util::ParseError;
+pub use util::ParseError;
 
-pub fn parse_file(file: PathBuf) -> Result<Program, ParseError> {
-    let file = std::fs::read_to_string(file.clone())
-        .map_err(|_e| ParseError::UnknownFile(file.to_str().unwrap().to_string()))?;
+pub fn parse_file(file_path: PathBuf) -> Result<Program, ParseError> {
+    let file = std::fs::read_to_string(file_path.clone())
+        .map_err(|_e| ParseError::UnknownFile(file_path.to_str().unwrap().to_string()))?;
 
-    let tokens = crate::lexer::Lexer::new(&file)
+    let tokens = crate::lexer::Lexer::new(file_path, &file)
         .map_err(ParseError::Lexer)?
         .collect()
         .map_err(ParseError::Lexer)?;

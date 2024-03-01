@@ -33,7 +33,10 @@ impl Parsable for MacroDecl {
 
             if let TokenType::MacroInvoc(name) = &def.token_type {
                 if defs[i + 1].token_type != TokenType::Colon {
-                    return Err(ParseError::UnexpectedToken(defs[i + 1].clone()));
+                    return Err(ParseError::UnexpectedToken(
+                        defs[i + 1].clone(),
+                        vec![TokenType::Colon],
+                    ));
                 }
 
                 if defs[i + 2].token_type == TokenType::Ident("ident".to_string()) {

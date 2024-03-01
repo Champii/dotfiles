@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::lexer::{span::Span, Token, TokenType};
 
 pub const KEYWORDS: [&str; 2] = ["if", "macro"];
@@ -5,29 +7,36 @@ pub const OPERATORS_CHARS: [char; 9] = ['+', '-', '*', '/', '=', '!', '<', '>', 
 
 #[derive(Debug)]
 pub enum LexerError {
-    UnknownToken(char),
+    UnknownToken(char, Span),
 }
 
 pub struct Lexer {
+    file_path: PathBuf,
     input: String,
     position: usize,
 }
 
 impl Lexer {
-    pub fn new(input: &str) -> Result<Self, LexerError> {
+    pub fn new(file_path: PathBuf, input: &str) -> Result<Self, LexerError> {
         Ok(Lexer {
+            file_path,
             input: input.to_string(),
             position: 0,
         })
     }
 
+    fn span(&self, len: usize) -> Span {
+        Span {
+            file_path: self.file_path.clone(),
+            start: self.position,
+            end: self.position + len,
+        }
+    }
+
     fn token(&self, token_type: TokenType, len: usize) -> Token {
         Token {
             token_type,
-            span: Span {
-                start: self.position,
-                end: self.position + len,
-            },
+            span: self.span(len),
         }
     }
 
@@ -50,7 +59,7 @@ impl Lexer {
             c if c.is_alphabetic() => self.ident_or_keyword(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
-            c => return Err(LexerError::UnknownToken(c)),
+            c => return Err(LexerError::UnknownToken(c, self.span(1))),
         };
 
         self.position = token.span.end;

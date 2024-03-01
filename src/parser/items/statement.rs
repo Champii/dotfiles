@@ -98,7 +98,14 @@ impl Parsable for PrimaryExpr {
                 })),
                 &tokens[1..],
             )),
-            _ => Err(ParseError::UnexpectedToken(token.clone())),
+            _ => Err(ParseError::UnexpectedToken(
+                token.clone(),
+                vec![
+                    TokenType::Ident("".to_string()),
+                    TokenType::MacroInvoc("".to_string()),
+                    TokenType::Number("".to_string()),
+                ],
+            )),
         }
     }
 }
@@ -118,7 +125,10 @@ impl Parsable for Number {
                 },
                 &tokens[1..],
             )),
-            _ => Err(ParseError::UnexpectedToken(token.clone())),
+            _ => Err(ParseError::UnexpectedToken(
+                token.clone(),
+                vec![TokenType::Number("".to_string())],
+            )),
         }
     }
 }
@@ -138,7 +148,10 @@ impl Parsable for Operator {
                 },
                 &tokens[1..],
             )),
-            _ => Err(ParseError::UnexpectedToken(token.clone())),
+            _ => Err(ParseError::UnexpectedToken(
+                token.clone(),
+                vec![TokenType::Operator("".to_string())],
+            )),
         }
     }
 }
