@@ -57,11 +57,6 @@ impl Diagnostic {
     pub fn report(&self) {
         let mut colors = ColorGenerator::new();
 
-        // Generate & choose some colours for each of our elements
-        let a = colors.next();
-        let b = colors.next();
-        let out = Color::Fixed(81);
-
         let file_name = self.span.file_path.file_name().unwrap().to_str().unwrap();
 
         let mut builder = Report::build(ReportKind::Error, file_name, self.span.start)
@@ -73,7 +68,7 @@ impl Diagnostic {
             builder = builder.with_label(
                 Label::new((label_file_name, span.start..span.end))
                     .with_message(message)
-                    .with_color(a),
+                    .with_color(colors.next()),
             );
         }
 

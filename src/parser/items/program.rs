@@ -17,16 +17,15 @@ impl Parsable for Program {
         let mut tokens = tokens;
 
         loop {
-            if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
-                break;
-            }
-
             while tokens
                 .get(0)
                 .map(|t| t.token_type == TokenType::Eol)
                 .unwrap_or(false)
             {
                 tokens = &tokens[1..];
+            }
+            if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
+                break;
             }
 
             let (statement, new_tokens) = TopLevel::parse(tokens, parse_ctx)?;
