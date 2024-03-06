@@ -6,8 +6,8 @@ use crate::parser::ParseError;
 #[derive(Debug)]
 pub enum DiagnosticType {
     Error,
-    Warning,
-    Note,
+    /* Warning,
+    Note, */
 }
 
 #[derive(Debug)]

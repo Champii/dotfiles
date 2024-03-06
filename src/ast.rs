@@ -47,6 +47,7 @@ pub struct MacroEntry {
 pub enum MacroFragment {
     Ident(Ident),
     Token(Token),
+    Repetition(Vec<MacroFragment>),
 }
 
 #[derive(Debug)]

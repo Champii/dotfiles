@@ -37,10 +37,8 @@ impl Parsable for MacroDecl {
 impl Parsable for MacroEntry {
     fn parse<'a>(
         tokens: &'a [Token],
-        parse_ctx: &mut ParseCtx,
+        _parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        // let remaining_tokens = expect_token(tokens, TokenType::Indent(parse_ctx.indent_level))?;
-
         let (defs, mut remaining_tokens) = consume_tokens_until(tokens, TokenType::FatArrow);
 
         let mut new_defs = Vec::new();
@@ -73,24 +71,26 @@ impl Parsable for MacroEntry {
                 new_defs.push(MacroFragment::Token(def.clone()));
             }
         }
-        // parse the defs and replace with MacroFragment
 
         remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
-
-        parse_ctx.indent_level += 2;
 
         let (mut block, remaining_tokens) = consume_tokens_until_one_of(
             remaining_tokens,
             vec![TokenType::Indent(0), TokenType::Indent(2)],
         );
 
+        // fix the indentation for the parser
+        for token in &mut block {
+            if let TokenType::Indent(level) = token.token_type {
+                token.token_type = TokenType::Indent(level - 4);
+            }
+        }
+
         block.push(Token {
             token_type: TokenType::Eof,
             span: block.last().unwrap().span.clone(),
         });
-
-        parse_ctx.indent_level -= 2;
 
         Ok((
             MacroEntry {

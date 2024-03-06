@@ -20,7 +20,8 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
                         .unwrap()
                         .kind
                     else {
-                        panic!("Macro not found")
+                        // It might be defined later
+                        continue;
                     };
 
                     decls.insert(i, (decl.clone(), invocation.args.clone()));
@@ -50,7 +51,9 @@ fn expand_macros_once(
         .enumerate()
         .map(|(i, top_level)| match top_level.kind {
             TopLevelKind::MacroInvoc(_) => {
-                let (decl, args) = decls.get(&i).unwrap();
+                let Some((decl, args)) = decls.get(&i) else {
+                    return Ok(vec![top_level]);
+                };
                 expand_top_level(decl, args.clone())
             }
             _ => Ok(vec![top_level]),
@@ -92,6 +95,7 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
                         continue 'first_loop;
                     }
                 }
+                _ => unimplemented!(),
             }
         }
 
@@ -99,11 +103,12 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
             .block
             .iter()
             .map(|token| match &token.token_type {
-                TokenType::MacroVar(name) => correspondances.get(name).unwrap().clone(),
-                TokenType::Indent(level) => {
-                    let mut new_token = token.clone();
-                    new_token.token_type = TokenType::Indent(level - 4);
-                    new_token
+                TokenType::MacroVar(name) => {
+                    if let Some(corresp) = correspondances.get(name) {
+                        corresp.clone()
+                    } else {
+                        token.clone()
+                    }
                 }
                 _ => token.clone(),
             })
