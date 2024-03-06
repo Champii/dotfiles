@@ -22,25 +22,31 @@ pub fn parse_vec_of<'a, T: Parsable>(
     let mut remaining_tokens = tokens;
     let mut items = Vec::new();
 
+    let mut remaining_tokens_with_delim = tokens;
+
     loop {
         if remaining_tokens.is_empty() {
             break;
         }
 
         let Ok((item, new_remaining_tokens)) = T::parse(remaining_tokens, parse_ctx) else {
+            remaining_tokens = remaining_tokens_with_delim;
             break;
         };
 
         remaining_tokens = new_remaining_tokens;
+        remaining_tokens_with_delim = new_remaining_tokens;
 
         items.push(item);
 
         if let Some(ref delim) = delim {
-            let Ok(new_remaining_tokens) = expect_token(remaining_tokens, delim.clone()) else {
+            if let Ok(new_remaining_tokens) =
+                expect_token(remaining_tokens_with_delim, delim.clone())
+            {
+                remaining_tokens = new_remaining_tokens
+            } else {
                 break;
             };
-
-            remaining_tokens = new_remaining_tokens;
         }
     }
 
