@@ -16,6 +16,13 @@ fn main() {
         }
     };
 
-    let ast = macro_expansion::expand_macros(ast);
+    let ast = match macro_expansion::expand_macros(ast) {
+        Ok(ast) => ast,
+        Err(e) => {
+            Diagnostic::from(e).report();
+            return;
+        }
+    };
+
     println!("{:#?}", ast);
 }

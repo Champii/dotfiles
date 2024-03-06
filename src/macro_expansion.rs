@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use crate::{
     ast::{MacroDecl, MacroFragment, Program, TopLevel, TopLevelKind},
     lexer::{Token, TokenType},
-    parser::{Parsable, ParseCtx},
+    parser::{Parsable, ParseCtx, ParseError},
 };
 
-pub fn expand_macros(mut program: Program) -> Program {
+pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
     let mut depth = 0;
 
     while program.has_macro_invoc() {
@@ -28,7 +28,7 @@ pub fn expand_macros(mut program: Program) -> Program {
                 _ => (),
             }
         }
-        program = expand_macros_once(program, &decls);
+        program = expand_macros_once(program, &decls)?;
 
         depth += 1;
 
@@ -37,14 +37,14 @@ pub fn expand_macros(mut program: Program) -> Program {
         }
     }
 
-    program
+    Ok(program)
 }
 
 fn expand_macros_once(
     mut program: Program,
     decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
-) -> Program {
-    program.top_levels = program
+) -> Result<Program, ParseError> {
+    let results = program
         .top_levels
         .into_iter()
         .enumerate()
@@ -53,15 +53,20 @@ fn expand_macros_once(
                 let (decl, args) = decls.get(&i).unwrap();
                 expand_top_level(decl, args.clone())
             }
-            _ => vec![top_level],
+            _ => Ok(vec![top_level]),
         })
-        .flatten()
-        .collect();
+        .collect::<Vec<_>>();
 
-    program
+    program.top_levels = vec![];
+
+    for result in results {
+        program.top_levels.extend(result?);
+    }
+
+    Ok(program)
 }
 
-fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Vec<TopLevel> {
+fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopLevel>, ParseError> {
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
 
@@ -95,18 +100,23 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Vec<TopLevel> {
             .iter()
             .map(|token| match &token.token_type {
                 TokenType::MacroVar(name) => correspondances.get(name).unwrap().clone(),
+                TokenType::Indent(level) => {
+                    let mut new_token = token.clone();
+                    new_token.token_type = TokenType::Indent(level - 4);
+                    new_token
+                }
                 _ => token.clone(),
             })
             .collect::<Vec<_>>();
 
-        if let Ok((top_level, _)) = TopLevel::parse(&body, &mut ParseCtx::new()) {
-            top_levels.push(top_level);
-        }
+        let (program, _) = Program::parse(&body, &mut ParseCtx::new())?;
+
+        top_levels.extend(program.top_levels);
     }
 
     if top_levels.is_empty() {
-        panic!("No correspondance found for macro invocation");
+        return Err(ParseError::MacroNoCorrespondance(macro_decl.name.clone()));
     }
 
-    top_levels
+    Ok(top_levels)
 }

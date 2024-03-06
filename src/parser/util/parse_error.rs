@@ -1,4 +1,7 @@
-use crate::lexer::{LexerError, Token, TokenType};
+use crate::{
+    ast::Ident,
+    lexer::{LexerError, Token, TokenType},
+};
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -8,4 +11,5 @@ pub enum ParseError {
     LeftoverTokens(Vec<Token>),
     UnknownFile(String),
     Lexer(LexerError),
+    MacroNoCorrespondance(Ident),
 }

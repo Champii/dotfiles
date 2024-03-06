@@ -3,12 +3,14 @@ use ariadne::{ColorGenerator, Label, Report, ReportKind, Source};
 use crate::lexer::{LexerError, Span};
 use crate::parser::ParseError;
 
+#[derive(Debug)]
 pub enum DiagnosticType {
     Error,
     Warning,
     Note,
 }
 
+#[derive(Debug)]
 pub struct Diagnostic {
     pub message: String,
     pub labels: Vec<(String, Span)>,
@@ -43,12 +45,13 @@ impl From<ParseError> for Diagnostic {
                 span,
                 kind: DiagnosticType::Error,
             },
-            _ => Diagnostic {
-                message: format!("Unknown error: Unexpected error: {:?}", err),
+            ParseError::MacroNoCorrespondance(ident) => Diagnostic {
+                message: format!("Macro: No correspondance for macro: {:?}", ident),
                 labels: vec![],
-                span: Span::default(),
+                span: ident.span,
                 kind: DiagnosticType::Error,
             },
+            _ => panic!("{:#?}", err),
         }
     }
 }

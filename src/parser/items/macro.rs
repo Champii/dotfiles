@@ -4,7 +4,10 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
+        util::{
+            consume_tokens_until, consume_tokens_until_one_of, expect_token, parse_vec_of,
+            ParseError,
+        },
     },
 };
 
@@ -77,16 +80,13 @@ impl Parsable for MacroEntry {
 
         parse_ctx.indent_level += 2;
 
-        remaining_tokens =
-            expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))?;
-
-        let (mut block, mut remaining_tokens) =
-            consume_tokens_until(remaining_tokens, TokenType::Eol);
-
-        remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+        let (mut block, remaining_tokens) = consume_tokens_until_one_of(
+            remaining_tokens,
+            vec![TokenType::Indent(0), TokenType::Indent(2)],
+        );
 
         block.push(Token {
-            token_type: TokenType::Eol,
+            token_type: TokenType::Eof,
             span: block.last().unwrap().span.clone(),
         });
 
