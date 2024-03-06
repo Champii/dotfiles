@@ -7,25 +7,43 @@ use crate::{
 };
 
 pub fn expand_macros(mut program: Program) -> Program {
-    let mut decls = HashMap::new();
+    let mut depth = 0;
 
-    for (i, top_level) in program.top_levels.iter().enumerate() {
-        match &top_level.kind {
-            TopLevelKind::MacroInvoc(invocation) => {
-                let TopLevelKind::MacroDecl(ref decl) = program
-                    .top_level_from_ident(&invocation.name.name)
-                    .unwrap()
-                    .kind
-                else {
-                    panic!("Macro not found")
-                };
+    while program.has_macro_invoc() {
+        let mut decls = HashMap::new();
 
-                decls.insert(i, (decl.clone(), invocation.args.clone()));
+        for (i, top_level) in program.top_levels.iter().enumerate() {
+            match &top_level.kind {
+                TopLevelKind::MacroInvoc(invocation) => {
+                    let TopLevelKind::MacroDecl(ref decl) = program
+                        .top_level_from_ident(&invocation.name.name)
+                        .unwrap()
+                        .kind
+                    else {
+                        panic!("Macro not found")
+                    };
+
+                    decls.insert(i, (decl.clone(), invocation.args.clone()));
+                }
+                _ => (),
             }
-            _ => (),
+        }
+        program = expand_macros_once(program, &decls);
+
+        depth += 1;
+
+        if depth > 100 {
+            panic!("Macro expansion depth exceeded (>100)");
         }
     }
 
+    program
+}
+
+fn expand_macros_once(
+    mut program: Program,
+    decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
+) -> Program {
     program.top_levels = program
         .top_levels
         .into_iter()
@@ -47,7 +65,7 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Vec<TopLevel> {
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
 
-    for entry in entries {
+    'first_loop: for entry in entries {
         let defs = &entry.defs;
         let mut correspondances = HashMap::new();
 
@@ -56,24 +74,39 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Vec<TopLevel> {
         }
 
         for (i, def) in defs.iter().enumerate() {
-            if let MacroFragment::Ident(ident) = def {
-                correspondances.insert(ident.name.clone(), args[i].clone());
+            match def {
+                MacroFragment::Ident(ident) => {
+                    if let TokenType::Ident(_) = args[i].token_type {
+                        correspondances.insert(ident.name.clone(), args[i].clone());
+                    } else {
+                        continue 'first_loop;
+                    }
+                }
+                MacroFragment::Token(token) => {
+                    if token.token_type != args[i].token_type {
+                        continue 'first_loop;
+                    }
+                }
             }
         }
 
-        // replace in the body
         let body = entry
             .block
             .iter()
             .map(|token| match &token.token_type {
-                TokenType::MacroInvoc(name) => correspondances.get(name).unwrap().clone(),
+                TokenType::MacroVar(name) => correspondances.get(name).unwrap().clone(),
                 _ => token.clone(),
             })
             .collect::<Vec<_>>();
 
-        top_levels.push(TopLevel::parse(&body, &mut ParseCtx::new()).unwrap().0);
+        if let Ok((top_level, _)) = TopLevel::parse(&body, &mut ParseCtx::new()) {
+            top_levels.push(top_level);
+        }
+    }
+
+    if top_levels.is_empty() {
+        panic!("No correspondance found for macro invocation");
     }
 
     top_levels
-    //parse the top_level
 }

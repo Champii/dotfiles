@@ -1,4 +1,4 @@
-use ariadne::{Color, ColorGenerator, Fmt, Label, Report, ReportKind, Source};
+use ariadne::{ColorGenerator, Label, Report, ReportKind, Source};
 
 use crate::lexer::{LexerError, Span};
 use crate::parser::ParseError;

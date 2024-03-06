@@ -25,8 +25,6 @@ impl Parsable for MacroDecl {
         let (entries, remaining_tokens) =
             parse_vec_of::<MacroEntry>(remaining_tokens, Some(TokenType::Indent(2)), parse_ctx)?;
 
-        println!("{:#?}", entries);
-
         parse_ctx.indent_level -= 2;
 
         Ok((MacroDecl { name, entries }, remaining_tokens))
@@ -50,7 +48,7 @@ impl Parsable for MacroEntry {
                 continue;
             }
 
-            if let TokenType::MacroInvoc(name) = &def.token_type {
+            if let TokenType::MacroVar(name) = &def.token_type {
                 if defs[i + 1].token_type != TokenType::Colon {
                     return Err(ParseError::UnexpectedToken(
                         defs[i + 1].clone(),

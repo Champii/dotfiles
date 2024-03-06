@@ -9,6 +9,13 @@ impl Program {
     pub fn top_level_from_ident(&self, ident: &str) -> Option<&TopLevel> {
         self.top_levels.iter().find(|tl| tl.ident.name == ident)
     }
+
+    pub fn has_macro_invoc(&self) -> bool {
+        self.top_levels.iter().any(|tl| match &tl.kind {
+            TopLevelKind::MacroInvoc(_) => true,
+            _ => false,
+        })
+    }
 }
 
 #[derive(Debug)]

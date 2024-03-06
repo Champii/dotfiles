@@ -52,8 +52,6 @@ impl Lexer {
                     _ => {
                         let token = self.indent();
 
-                        println!("{:?}", token);
-
                         self.position = token.span.end;
 
                         self.last_token = Some(token.clone());
@@ -76,7 +74,8 @@ impl Lexer {
             '\n' => self.token(TokenType::Eol, 1),
             '-' if self.peek(1) == '>' => self.token(TokenType::Arrow, 2),
             '=' if self.peek(1) == '>' => self.token(TokenType::FatArrow, 2),
-            '$' if self.peek(1).is_alphabetic() => self.macro_invoc(),
+            '$' if self.peek(1).is_alphabetic() => self.macro_var(),
+            '%' if self.peek(1).is_alphabetic() => self.macro_invoc(),
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
@@ -146,6 +145,21 @@ impl Lexer {
         } else {
             self.token(TokenType::Ident(ident), end - start)
         }
+    }
+
+    fn macro_var(&mut self) -> Token {
+        self.position += 1;
+        let start = self.position;
+        let mut end = self.position;
+
+        while self.peek(end - start).is_alphanumeric() {
+            end += 1;
+        }
+
+        self.token(
+            TokenType::MacroVar(self.input[start..end].to_string()),
+            end - start,
+        )
     }
 
     fn macro_invoc(&mut self) -> Token {

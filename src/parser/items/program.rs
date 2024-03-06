@@ -40,7 +40,6 @@ impl Parsable for Program {
                 break;
             }
 
-            // tokens = expect_token(new_tokens, TokenType::Eol)?;
             tokens = new_tokens;
 
             statements.push(statement);
