@@ -16,6 +16,7 @@ pub struct TopLevel {
     pub ident: Ident,
     pub kind: TopLevelKind,
 }
+
 #[derive(Debug)]
 pub enum TopLevelKind {
     MacroDecl(MacroDecl),
@@ -23,14 +24,19 @@ pub enum TopLevelKind {
     FunctionDecl(FunctionDecl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MacroDecl {
     pub name: Ident,
+    pub entries: Vec<MacroEntry>,
+}
+
+#[derive(Debug, Clone)]
+pub struct MacroEntry {
     pub defs: Vec<MacroFragment>,
     pub block: Vec<Token>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MacroFragment {
     Ident(Ident),
     Token(Token),

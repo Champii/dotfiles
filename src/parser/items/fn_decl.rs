@@ -23,6 +23,8 @@ impl Parsable for FunctionDecl {
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
 
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
         Ok((
             FunctionDecl {
                 name,

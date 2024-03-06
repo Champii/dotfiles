@@ -16,7 +16,7 @@ impl Parsable for Block {
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
             parse_ctx.indent_level += 2;
             let (statements, new_tokens) =
-                parse_vec_of::<Statement>(&tokens[1..], None, parse_ctx)?;
+                parse_vec_of::<Statement>(&tokens[1..], Some(TokenType::Eol), parse_ctx)?;
             parse_ctx.indent_level -= 2;
 
             (statements, new_tokens)

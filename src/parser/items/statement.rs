@@ -21,7 +21,6 @@ impl Parsable for Statement {
             tokens
         };
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
         Ok((Statement::Expression(expression), remaining_tokens))
     }

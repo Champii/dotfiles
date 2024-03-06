@@ -1,10 +1,10 @@
 use crate::{
-    ast::{Ident, MacroDecl, MacroFragment, MacroInvoc},
+    ast::{Ident, MacroDecl, MacroEntry, MacroFragment, MacroInvoc},
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{consume_tokens_until, expect_token, ParseError},
+        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -18,10 +18,29 @@ impl Parsable for MacroDecl {
         let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(2))?;
+        parse_ctx.indent_level += 2;
 
-        let (defs, mut remaining_tokens) =
-            consume_tokens_until(remaining_tokens, TokenType::FatArrow);
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(2))?;
+
+        let (entries, remaining_tokens) =
+            parse_vec_of::<MacroEntry>(remaining_tokens, Some(TokenType::Indent(2)), parse_ctx)?;
+
+        println!("{:#?}", entries);
+
+        parse_ctx.indent_level -= 2;
+
+        Ok((MacroDecl { name, entries }, remaining_tokens))
+    }
+}
+
+impl Parsable for MacroEntry {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        // let remaining_tokens = expect_token(tokens, TokenType::Indent(parse_ctx.indent_level))?;
+
+        let (defs, mut remaining_tokens) = consume_tokens_until(tokens, TokenType::FatArrow);
 
         let mut new_defs = Vec::new();
 
@@ -57,17 +76,26 @@ impl Parsable for MacroDecl {
 
         remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
-        remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(4))?;
 
-        let (mut block, remaining_tokens) = consume_tokens_until(remaining_tokens, TokenType::Eol);
+        parse_ctx.indent_level += 2;
+
+        remaining_tokens =
+            expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))?;
+
+        let (mut block, mut remaining_tokens) =
+            consume_tokens_until(remaining_tokens, TokenType::Eol);
+
+        remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
         block.push(Token {
             token_type: TokenType::Eol,
             span: block.last().unwrap().span.clone(),
         });
 
+        parse_ctx.indent_level -= 2;
+
         Ok((
-            MacroDecl {
-                name,
+            MacroEntry {
                 defs: new_defs,
                 block,
             },
@@ -84,6 +112,7 @@ impl Parsable for MacroInvoc {
         if let Some(token) = tokens.get(0) {
             if let TokenType::MacroInvoc(ident) = &token.token_type {
                 let (args, remaining_tokens) = consume_tokens_until(&tokens[1..], TokenType::Eol);
+                let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
                 return Ok((
                     MacroInvoc {

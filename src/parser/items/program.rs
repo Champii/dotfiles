@@ -19,17 +19,28 @@ impl Parsable for Program {
         loop {
             while tokens
                 .get(0)
-                .map(|t| t.token_type == TokenType::Eol)
+                .map(|t| t.token_type == TokenType::Indent(0))
                 .unwrap_or(false)
+                && tokens
+                    .get(1)
+                    .map(|t| t.token_type == TokenType::Eol)
+                    .unwrap_or(false)
             {
-                tokens = &tokens[1..];
+                tokens = &tokens[2..];
             }
             if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
                 break;
             }
 
+            tokens = expect_token(tokens, TokenType::Indent(0))?;
+
             let (statement, new_tokens) = TopLevel::parse(tokens, parse_ctx)?;
 
+            if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
+                break;
+            }
+
+            // tokens = expect_token(new_tokens, TokenType::Eol)?;
             tokens = new_tokens;
 
             statements.push(statement);

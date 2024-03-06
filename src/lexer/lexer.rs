@@ -14,6 +14,7 @@ pub struct Lexer {
     file_path: PathBuf,
     input: String,
     position: usize,
+    last_token: Option<Token>,
 }
 
 impl Lexer {
@@ -22,6 +23,7 @@ impl Lexer {
             file_path,
             input: input.to_string(),
             position: 0,
+            last_token: None,
         })
     }
 
@@ -41,13 +43,37 @@ impl Lexer {
     }
 
     pub fn next(&mut self) -> Result<Token, LexerError> {
-        if self.prev_char() != '\n' {
+        if self.prev_char() != '\n' && self.position != 0 || self.position == self.input.len() {
             self.skip_whitespace();
+        } else {
+            if let Some(token) = &self.last_token {
+                match token.token_type {
+                    TokenType::Indent(_) => (),
+                    _ => {
+                        let token = self.indent();
+
+                        println!("{:?}", token);
+
+                        self.position = token.span.end;
+
+                        self.last_token = Some(token.clone());
+
+                        return Ok(token);
+                    }
+                }
+            } else {
+                let token = self.indent();
+
+                self.position = token.span.end;
+
+                self.last_token = Some(token.clone());
+
+                return Ok(token);
+            }
         }
 
         let token = match self.current_char() {
             '\n' => self.token(TokenType::Eol, 1),
-            c if c.is_whitespace() && self.prev_char() == '\n' => self.indent(),
             '-' if self.peek(1) == '>' => self.token(TokenType::Arrow, 2),
             '=' if self.peek(1) == '>' => self.token(TokenType::FatArrow, 2),
             '$' if self.peek(1).is_alphabetic() => self.macro_invoc(),
@@ -63,6 +89,8 @@ impl Lexer {
         };
 
         self.position = token.span.end;
+
+        self.last_token = Some(token.clone());
 
         Ok(token)
     }
@@ -153,7 +181,7 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_whitespace() {
+        while self.peek(end - start).is_whitespace() && self.peek(end - start) != '\n' {
             end += 1;
         }
 

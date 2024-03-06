@@ -38,13 +38,13 @@ impl From<ParseError> for Diagnostic {
                 kind: DiagnosticType::Error,
             },
             ParseError::Lexer(LexerError::UnknownToken(c, span)) => Diagnostic {
-                message: format!("Unknown token: {:?}", c),
+                message: format!("Lexer: Unknown token: {:?}", c),
                 labels: vec![],
                 span,
                 kind: DiagnosticType::Error,
             },
             _ => Diagnostic {
-                message: format!("Unexpected error: {:?}", err),
+                message: format!("Unknown error: Unexpected error: {:?}", err),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
