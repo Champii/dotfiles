@@ -147,7 +147,7 @@ macro generate
     struct Generated
       $name: $type
 
-$generate hello, String
+%generate hello, String
 ```
 
 ## Modules and dependancies
