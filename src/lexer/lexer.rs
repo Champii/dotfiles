@@ -75,6 +75,8 @@ impl Lexer {
             '-' if self.peek(1) == '>' => self.token(TokenType::Arrow, 2),
             '=' if self.peek(1) == '>' => self.token(TokenType::FatArrow, 2),
             '$' if self.peek(1).is_alphabetic() => self.macro_var(),
+            '$' if self.peek(1) == '(' => self.token(TokenType::MacroRepeatOpen, 2),
+            ')' if self.peek(1) == '*' => self.token(TokenType::MacroRepeatClose, 2),
             '%' if self.peek(1).is_alphabetic() => self.macro_invoc(),
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),

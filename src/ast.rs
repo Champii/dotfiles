@@ -40,7 +40,7 @@ pub struct MacroDecl {
 #[derive(Debug, Clone)]
 pub struct MacroEntry {
     pub defs: Vec<MacroFragment>,
-    pub block: Vec<Token>,
+    pub body: Vec<MacroFragment>,
 }
 
 #[derive(Debug, Clone)]

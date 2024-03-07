@@ -14,6 +14,8 @@ pub enum TokenType {
     Keyword(String),
     MacroVar(String),
     MacroInvoc(String),
+    MacroRepeatOpen,
+    MacroRepeatClose,
     Equal,
     OpenParen,
     CloseParen,
@@ -24,4 +26,10 @@ pub enum TokenType {
     Indent(u8),
     Eol,
     Eof,
+}
+
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        self.token_type == other.token_type
+    }
 }

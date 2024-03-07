@@ -1,6 +1,6 @@
 use crate::{
     ast::{Ident, MacroDecl, MacroEntry, MacroFragment, MacroInvoc},
-    lexer::{Token, TokenType},
+    lexer::{Span, Token, TokenType},
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
@@ -37,10 +37,12 @@ impl Parsable for MacroDecl {
 impl Parsable for MacroEntry {
     fn parse<'a>(
         tokens: &'a [Token],
-        _parse_ctx: &mut ParseCtx,
+        parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let (defs, mut remaining_tokens) = consume_tokens_until(tokens, TokenType::FatArrow);
+        // let (defs, remaining_tokens) = consume_tokens_until(tokens, TokenType::FatArrow);
 
+        // parse macro head
+        /*
         let mut new_defs = Vec::new();
 
         let mut skip_until = 0;
@@ -49,7 +51,7 @@ impl Parsable for MacroEntry {
                 continue;
             }
 
-            if let TokenType::MacroVar(name) = &def.token_type {
+            /* if let TokenType::MacroVar(name) = &def.token_type {
                 if defs[i + 1].token_type != TokenType::Colon {
                     return Err(ParseError::UnexpectedToken(
                         defs[i + 1].clone(),
@@ -69,37 +71,180 @@ impl Parsable for MacroEntry {
                 continue;
             } else {
                 new_defs.push(MacroFragment::Token(def.clone()));
+            } */
+            match &def.token_type {
+                TokenType::MacroVar(name) => {
+                    if defs[i + 1].token_type != TokenType::Colon {
+                        return Err(ParseError::UnexpectedToken(
+                            defs[i + 1].clone(),
+                            vec![TokenType::Colon],
+                        ));
+                    }
+
+                    if defs[i + 2].token_type == TokenType::Ident("ident".to_string()) {
+                        new_defs.push(MacroFragment::Ident(Ident {
+                            name: name.clone(),
+                            span: def.span.clone(),
+                        }));
+                    }
+
+                    skip_until = i + 3;
+
+                    continue;
+                }
+                TokenType::MacroRepeatOpen => {
+                }
+                TokenType::MacroRepeatClose => {
+                    return Ok((new_defs, remaining_tokens));
+                }
+                _ => {
+                    let mut token = token.clone();
+
+                    // fix the indentation for the parser
+                    if let TokenType::Indent(level) = token.token_type {
+                        token.token_type = TokenType::Indent(level - 4);
+                    }
+
+                    new_defs.push(MacroFragment::Token(token));
+                    remaining_tokens = &remaining_tokens[1..];
+                }
             }
-        }
+        } */
+        let (defs, mut remaining_tokens) = parse_macro_head_recursive(tokens, parse_ctx)?;
 
         remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (mut block, remaining_tokens) = consume_tokens_until_one_of(
-            remaining_tokens,
-            vec![TokenType::Indent(0), TokenType::Indent(2)],
-        );
+        println!("Defs {:#?}", defs);
 
-        // fix the indentation for the parser
-        for token in &mut block {
-            if let TokenType::Indent(level) = token.token_type {
-                token.token_type = TokenType::Indent(level - 4);
+        // parse macro body
+        let (mut body, remaining_tokens) =
+            parse_macro_block_recursive(remaining_tokens, parse_ctx)?;
+
+        println!("Body {:#?}", body);
+
+        body.push(MacroFragment::Token(Token {
+            token_type: TokenType::Eof,
+            span: Span::default(),
+        }));
+
+        Ok((MacroEntry { defs, body }, remaining_tokens))
+    }
+}
+
+fn parse_macro_head_recursive<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(Vec<MacroFragment>, &'a [Token]), ParseError> {
+    let mut defs = Vec::new();
+    let mut remaining_tokens = tokens;
+
+    let mut skip_until = 0;
+    while let Some(token) = remaining_tokens.get(0) {
+        if skip_until > 0 {
+            skip_until -= 1;
+            remaining_tokens = &remaining_tokens[1..];
+            continue;
+        }
+        match &token.token_type {
+            TokenType::MacroVar(name) => {
+                if remaining_tokens.get(1).unwrap().token_type != TokenType::Colon {
+                    return Err(ParseError::UnexpectedToken(
+                        remaining_tokens.get(1).unwrap().clone(),
+                        vec![TokenType::Colon],
+                    ));
+                }
+
+                if remaining_tokens.get(2).unwrap().token_type
+                    == TokenType::Ident("ident".to_string())
+                {
+                    defs.push(MacroFragment::Ident(Ident {
+                        name: name.clone(),
+                        span: token.span.clone(),
+                    }));
+                }
+
+                skip_until = 3;
+
+                continue;
+            }
+            TokenType::MacroRepeatOpen => {
+                let (inner_block, new_remaining_tokens) =
+                    parse_macro_head_recursive(&remaining_tokens[1..], parse_ctx)?;
+
+                remaining_tokens = new_remaining_tokens;
+                defs.push(MacroFragment::Repetition(inner_block));
+            }
+            TokenType::MacroRepeatClose => {
+                return Ok((defs, &remaining_tokens[1..]));
+            }
+            TokenType::FatArrow => {
+                return Ok((defs, remaining_tokens));
+            }
+            _ => {
+                let mut token = token.clone();
+
+                // fix the indentation for the parser
+                if let TokenType::Indent(level) = token.token_type {
+                    token.token_type = TokenType::Indent(level - 4);
+                }
+
+                defs.push(MacroFragment::Token(token));
+                remaining_tokens = &remaining_tokens[1..];
             }
         }
-
-        block.push(Token {
-            token_type: TokenType::Eof,
-            span: block.last().unwrap().span.clone(),
-        });
-
-        Ok((
-            MacroEntry {
-                defs: new_defs,
-                block,
-            },
-            remaining_tokens,
-        ))
     }
+
+    Ok((defs, remaining_tokens))
+}
+
+fn parse_macro_block_recursive<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(Vec<MacroFragment>, &'a [Token]), ParseError> {
+    let mut block = Vec::new();
+    let mut remaining_tokens = tokens;
+
+    while let Some(token) = remaining_tokens.get(0) {
+        match &token.token_type {
+            TokenType::MacroVar(name) => {
+                let ident = MacroFragment::Ident(Ident {
+                    name: name.clone(),
+                    span: token.span.clone(),
+                });
+                block.push(ident);
+                remaining_tokens = &remaining_tokens[1..];
+            }
+            TokenType::MacroRepeatOpen => {
+                let (inner_block, new_remaining_tokens) =
+                    parse_macro_block_recursive(&remaining_tokens[1..], parse_ctx)?;
+
+                remaining_tokens = new_remaining_tokens;
+                block.push(MacroFragment::Repetition(inner_block));
+            }
+            TokenType::MacroRepeatClose => {
+                return Ok((block, &remaining_tokens[1..]));
+            }
+            _ => {
+                let mut token = token.clone();
+
+                // fix the indentation for the parser
+                if let TokenType::Indent(level) = token.token_type {
+                    if level == 0 || level == 2 {
+                        // the definition is over
+                        return Ok((block, remaining_tokens));
+                    }
+                    token.token_type = TokenType::Indent(level - 4);
+                }
+
+                block.push(MacroFragment::Token(token));
+                remaining_tokens = &remaining_tokens[1..];
+            }
+        }
+        println!("Block {:#?}", block);
+    }
+
+    Ok((block, remaining_tokens))
 }
 
 impl Parsable for MacroInvoc {
