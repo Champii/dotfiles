@@ -16,8 +16,6 @@ fn main() {
         }
     };
 
-    println!("{:#?}", ast);
-
     let ast = match macro_expansion::expand_macros(ast) {
         Ok(ast) => ast,
         Err(e) => {

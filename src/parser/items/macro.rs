@@ -175,8 +175,21 @@ impl Parsable for MacroInvoc {
     ) -> Result<(Self, &'a [Token]), ParseError> {
         if let Some(token) = tokens.get(0) {
             if let TokenType::MacroInvoc(ident) = &token.token_type {
-                let (args, remaining_tokens) = consume_tokens_until(&tokens[1..], TokenType::Eol);
-                let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+                let (args, remaining_tokens) =
+                    consume_tokens_until(&tokens[1..], TokenType::Indent(0));
+                // let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+                let args = args
+                    .iter()
+                    .filter(|t| {
+                        t.token_type != TokenType::Eol
+                            && if let TokenType::Indent(_) = t.token_type {
+                                false
+                            } else {
+                                true
+                            }
+                    })
+                    .cloned()
+                    .collect();
 
                 return Ok((
                     MacroInvoc {
