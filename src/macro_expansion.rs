@@ -9,7 +9,6 @@ use crate::{
 pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
     let mut depth = 0;
 
-    let mut unresolved_names = vec![];
     while program.has_macro_invoc() {
         let mut decls = HashMap::new();
 
@@ -30,7 +29,7 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
                 _ => (),
             }
         }
-        program = expand_macros_once(program, &decls, &mut unresolved_names)?;
+        program = expand_macros_once(program, &decls)?;
 
         depth += 1;
 
@@ -39,17 +38,12 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
         }
     }
 
-    for name in &mut *unresolved_names {
-        return Err(ParseError::MacroUnknownVar(name.clone()));
-    }
-
     Ok(program)
 }
 
 fn expand_macros_once(
     mut program: Program,
     decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
-    unresolved_names: &mut Vec<String>,
 ) -> Result<Program, ParseError> {
     let results = program
         .top_levels
@@ -61,7 +55,7 @@ fn expand_macros_once(
                     return Ok(vec![top_level]);
                 };
 
-                expand_top_level(decl, args.clone(), unresolved_names)
+                expand_top_level(decl, args.clone())
             }
             _ => Ok(vec![top_level]),
         })
@@ -217,7 +211,6 @@ impl<'a> MacroArgMatcher<'a> {
                 if let Some(arg) = thread.args.get(0) {
                     let tokens = &thread.tokens;
                     if tokens.is_empty() {
-                        // new_new_threads.push(thread.clone());
                         continue;
                     }
 
@@ -328,11 +321,7 @@ fn get_correspondances_thread<'a>(threads: Vec<MacroThread<'a>>) -> Option<Macro
     // .map(|thread| thread.correspondances.clone())
 }
 
-fn expand_top_level(
-    macro_decl: &MacroDecl,
-    args: Vec<Token>,
-    unresolved_names: &mut Vec<String>,
-) -> Result<Vec<TopLevel>, ParseError> {
+fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopLevel>, ParseError> {
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
 
@@ -343,8 +332,7 @@ fn expand_top_level(
             continue;
         };
 
-        let body =
-            replace_body_variables(entry.body.clone(), &correspondances, 0, unresolved_names);
+        let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
 
         let (program, _) = Program::parse(&body, &mut ParseCtx::new())?;
 
@@ -362,23 +350,14 @@ fn replace_body_variables(
     body: Vec<MacroFragment>,
     correspondances: &Correspondance,
     correspondance_level: usize,
-    unresolved_names: &mut Vec<String>,
 ) -> Vec<Token> {
     body.iter()
         .map(|fragment| match &fragment {
             MacroFragment::Ident(name) => {
                 if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
                 {
-                    *unresolved_names = unresolved_names
-                        .iter()
-                        .filter(|n| **n == name.name)
-                        .cloned()
-                        .collect();
-
                     corresp.clone()
                 } else {
-                    // panic!("No correspondance for macro variable {:#?}", name);
-                    // unresolved_names.push(name.name.clone());
                     vec![Token {
                         token_type: TokenType::MacroVar(name.name.clone()),
                         span: name.span.clone(),
@@ -430,7 +409,6 @@ fn replace_body_variables(
                         repetition.clone(),
                         &new_correspondances,
                         correspondance_level + 1,
-                        unresolved_names,
                     ));
                 }
 
