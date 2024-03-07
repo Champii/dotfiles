@@ -73,26 +73,3 @@ pub fn consume_tokens_until(tokens: &[Token], token_type: TokenType) -> (Vec<Tok
 
     (consumed_tokens, remaining_tokens)
 }
-
-pub fn consume_tokens_until_one_of(
-    tokens: &[Token],
-    token_types: Vec<TokenType>,
-) -> (Vec<Token>, &[Token]) {
-    let mut remaining_tokens = tokens;
-    let mut consumed_tokens = Vec::new();
-
-    loop {
-        if remaining_tokens.is_empty() {
-            break;
-        }
-
-        if token_types.contains(&remaining_tokens[0].token_type) {
-            break;
-        }
-
-        consumed_tokens.push(remaining_tokens[0].clone());
-        remaining_tokens = &remaining_tokens[1..];
-    }
-
-    (consumed_tokens, remaining_tokens)
-}

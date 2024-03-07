@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap};
 
 use crate::{
     ast::{Ident, MacroDecl, MacroFragment, Program, TopLevel, TopLevelKind},
@@ -70,12 +70,6 @@ fn expand_macros_once(
     Ok(program)
 }
 
-/* #[derive(Debug, Clone)]
-enum CorrespondanceKind {
-    Direct(Token),
-    Nested(BTreeMap<String, CorrespondanceKind>),
-} */
-
 #[derive(Debug, Clone)]
 struct Correspondance {
     pub entries: BTreeMap<String, Vec<Token>>,
@@ -109,7 +103,7 @@ impl Correspondance {
                 .nested_corresp_keys
                 .iter()
                 .enumerate()
-                .find(|(i, names)| **names == correspondance.keys())
+                .find(|(_i, names)| **names == correspondance.keys())
                 .map(|(i, _)| i);
 
             if let Some(i) = nested_idx {
@@ -120,21 +114,6 @@ impl Correspondance {
             self.nested_corresp.push(correspondance);
         };
     }
-
-    /* pub fn get_nested_scope_of(&self, name: &str) -> Option<BTreeMap<String, CorrespondanceKind>> {
-        match self.correspondances.get(name) {
-            Some(CorrespondanceKind::Direct(token)) => Some(self.correspondances.clone()),
-            Some(CorrespondanceKind::Nested(correspondance)) => Some(correspondance.clone()),
-            _ => None,
-        }
-    } */
-
-    /* pub fn get(&self, name: &str) -> Option<Token> {
-        match self.correspondances.get(name) {
-            Some(CorrespondanceKind::Direct(token)) => Some(token.clone()),
-            _ => None,
-        }
-    } */
 
     pub fn keys(&self) -> Vec<String> {
         self.entries
@@ -172,7 +151,7 @@ impl Correspondance {
             entry.extend(tokens);
         }
 
-        for (i, nested_corresp) in other.nested_corresp.iter().enumerate() {
+        for nested_corresp in other.nested_corresp.iter() {
             if self.nested_corresp_keys.contains(&nested_corresp.keys()) {
                 let idx = self
                     .nested_corresp_keys
@@ -221,11 +200,6 @@ impl<'a> MacroArgMatcher<'a> {
     }
 
     fn match_threads(&mut self) -> Result<(Correspondance, &'a [Token]), ParseError> {
-        // let mut args = &self.args[..];
-
-        /* while let Some(token) = args.get(0) {
-        let mut new_threads = vec![]; */
-
         let mut new_threads = self.threads.clone();
 
         while !has_one_solution(new_threads.clone(), self.must_be_completed)
@@ -237,7 +211,7 @@ impl<'a> MacroArgMatcher<'a> {
                 if let Some(arg) = thread.args.get(0) {
                     let tokens = &thread.tokens;
                     if tokens.is_empty() {
-                        new_new_threads.push(thread.clone());
+                        // new_new_threads.push(thread.clone());
                         continue;
                     }
 
@@ -279,8 +253,6 @@ impl<'a> MacroArgMatcher<'a> {
                                     .correspondances
                                     .insert_nested(correspondances.clone());
 
-                                println!("NEW ARGS {:#?}", new_args);
-
                                 // Case repetition found and it continues
                                 let new_thread_matched = MacroThread {
                                     args: new_args,
@@ -308,20 +280,16 @@ impl<'a> MacroArgMatcher<'a> {
                         && thread.args.is_empty())
                         || (!self.must_be_completed && (thread.tokens.is_empty()))
                     {
-                        println!("FOUND IT {:#?}", thread);
                         return Ok((thread.correspondances.clone(), thread.args));
                     }
-                    // return Ok((thread.correspondances.clone(), thread.args.clone()));
                 }
             }
             self.threads = new_new_threads.clone();
             new_threads = new_new_threads.clone();
         }
 
-        println!("THREADS {:#?}", self.threads);
-
         if let Some(thread) = get_correspondances_thread(new_threads.clone()) {
-            Ok((thread.correspondances.clone(), thread.args.clone()))
+            Ok((thread.correspondances.clone(), thread.args))
         } else {
             Err(ParseError::MacroNoCorrespondance(Ident {
                 name: "macro".to_string(),
@@ -358,49 +326,14 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
 
-    'first_loop: for entry in entries {
+    for entry in entries {
         let defs = &entry.defs;
         let mut macro_matcher = MacroArgMatcher::new(&args, defs.clone());
-        let correspondances = macro_matcher.run()?;
-        println!("{:#?}", correspondances);
-
-        /* for (i, def) in defs.iter().enumerate() {
-            match def {
-                MacroFragment::Ident(ident) => {
-                    if let TokenType::Ident(_) = args[i].token_type {
-                        correspondances.insert(ident.name.clone(), args[i].clone());
-                    } else {
-                        continue 'first_loop;
-                    }
-                }
-                MacroFragment::Token(token) => {
-                    if token.token_type != args[i].token_type {
-                        continue 'first_loop;
-                    }
-                }
-                _ => unimplemented!(),
-            }
-        } */
-
-        /* let body = entry
-        .body
-        .iter()
-        .map(|token| match &token.token_type {
-            TokenType::MacroVar(name) => {
-                if let Some(corresp) = correspondances.get(name) {
-                    corresp.clone()
-                } else {
-                    // If no correspondance, it might be defined by a nested macro later
-                    token.clone()
-                }
-            }
-            _ => token.clone(),
-        })
-        .collect::<Vec<_>>(); */
+        let Ok(correspondances) = macro_matcher.run() else {
+            continue;
+        };
 
         let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
-
-        println!("BODY VARIABLES: {:#?}", body);
 
         let (program, _) = Program::parse(&body, &mut ParseCtx::new())?;
 
@@ -425,22 +358,12 @@ fn replace_body_variables(
                 if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
                 {
                     corresp.clone()
-                    // } else {
-                    // If no correspondance, it might be defined by a nested macro later
-                    // fragment.clone()
                 } else {
                     panic!("No correspondance for macro variable {:#?}", name);
                 }
-
-                /* Token {
-                    token_type: TokenType::MacroVar(name.name.clone()),
-                    span: name.span.clone(),
-                } */
             }
             MacroFragment::Token(token) => vec![token.clone()],
             MacroFragment::Repetition(repetition) => {
-                // find correspondance for repetition
-
                 let repetition_names = repetition
                     .iter()
                     .filter_map(|fragment| match fragment {
@@ -454,13 +377,12 @@ fn replace_body_variables(
                     .nested_corresp
                     .iter()
                     .enumerate()
-                    .find(|(i, corresp)| corresp.keys() == repetition_names)
+                    .find(|(_i, corresp)| corresp.keys() == repetition_names)
                     .unwrap();
 
-                // loop for each values of the repetition
                 let mut repetitions = vec![];
 
-                for (i, ident) in nested_correspondance
+                for (i, _ident) in nested_correspondance
                     .entries
                     .iter()
                     .enumerate()
