@@ -29,3 +29,42 @@ impl Parsable for Block {
         Ok((Block { statements }, new_tokens))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+    use crate::lexer::Lexer;
+
+    fn lex(input: &str) -> Vec<Token> {
+        Lexer::new(PathBuf::new(), input)
+            .unwrap()
+            .collect()
+            .unwrap()
+    }
+
+    #[test]
+    fn test_parse_block() {
+        let input = "statement";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(block.statements.len(), 1);
+        assert_eq!(rest.len(), 1);
+        assert_eq!(rest[0].token_type, TokenType::Eof);
+    }
+
+    #[test]
+    fn test_parse_block_with_indent() {
+        let input = "\n  statement\n  statement";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(block.statements.len(), 2);
+        assert_eq!(rest.len(), 1);
+        assert_eq!(rest[0].token_type, TokenType::Eof);
+    }
+}

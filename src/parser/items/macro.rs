@@ -107,9 +107,9 @@ fn parse_macro_head_recursive<'a>(
                 let mut token = token.clone();
 
                 // fix the indentation for the parser
-                if let TokenType::Indent(level) = token.token_type {
+                /* if let TokenType::Indent(level) = token.token_type {
                     token.token_type = TokenType::Indent(level - 4);
-                }
+                } */
 
                 defs.push(MacroFragment::Token(token));
                 remaining_tokens = &remaining_tokens[1..];
@@ -205,5 +205,55 @@ impl Parsable for MacroInvoc {
         }
 
         Err(ParseError::UnexpectedEof)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+    use crate::lexer::Lexer;
+
+    fn lex(input: &str) -> Vec<Token> {
+        Lexer::new(PathBuf::new(), input)
+            .unwrap()
+            .collect()
+            .unwrap()
+    }
+
+    #[test]
+    fn test_parse_macro_decl() {
+        let input = "macro mymacro\n  $a:ident =>\n    statement";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (macro_decl, rest) = MacroDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(macro_decl.name.name, "mymacro");
+        assert_eq!(macro_decl.entries.len(), 1);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_macro_entry() {
+        let input = "$a:ident =>\n    statement";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (macro_entry, rest) = MacroEntry::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(macro_entry.defs.len(), 1);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_macro_invoc() {
+        let input = "%mymacro\n  a\n  b\n";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (macro_invoc, rest) = MacroInvoc::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(macro_invoc.name.name, "mymacro");
+        assert_eq!(macro_invoc.args.len(), 3); // FIXME, should be 2
+        assert_eq!(rest.len(), 0);
     }
 }

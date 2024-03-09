@@ -35,3 +35,49 @@ impl Parsable for FunctionDecl {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+    use crate::lexer::Lexer;
+
+    fn lex(input: &str) -> Vec<Token> {
+        Lexer::new(PathBuf::new(), input)
+            .unwrap()
+            .collect()
+            .unwrap()
+    }
+
+    #[test]
+    fn test_parse_function_decl() {
+        let input = "myfn = a, b, c ->\n  statement\n";
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(function_decl.name.name, "myfn");
+        assert_eq!(function_decl.parameters.len(), 3);
+        assert_eq!(function_decl.body.statements.len(), 1);
+        assert_eq!(rest.len(), 1);
+        assert_eq!(rest[0].token_type, TokenType::Eof);
+    }
+
+    #[test]
+    fn test_parse_function_decl_multiline() {
+        let input = r#"myfn = a, b, c ->
+  statement
+  3 + 3
+"#;
+        let tokens = lex(input);
+        let tokens = &tokens[1..]; // skip the Indent(0)
+        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(function_decl.name.name, "myfn");
+        assert_eq!(function_decl.parameters.len(), 3);
+        assert_eq!(function_decl.body.statements.len(), 2);
+        assert_eq!(rest.len(), 1);
+        assert_eq!(rest[0].token_type, TokenType::Eof);
+    }
+}

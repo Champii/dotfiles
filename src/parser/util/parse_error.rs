@@ -12,5 +12,4 @@ pub enum ParseError {
     UnknownFile(String),
     Lexer(LexerError),
     MacroNoCorrespondance(Ident),
-    MacroUnknownVar(String),
 }

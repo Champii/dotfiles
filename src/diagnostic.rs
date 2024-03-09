@@ -46,8 +46,11 @@ impl From<ParseError> for Diagnostic {
                 kind: DiagnosticType::Error,
             },
             ParseError::MacroNoCorrespondance(ident) => Diagnostic {
-                message: format!("Macro: No correspondance for macro: {:?}", ident),
-                labels: vec![],
+                message: format!("Macro: No correspondance for macro: {:?}", ident.name),
+                labels: vec![(
+                    format!("Cannot find any entries matching the macro arguments"),
+                    ident.span.clone(),
+                )],
                 span: ident.span,
                 kind: DiagnosticType::Error,
             },
