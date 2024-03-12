@@ -56,7 +56,7 @@ main = -> [1, 2, 3] |> map (+2)
 
 ```haskell
 trait ToString
-  @to_string : a => String
+  @to_string : String
 
 impl ToString Int
   @to_string = -> @show!
@@ -65,7 +65,7 @@ impl ToString Int
 ## Dynamic trait
 
 ```haskell
-some_func : ToString a => String
+some_func : ToString T => String
 some_fumc = x -> x.to_string!
 ```
 
@@ -80,6 +80,17 @@ struct Hello
 main = ->
   hello = Hello::new "World"
   hello.display!
+```
+
+## Generics
+
+```haskell
+struct Wrapper T
+  inner: T
+
+enum Choice T, U
+  Left T
+  Right U
 ```
 
 ## Reference/Dereference
@@ -108,9 +119,9 @@ main = ->
 main = ->
   a = (10, "hello")
   match a
-    (0, "world") => "something"
+    (0, "world")      => "something"
     (a, str) if a > 5 => str
-    _ => "otherwise"
+    _                 => "otherwise"
 ```
 
 ## Destructuring
@@ -169,4 +180,18 @@ struct MyStruct
 
 < MyStruct
 ```
+
+
+# TODO
+
+  - Macros
+    - Macro nested var repetition $($($arg:ident)*)*
+    - Don't ignore \n and indent for macro args parsing
+    - Better error management and diagnostic details
+  - Parser
+    - Adaptative indentation: Scan the first indentation level and set it as default
+  - Modules and dependancies
+    - Basic external module management
+
+
 

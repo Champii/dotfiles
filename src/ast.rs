@@ -1,6 +1,6 @@
 use crate::lexer::{Span, Token};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Program {
     pub top_levels: Vec<TopLevel>,
 }
@@ -18,81 +18,81 @@ impl Program {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct TopLevel {
     pub ident: Ident,
     pub kind: TopLevelKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum TopLevelKind {
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MacroDecl {
     pub name: Ident,
     pub entries: Vec<MacroEntry>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MacroEntry {
     pub defs: Vec<MacroFragment>,
     pub body: Vec<MacroFragment>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum MacroFragment {
     Ident(Ident),
     Token(Token),
     Repetition(Vec<MacroFragment>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MacroInvoc {
     pub name: Ident,
     pub args: Vec<Token>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct FunctionDecl {
     pub name: Ident,
     pub parameters: Vec<Ident>,
     pub body: Block,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Block {
     pub statements: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Statement {
     Expression(Expression),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Expression {
     BinopExpr(UnaryExpr, Operator, Box<Expression>),
     UnaryExpr(UnaryExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum UnaryExpr {
     PrimaryExpr(PrimaryExpr),
     UnaryExpr(Operator, Box<UnaryExpr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PrimaryExpr {
     Ident(Ident),
     Literal(Literal),
     MacroInvoc(MacroInvoc),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Literal {
     Number(Number),
 }
@@ -103,14 +103,38 @@ pub struct Ident {
     pub span: Span,
 }
 
+impl PartialEq for Ident {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Eq for Ident {}
+
 #[derive(Debug)]
 pub struct Number {
     pub value: String,
     pub span: Span,
 }
 
+impl PartialEq for Number {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Eq for Number {}
+
 #[derive(Debug)]
 pub struct Operator {
     pub value: String,
     pub span: Span,
 }
+
+impl PartialEq for Operator {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Eq for Operator {}

@@ -104,14 +104,7 @@ fn parse_macro_head_recursive<'a>(
                 return Ok((defs, remaining_tokens));
             }
             _ => {
-                let mut token = token.clone();
-
-                // fix the indentation for the parser
-                /* if let TokenType::Indent(level) = token.token_type {
-                    token.token_type = TokenType::Indent(level - 4);
-                } */
-
-                defs.push(MacroFragment::Token(token));
+                defs.push(MacroFragment::Token(token.clone()));
                 remaining_tokens = &remaining_tokens[1..];
             }
         }

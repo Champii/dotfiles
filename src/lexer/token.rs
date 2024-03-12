@@ -33,3 +33,5 @@ impl PartialEq for Token {
         self.token_type == other.token_type
     }
 }
+
+impl Eq for Token {}

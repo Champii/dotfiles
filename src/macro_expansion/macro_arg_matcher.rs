@@ -157,5 +157,4 @@ fn get_correspondances_thread<'a>(threads: Vec<MacroThread<'a>>) -> Option<Macro
     } else {
         None
     }
-    // .map(|thread| thread.correspondances.clone())
 }

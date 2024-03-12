@@ -91,6 +91,8 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
         let (program, _) = Program::parse(&body, &mut ParseCtx::new())?;
 
         top_levels.extend(program.top_levels);
+
+        break;
     }
 
     if top_levels.is_empty() {
@@ -171,4 +173,151 @@ fn replace_body_variables(
         })
         .flatten()
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::parser::parse_string;
+
+    use super::*;
+
+    #[test]
+    fn simple_macro_expand() {
+        let input = r#"macro mymacro
+  a b c =>
+    main = -> 1
+%mymacro a b c
+
+"#;
+
+        let expected = r#"macro mymacro
+  a b c =>
+    main = -> 1
+main = -> 1
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
+
+    #[test]
+    fn simple_macro_expand_fail() {
+        let input = r#"macro mymacro
+  a b c =>
+    main = -> 1
+%mymacro a c b
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program);
+
+        assert!(expanded.is_err());
+    }
+
+    #[test]
+    fn argument_matching() {
+        let input = r#"macro mymacro
+  $a:ident $b:ident $c:ident =>
+    $a = $b -> $c
+%mymacro x y z
+
+"#;
+
+        let expected = r#"macro mymacro
+  $a:ident $b:ident $c:ident =>
+    $a = $b -> $c
+x = y -> z
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
+
+    #[test]
+    fn argument_repetition() {
+        let input = r#"macro mymacro
+  $a:ident $($b:ident)* $c:ident =>
+    $a = $($b,)* -> $c
+%mymacro a b c d e
+
+"#;
+
+        let expected = r#"macro mymacro
+  $a:ident $($b:ident)* $c:ident =>
+    $a = $($b,)* -> $c
+a = b, c, d, -> e
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
+
+    #[test]
+    fn multi_entries_macro() {
+        let input = r#"macro mymacro
+  $a:ident $b:ident $c:ident =>
+    $a = $b -> $c
+  $a:ident =>
+    $a = -> 1
+%mymacro x y z
+%mymacro x
+
+"#;
+
+        let expected = r#"macro mymacro
+  $a:ident $b:ident $c:ident =>
+    $a = $b -> $c
+  $a:ident =>
+    $a = -> 1
+x = y -> z
+x = -> 1
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
+
+    #[test]
+    fn no_repetition() {
+        let input = r#"macro mymacro
+  $a:ident $($b:ident)* $c:ident =>
+    $a = $($b,)* -> $c
+%mymacro a c
+
+"#;
+        let expected = r#"macro mymacro
+  $a:ident $($b:ident)* $c:ident =>
+    $a = $($b,)* -> $c
+a = -> c
+
+"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
 }

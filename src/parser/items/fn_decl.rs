@@ -19,6 +19,11 @@ impl Parsable for FunctionDecl {
         let (parameters, mut remaining_tokens) =
             parse_vec_of::<Ident>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
+        // consume token if it's a coma
+        if !remaining_tokens.is_empty() && remaining_tokens[0].token_type == TokenType::Coma {
+            remaining_tokens = &remaining_tokens[1..];
+        }
+
         remaining_tokens = expect_token(remaining_tokens, TokenType::Arrow)?;
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
