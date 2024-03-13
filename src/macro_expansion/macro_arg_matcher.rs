@@ -84,16 +84,12 @@ impl<'a> MacroArgMatcher<'a> {
                                 tokens: tokens[1..].to_vec(),
                                 correspondances: thread.correspondances.clone(),
                             });
-                            println!("Match args {:#?}", thread.args);
 
                             let mut matcher = MacroArgMatcher::new(thread.args, repetition.clone());
                             if let Ok((correspondances, new_args)) = matcher.match_threads() {
                                 thread
                                     .correspondances
                                     .insert_nested(correspondances.clone());
-
-                                println!("Inner match args {:#?}", new_args);
-                                println!("Inner match tokens {:#?}", tokens);
 
                                 // Case repetition found and it continues
                                 let new_thread_matched = MacroThread {
@@ -112,14 +108,6 @@ impl<'a> MacroArgMatcher<'a> {
                                 };
 
                                 new_new_threads.push(new_thread_matched);
-                            } else {
-
-                                // Case repetition not found
-                                /* new_new_threads.push(MacroThread {
-                                    args: &thread.args,
-                                    tokens: tokens[1..].to_vec(),
-                                    correspondances: thread.correspondances.clone(),
-                                }); */
                             }
                         }
                     }
@@ -141,7 +129,6 @@ impl<'a> MacroArgMatcher<'a> {
         if let Some(thread) = get_correspondances_thread(new_threads.clone()) {
             Ok((thread.correspondances.clone(), thread.args))
         } else {
-            println!("HERROR HERE ???!");
             Err(ParseError::MacroNoCorrespondance(Ident {
                 name: "macro".to_string(),
                 span: Span::default(),
