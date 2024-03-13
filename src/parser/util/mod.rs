@@ -6,7 +6,13 @@ pub use parse_error::ParseError;
 
 /// Consumes a token of the given type from the input tokens.
 pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token], ParseError> {
-    let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+    if tokens.is_empty() && token_type == TokenType::Eof {
+        return Ok(tokens);
+    }
+
+    let token = tokens
+        .get(0)
+        .ok_or(ParseError::UnexpectedEof(token_type.clone()))?;
     if token.token_type != token_type {
         return Err(ParseError::UnexpectedToken(token.clone(), vec![token_type]));
     }

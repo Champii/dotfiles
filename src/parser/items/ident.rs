@@ -9,7 +9,9 @@ impl Parsable for Ident {
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Ident("".to_string())))?;
 
         match &token.token_type {
             TokenType::Ident(name) => Ok((
@@ -37,6 +39,7 @@ mod tests {
     fn lex(input: &str) -> Vec<Token> {
         Lexer::new(PathBuf::new(), input)
             .unwrap()
+            .with_newline_at_end(false)
             .collect()
             .unwrap()
     }

@@ -40,6 +40,7 @@ mod tests {
     fn lex(input: &str) -> Vec<Token> {
         Lexer::new(PathBuf::new(), input)
             .unwrap()
+            .with_newline_at_end(false)
             .collect()
             .unwrap()
     }

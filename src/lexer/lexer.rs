@@ -15,6 +15,7 @@ pub struct Lexer {
     input: String,
     position: usize,
     last_token: Option<Token>,
+    add_empty_newline_at_end: bool,
 }
 
 impl Lexer {
@@ -24,7 +25,13 @@ impl Lexer {
             input: input.to_string(),
             position: 0,
             last_token: None,
+            add_empty_newline_at_end: true,
         })
+    }
+
+    pub fn with_newline_at_end(mut self, add_empty_newline_at_end: bool) -> Self {
+        self.add_empty_newline_at_end = add_empty_newline_at_end;
+        self
     }
 
     fn span(&self, len: usize) -> Span {
@@ -103,13 +110,25 @@ impl Lexer {
             let token = self.next()?;
 
             if token.token_type == TokenType::Eof {
-                tokens.push(token);
-
                 break;
             }
 
             tokens.push(token);
         }
+
+        if self.add_empty_newline_at_end {
+            if let Some(token) = tokens.last() {
+                if token.token_type != TokenType::Eol {
+                    // Finish the current line
+                    tokens.push(self.token(TokenType::Eol, 1));
+                }
+            }
+            // add an empty line at the end of the file
+            tokens.push(self.token(TokenType::Indent(0), 0));
+            tokens.push(self.token(TokenType::Eol, 1));
+        }
+
+        tokens.push(self.token(TokenType::Eof, 0));
 
         Ok(tokens)
     }

@@ -197,7 +197,9 @@ impl Parsable for MacroInvoc {
             }
         }
 
-        Err(ParseError::UnexpectedEof)
+        Err(ParseError::UnexpectedEof(TokenType::MacroInvoc(
+            "".to_string(),
+        )))
     }
 }
 
@@ -211,6 +213,7 @@ mod tests {
     fn lex(input: &str) -> Vec<Token> {
         Lexer::new(PathBuf::new(), input)
             .unwrap()
+            .with_newline_at_end(false)
             .collect()
             .unwrap()
     }
@@ -240,7 +243,7 @@ mod tests {
 
     #[test]
     fn test_parse_macro_invoc() {
-        let input = "%mymacro\n  a\n  b\n";
+        let input = "%mymacro\n  a\n  b";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
         let (macro_invoc, rest) = MacroInvoc::parse(&tokens, &mut ParseCtx::new()).unwrap();

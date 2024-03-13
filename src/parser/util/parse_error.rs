@@ -7,7 +7,7 @@ use crate::{
 pub enum ParseError {
     UnexpectedKeyword(Token, Vec<String>),
     UnexpectedToken(Token, Vec<TokenType>),
-    UnexpectedEof,
+    UnexpectedEof(TokenType),
     LeftoverTokens(Vec<Token>),
     UnknownFile(String),
     Lexer(LexerError),

@@ -59,3 +59,31 @@ impl Parsable for Program {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::parser::parse_string;
+
+    #[test]
+    fn program_with_newlines() {
+        let input = r#"
+
+main = -> 1
+
+
+test = -> 2
+
+
+"#;
+
+        assert!(parse_string(input).is_ok());
+    }
+
+    #[test]
+    fn program_with_no_newlines() {
+        let input = r#"main = -> 1
+test = -> 2"#;
+
+        assert!(parse_string(input).is_ok());
+    }
+}

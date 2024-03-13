@@ -33,7 +33,12 @@ impl Parsable for Expression {
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens, parse_ctx)?;
 
-        let token = remaining_tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token =
+            remaining_tokens
+                .get(0)
+                .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                    "".to_string(),
+                )))?;
         if let TokenType::Operator(_) = token.token_type {
             let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
             let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
@@ -53,7 +58,11 @@ impl Parsable for UnaryExpr {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                "".to_string(),
+            )))?;
 
         if let TokenType::Operator(_) = token.token_type {
             let (operator, remaining_tokens) = Operator::parse(tokens, parse_ctx)?;
@@ -76,7 +85,9 @@ impl Parsable for PrimaryExpr {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Ident("".to_string())))?;
 
         match &token.token_type {
             TokenType::Ident(name) => Ok((
@@ -114,7 +125,9 @@ impl Parsable for Number {
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Number("".to_string())))?;
 
         match &token.token_type {
             TokenType::Number(value) => Ok((
@@ -137,7 +150,11 @@ impl Parsable for Operator {
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let token = tokens.get(0).ok_or(ParseError::UnexpectedEof)?;
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                "".to_string(),
+            )))?;
 
         match &token.token_type {
             TokenType::Operator(value) => Ok((

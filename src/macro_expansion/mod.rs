@@ -131,12 +131,14 @@ fn replace_body_variables(
                     .collect::<Vec<_>>();
 
                 // find nested correspondance from names
-                let (index, nested_correspondance) = correspondances
+                let Some((index, nested_correspondance)) = correspondances
                     .nested_corresp
                     .iter()
                     .enumerate()
                     .find(|(_i, corresp)| corresp.keys() == repetition_names)
-                    .unwrap();
+                else {
+                    return vec![];
+                };
 
                 let mut repetitions = vec![];
 
@@ -172,6 +174,23 @@ fn replace_body_variables(
             }
         })
         .flatten()
+        /* .chain(
+            vec![
+                Token {
+                    token_type: TokenType::Eol,
+                    span: Default::default(),
+                },
+                Token {
+                    token_type: TokenType::Indent(0),
+                    span: Default::default(),
+                },
+                Token {
+                    token_type: TokenType::Eol,
+                    span: Default::default(),
+                },
+            ]
+            .into_iter(),
+        ) */
         .collect()
 }
 
@@ -186,16 +205,12 @@ mod tests {
         let input = r#"macro mymacro
   a b c =>
     main = -> 1
-%mymacro a b c
-
-"#;
+%mymacro a b c"#;
 
         let expected = r#"macro mymacro
   a b c =>
     main = -> 1
-main = -> 1
-
-"#;
+main = -> 1"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program).unwrap();
@@ -210,9 +225,7 @@ main = -> 1
         let input = r#"macro mymacro
   a b c =>
     main = -> 1
-%mymacro a c b
-
-"#;
+%mymacro a c b"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program);
@@ -225,16 +238,12 @@ main = -> 1
         let input = r#"macro mymacro
   $a:ident $b:ident $c:ident =>
     $a = $b -> $c
-%mymacro x y z
-
-"#;
+%mymacro x y z "#;
 
         let expected = r#"macro mymacro
   $a:ident $b:ident $c:ident =>
     $a = $b -> $c
-x = y -> z
-
-"#;
+x = y -> z"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program).unwrap();
@@ -249,16 +258,12 @@ x = y -> z
         let input = r#"macro mymacro
   $a:ident $($b:ident)* $c:ident =>
     $a = $($b,)* -> $c
-%mymacro a b c d e
-
-"#;
+%mymacro a b c d e"#;
 
         let expected = r#"macro mymacro
   $a:ident $($b:ident)* $c:ident =>
     $a = $($b,)* -> $c
-a = b, c, d, -> e
-
-"#;
+a = b, c, d, -> e"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program).unwrap();
@@ -276,9 +281,7 @@ a = b, c, d, -> e
   $a:ident =>
     $a = -> 1
 %mymacro x y z
-%mymacro x
-
-"#;
+%mymacro x"#;
 
         let expected = r#"macro mymacro
   $a:ident $b:ident $c:ident =>
@@ -286,9 +289,7 @@ a = b, c, d, -> e
   $a:ident =>
     $a = -> 1
 x = y -> z
-x = -> 1
-
-"#;
+x = -> 1"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program).unwrap();
@@ -303,20 +304,19 @@ x = -> 1
         let input = r#"macro mymacro
   $a:ident $($b:ident)* $c:ident =>
     $a = $($b,)* -> $c
-%mymacro a c
-
-"#;
+%mymacro a c"#;
         let expected = r#"macro mymacro
   $a:ident $($b:ident)* $c:ident =>
     $a = $($b,)* -> $c
-a = -> c
-
-"#;
+a = -> c"#;
 
         let input_program = parse_string(input).unwrap();
         let expanded = expand_macros(input_program).unwrap();
+        println!("{:#?}", expanded);
 
         let expected_program = parse_string(expected).unwrap();
+
+        println!("{:#?}", expected_program);
 
         assert_eq!(expanded, expected_program);
     }
