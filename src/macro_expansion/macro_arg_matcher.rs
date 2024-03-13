@@ -84,12 +84,16 @@ impl<'a> MacroArgMatcher<'a> {
                                 tokens: tokens[1..].to_vec(),
                                 correspondances: thread.correspondances.clone(),
                             });
+                            println!("Match args {:#?}", thread.args);
 
                             let mut matcher = MacroArgMatcher::new(thread.args, repetition.clone());
                             if let Ok((correspondances, new_args)) = matcher.match_threads() {
                                 thread
                                     .correspondances
                                     .insert_nested(correspondances.clone());
+
+                                println!("Inner match args {:#?}", new_args);
+                                println!("Inner match tokens {:#?}", tokens);
 
                                 // Case repetition found and it continues
                                 let new_thread_matched = MacroThread {
@@ -108,6 +112,14 @@ impl<'a> MacroArgMatcher<'a> {
                                 };
 
                                 new_new_threads.push(new_thread_matched);
+                            } else {
+
+                                // Case repetition not found
+                                /* new_new_threads.push(MacroThread {
+                                    args: &thread.args,
+                                    tokens: tokens[1..].to_vec(),
+                                    correspondances: thread.correspondances.clone(),
+                                }); */
                             }
                         }
                     }
@@ -129,6 +141,7 @@ impl<'a> MacroArgMatcher<'a> {
         if let Some(thread) = get_correspondances_thread(new_threads.clone()) {
             Ok((thread.correspondances.clone(), thread.args))
         } else {
+            println!("HERROR HERE ???!");
             Err(ParseError::MacroNoCorrespondance(Ident {
                 name: "macro".to_string(),
                 span: Span::default(),
@@ -137,22 +150,40 @@ impl<'a> MacroArgMatcher<'a> {
     }
 }
 
+fn remaining_is_all_repetition_or_empty(tokens: &[MacroFragment]) -> bool {
+    if tokens.is_empty() {
+        return true;
+    }
+
+    tokens.iter().all(|token| {
+        if let MacroFragment::Repetition(_) = token {
+            true
+        } else {
+            false
+        }
+    })
+}
+
 fn has_one_solution(threads: Vec<MacroThread>, must_be_completed: bool) -> bool {
     threads.iter().any(|thread| {
-        (must_be_completed && (thread.tokens.is_empty() && thread.args.is_empty()))
-            || (!must_be_completed && (thread.tokens.is_empty() || thread.args.is_empty()))
+        (must_be_completed
+            && (remaining_is_all_repetition_or_empty(&thread.tokens) && thread.args.is_empty()))
+            || (!must_be_completed
+                && (remaining_is_all_repetition_or_empty(&thread.tokens) || thread.args.is_empty()))
     })
 }
 
 fn get_correspondances_thread<'a>(threads: Vec<MacroThread<'a>>) -> Option<MacroThread<'a>> {
-    if let Some(found) = threads
-        .iter()
-        .find(|thread| thread.tokens.is_empty() && thread.args.is_empty())
-    {
+    if let Some(found) = threads.iter().find(|thread| {
+        remaining_is_all_repetition_or_empty(&thread.tokens) && thread.args.is_empty()
+    }) {
         return Some(found.clone());
     } else if let Some(found) = threads.iter().find(|thread| thread.args.is_empty()) {
         return Some(found.clone());
-    } else if let Some(found) = threads.iter().find(|thread| thread.tokens.is_empty()) {
+    } else if let Some(found) = threads
+        .iter()
+        .find(|thread| remaining_is_all_repetition_or_empty(&thread.tokens))
+    {
         return Some(found.clone());
     } else {
         None

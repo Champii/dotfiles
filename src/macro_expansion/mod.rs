@@ -320,4 +320,24 @@ a = -> c"#;
 
         assert_eq!(expanded, expected_program);
     }
+
+    #[test]
+    fn empty_repetition_matches_less_args() {
+        let input = r#"macro mymacro
+  $name:ident $($args:ident)* =>
+    $name = $($args,)* -> 1
+%mymacro a"#;
+
+        let expected = r#"macro mymacro
+  $name:ident $($args:ident)* =>
+    $name = $($args,)* -> 1
+a = -> 1"#;
+
+        let input_program = parse_string(input).unwrap();
+        let expanded = expand_macros(input_program).unwrap();
+
+        let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
 }
