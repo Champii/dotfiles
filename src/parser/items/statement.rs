@@ -1,6 +1,7 @@
 use crate::{
     ast::{
-        Expression, Ident, Literal, MacroInvoc, Number, Operator, PrimaryExpr, Statement, UnaryExpr,
+        Expression, Ident, IdentifierPath, Literal, LiteralKind, MacroInvoc, Number, Operand,
+        Operator, PrimaryExpr, Statement, UnaryExpr,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -85,27 +86,36 @@ impl Parsable for PrimaryExpr {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (operand, remaining_tokens) = Operand::parse(tokens, parse_ctx)?;
+
+        let primary_expr = PrimaryExpr {
+            operand,
+            secondaries: None,
+        };
+
+        Ok((primary_expr, remaining_tokens))
+    }
+}
+
+impl Parsable for Operand {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Ident("".to_string())))?;
 
         match &token.token_type {
-            TokenType::Ident(name) => Ok((
-                PrimaryExpr::Ident(Ident {
-                    name: name.clone(),
-                    span: token.span.clone(),
-                }),
-                &tokens[1..],
-            )),
-            TokenType::MacroInvoc(_) => {
-                let (macro_invoc, remaining_tokens) = MacroInvoc::parse(tokens, parse_ctx)?;
-                Ok((PrimaryExpr::MacroInvoc(macro_invoc), remaining_tokens))
+            TokenType::Ident(_) => {
+                let (identifier_path, remaining_tokens) = IdentifierPath::parse(tokens, parse_ctx)?;
+                Ok((Operand::Ident(identifier_path), remaining_tokens))
             }
             TokenType::Number(value) => Ok((
-                PrimaryExpr::Literal(Literal::Number(Number {
-                    value: value.clone(),
+                Operand::Literal(Literal {
+                    kind: LiteralKind::Number(value.parse().unwrap()),
                     span: token.span.clone(),
-                })),
+                }),
                 &tokens[1..],
             )),
             _ => Err(ParseError::UnexpectedToken(
@@ -120,28 +130,42 @@ impl Parsable for PrimaryExpr {
     }
 }
 
-impl Parsable for Number {
+impl Parsable for Literal {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
+        let mut remaining_tokens = tokens;
+
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Number("".to_string())))?;
 
-        match &token.token_type {
-            TokenType::Number(value) => Ok((
-                Number {
-                    value: value.clone(),
-                    span: token.span.clone(),
-                },
-                &tokens[1..],
-            )),
-            _ => Err(ParseError::UnexpectedToken(
-                token.clone(),
-                vec![TokenType::Number("".to_string())],
-            )),
-        }
+        let literal_kind = match &token.token_type {
+            TokenType::Ident(value) if value == "true" || value == "false" => {
+                LiteralKind::Bool(value.parse().unwrap())
+            }
+            TokenType::Number(value) => LiteralKind::Number(value.parse().unwrap()),
+            // TokenType::Float(value) => LiteralKind::Float(value.parse().unwrap()),
+            // TokenType::Array(_) => {
+            // let (array, remaining_tokens) = Array::parse(tokens, parse_ctx)?;
+            // LiteralKind::Array(array)
+            // }
+            _ => {
+                return Err(ParseError::UnexpectedToken(
+                    token.clone(),
+                    vec![TokenType::Number("".to_string())],
+                ))
+            }
+        };
+
+        Ok((
+            Literal {
+                kind: literal_kind,
+                span: token.span.clone(),
+            },
+            &tokens[1..],
+        ))
     }
 }
 

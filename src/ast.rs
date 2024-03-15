@@ -1,6 +1,6 @@
 use crate::lexer::{Span, Token};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct Program {
     pub top_levels: Vec<TopLevel>,
 }
@@ -18,85 +18,129 @@ impl Program {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct TopLevel {
     pub ident: Ident,
     pub kind: TopLevelKind,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MacroDecl {
     pub name: Ident,
     pub entries: Vec<MacroEntry>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MacroEntry {
     pub defs: Vec<MacroFragment>,
     pub body: Vec<MacroFragment>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum MacroFragment {
     Ident(Ident),
     Token(Token),
     Repetition(Vec<MacroFragment>),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MacroInvoc {
     pub name: Ident,
     pub args: Vec<Token>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct FunctionDecl {
     pub name: Ident,
     pub parameters: Vec<Ident>,
     pub body: Block,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct Block {
     pub statements: Vec<Statement>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum Statement {
     Expression(Expression),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     BinopExpr(UnaryExpr, Operator, Box<Expression>),
     UnaryExpr(UnaryExpr),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum UnaryExpr {
     PrimaryExpr(PrimaryExpr),
     UnaryExpr(Operator, Box<UnaryExpr>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum PrimaryExpr {
-    Ident(Ident),
-    Literal(Literal),
-    MacroInvoc(MacroInvoc),
+#[derive(Debug, PartialEq)]
+pub struct PrimaryExpr {
+    pub operand: Operand,
+    pub secondaries: Option<Vec<SecondaryExpr>>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
+pub enum Operand {
+    Literal(Literal),
+    Ident(IdentifierPath),
+    Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct IdentifierPath {
+    pub path: Vec<Ident>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Literal {
+    pub kind: LiteralKind,
+    pub span: Span,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum LiteralKind {
+    Bool(bool),
+    Number(u64),
+    Float(f64),
+    Array(Array),
+    String(String),
+    Char(char),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Array {
+    pub values: Vec<Expression>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum SecondaryExpr {
+    Arguments(Vec<Argument>),
+    Indice(Box<Expression>), // Boxing here to keep the enum size low
+    Dot(Ident),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Argument {
+    pub arg: UnaryExpr,
+}
+
+/* #[derive(Debug, PartialEq, Eq)]
 pub enum Literal {
     Number(Number),
 }
-
+ */
 #[derive(Debug, Clone)]
 pub struct Ident {
     pub name: String,

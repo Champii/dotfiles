@@ -23,6 +23,7 @@ pub enum TokenType {
     FatArrow,
     Coma,
     Colon,
+    DoubleColon,
     Indent(u8),
     Eol,
     Eof,

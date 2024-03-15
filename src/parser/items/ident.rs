@@ -1,8 +1,24 @@
 use crate::{
-    ast::Ident,
+    ast::{Ident, IdentifierPath},
     lexer::{Token, TokenType},
-    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
+    parser::{
+        parsable::Parsable,
+        parse_ctx::ParseCtx,
+        util::{parse_vec_of, ParseError},
+    },
 };
+
+impl Parsable for IdentifierPath {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (idents, remaining_tokens) =
+            parse_vec_of(&tokens, Some(TokenType::DoubleColon), parse_ctx)?;
+
+        Ok((IdentifierPath { path: idents }, remaining_tokens))
+    }
+}
 
 impl Parsable for Ident {
     fn parse<'a>(

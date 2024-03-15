@@ -15,6 +15,7 @@ pub struct Lexer {
     input: String,
     position: usize,
     last_token: Option<Token>,
+    /// true by default, is turned off for the parser unit tests
     add_empty_newline_at_end: bool,
 }
 
@@ -29,6 +30,7 @@ impl Lexer {
         })
     }
 
+    #[cfg(test)]
     pub fn with_newline_at_end(mut self, add_empty_newline_at_end: bool) -> Self {
         self.add_empty_newline_at_end = add_empty_newline_at_end;
         self
@@ -89,6 +91,7 @@ impl Lexer {
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
             ',' => self.token(TokenType::Coma, 1),
+            ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
             c if c.is_alphabetic() => self.ident_or_keyword(),
             c if c.is_digit(10) => self.number(),

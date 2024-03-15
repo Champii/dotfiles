@@ -6,3 +6,11 @@ pub struct Span {
     pub start: usize,
     pub end: usize,
 }
+
+impl PartialEq for Span {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
+
+impl Eq for Span {}
