@@ -1,10 +1,10 @@
 use crate::{
-    ast::{Literal, LiteralKind},
+    ast::{Array, Expression, Literal, LiteralKind},
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{consume_tokens_until, expect_token, ParseError},
+        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -28,6 +28,10 @@ impl Parsable for Literal {
                 tokens = &tokens[1..];
                 LiteralKind::Number(value.parse().unwrap())
             }
+            TokenType::Float(value) => {
+                tokens = &tokens[1..];
+                LiteralKind::Float(value.parse().unwrap())
+            }
             TokenType::DoubleQuote => {
                 let (string, remaining_tokens) = String::parse(tokens, parse_ctx)?;
                 tokens = remaining_tokens;
@@ -38,11 +42,13 @@ impl Parsable for Literal {
                 tokens = remaining_tokens;
                 LiteralKind::Char(char)
             }
-            // TokenType::Float(value) => LiteralKind::Float(value.parse().unwrap()),
-            // TokenType::Array(_) => {
-            // let (array, remaining_tokens) = Array::parse(tokens, parse_ctx)?;
-            // LiteralKind::Array(array)
-            // }
+            TokenType::OpenBracket => {
+                let (array, remaining_tokens) =
+                    parse_vec_of::<Expression>(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
+                let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
+                tokens = remaining_tokens;
+                LiteralKind::Array(Array { elements: array })
+            }
             _ => {
                 return Err(ParseError::UnexpectedToken(
                     token.clone(),
@@ -112,7 +118,11 @@ impl Parsable for char {
 mod literals {
 
     use super::*;
-    use crate::parser::util::lex_test;
+    use crate::{
+        ast::{Ident, IdentifierPath, Operand, Operator, PrimaryExpr, UnaryExpr},
+        lexer::Span,
+        parser::util::lex_test,
+    };
 
     fn parse_literal(input: &str) -> Literal {
         let tokens = lex_test(input);
@@ -145,5 +155,137 @@ mod literals {
         let literal = parse_literal(input);
 
         assert_eq!(literal.kind, LiteralKind::Char('a'));
+    }
+
+    #[test]
+    fn test_parse_float() {
+        let input = "123.456";
+        let literal = parse_literal(input);
+
+        assert_eq!(literal.kind, LiteralKind::Float(123.456));
+    }
+
+    #[test]
+    fn test_parse_bool() {
+        let input = "true";
+        let literal = parse_literal(input);
+
+        assert_eq!(literal.kind, LiteralKind::Bool(true));
+    }
+
+    #[test]
+    fn test_parse_array() {
+        let input = "[1, 2, 3]";
+        let literal = parse_literal(input);
+
+        assert_eq!(
+            literal.kind,
+            LiteralKind::Array(Array {
+                elements: vec![
+                    Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: LiteralKind::Number(1),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    })),
+                    Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: LiteralKind::Number(2),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    })),
+                    Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: LiteralKind::Number(3),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    })),
+                ],
+            })
+        );
+    }
+
+    #[test]
+    fn test_parse_array_empty() {
+        let input = "[]";
+        let literal = parse_literal(input);
+
+        assert_eq!(literal.kind, LiteralKind::Array(Array { elements: vec![] }));
+    }
+
+    #[test]
+    fn test_parse_array_nested_expr() {
+        let input = "[1, [hello, 3], 8, 5 + 4]";
+        let literal = parse_literal(input);
+
+        let expected = LiteralKind::Array(Array {
+            elements: vec![
+                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                })),
+                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        span: Span::default(),
+                        kind: LiteralKind::Array(Array {
+                            elements: vec![
+                                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                    operand: Operand::Ident(IdentifierPath {
+                                        path: vec![Ident {
+                                            name: "hello".to_string(),
+                                            span: Span::default(),
+                                        }],
+                                    }),
+                                    secondaries: None,
+                                })),
+                                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                    operand: Operand::Literal(Literal {
+                                        kind: LiteralKind::Number(3),
+                                        span: Span::default(),
+                                    }),
+                                    secondaries: None,
+                                })),
+                            ],
+                        }),
+                    }),
+                    secondaries: None,
+                })),
+                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: LiteralKind::Number(8),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                })),
+                Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: LiteralKind::Number(5),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    }),
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: LiteralKind::Number(4),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    }))),
+                ),
+            ],
+        });
+
+        assert_eq!(literal.kind, expected,);
     }
 }

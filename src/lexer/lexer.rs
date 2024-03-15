@@ -90,9 +90,12 @@ impl Lexer {
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
+            '[' => self.token(TokenType::OpenBracket, 1),
+            ']' => self.token(TokenType::CloseBracket, 1),
             ',' => self.token(TokenType::Coma, 1),
             ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
+            '.' => self.token(TokenType::Dot, 1),
             '\'' => self.token(TokenType::SimpleQuote, 1),
             '"' => self.token(TokenType::DoubleQuote, 1),
             c if c.is_alphabetic() => self.ident_or_keyword(),
@@ -209,6 +212,19 @@ impl Lexer {
 
         while self.peek(end - start).is_digit(10) {
             end += 1;
+        }
+
+        if self.peek(end - start) == '.' {
+            end += 1;
+
+            while self.peek(end - start).is_digit(10) {
+                end += 1;
+            }
+
+            return self.token(
+                TokenType::Float(self.input[start..end].to_string()),
+                end - start,
+            );
         }
 
         self.token(

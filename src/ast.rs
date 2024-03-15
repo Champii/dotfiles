@@ -121,7 +121,7 @@ pub enum LiteralKind {
 
 #[derive(Debug, PartialEq)]
 pub struct Array {
-    pub values: Vec<Expression>,
+    pub elements: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -133,14 +133,9 @@ pub enum SecondaryExpr {
 
 #[derive(Debug, PartialEq)]
 pub struct Argument {
-    pub arg: UnaryExpr,
+    pub arg: Expression,
 }
 
-/* #[derive(Debug, PartialEq, Eq)]
-pub enum Literal {
-    Number(Number),
-}
- */
 #[derive(Debug, Clone)]
 pub struct Ident {
     pub name: String,

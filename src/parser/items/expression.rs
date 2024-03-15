@@ -1,10 +1,13 @@
 use crate::{
-    ast::{Expression, IdentifierPath, Literal, Operand, Operator, PrimaryExpr, UnaryExpr},
+    ast::{
+        Argument, Expression, Ident, IdentifierPath, Literal, Operand, Operator, PrimaryExpr,
+        SecondaryExpr, UnaryExpr,
+    },
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
+        util::{expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -73,12 +76,80 @@ impl Parsable for PrimaryExpr {
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let (operand, remaining_tokens) = Operand::parse(tokens, parse_ctx)?;
 
-        let primary_expr = PrimaryExpr {
+        let mut primary_expr = PrimaryExpr {
             operand,
             secondaries: None,
         };
 
-        Ok((primary_expr, remaining_tokens))
+        if remaining_tokens.is_empty() {
+            return Ok((primary_expr, remaining_tokens));
+        }
+
+        let (secondaries, remaining_tokens_after_secondaries) =
+            parse_vec_of::<SecondaryExpr>(remaining_tokens, None, parse_ctx)?;
+
+        // if operand is literal, cannot be function call
+        if let Operand::Literal(_) = primary_expr.operand {
+            if !secondaries.is_empty() {
+                let first_secondary = secondaries
+                    .get(0)
+                    .ok_or(ParseError::UnexpectedEof(TokenType::Eof))?;
+
+                if let SecondaryExpr::Arguments(_) = first_secondary {
+                    return Ok((primary_expr, remaining_tokens));
+                }
+            }
+        }
+
+        if !secondaries.is_empty() {
+            primary_expr.secondaries = Some(secondaries);
+        }
+
+        return Ok((primary_expr, remaining_tokens_after_secondaries));
+    }
+}
+
+impl Parsable for SecondaryExpr {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                "".to_string(),
+            )))?;
+
+        if let TokenType::OpenBracket = token.token_type {
+            let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
+            let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
+
+            Ok((
+                SecondaryExpr::Indice(Box::new(expression)),
+                remaining_tokens,
+            ))
+        } else if let TokenType::Dot = token.token_type {
+            let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+
+            Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+        } else {
+            let (arguments, remaining_tokens) =
+                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)?;
+
+            if arguments.is_empty() {
+                return Err(ParseError::UnexpectedToken(
+                    token.clone(),
+                    vec![TokenType::OpenParen],
+                ));
+            }
+
+            let arguments = arguments
+                .into_iter()
+                .map(|expr| Argument { arg: expr })
+                .collect::<Vec<_>>();
+
+            Ok((SecondaryExpr::Arguments(arguments), remaining_tokens))
+        }
     }
 }
 
@@ -145,8 +216,7 @@ impl Parsable for Operator {
 }
 
 #[cfg(test)]
-mod tests {
-
+mod expression {
     use super::*;
     use crate::{
         ast::{Literal, Operand, PrimaryExpr, UnaryExpr},
@@ -233,6 +303,176 @@ mod tests {
                     })))
                 ))),
                 secondaries: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn call_expression() {
+        let input = "hello 1, 2, 3";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    }],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Arguments(vec![
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(2),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(3),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                    },
+                ])]),
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn indice_expression() {
+        let input = "hello[1]";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    }],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Indice(Box::new(
+                    Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(1),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    }))
+                ))]),
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression() {
+        let input = "hello.world";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    }],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                    name: "world".to_string(),
+                    span: Span::default(),
+                })]),
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn complex_secondaries() {
+        let input = "hello[1].world 1, 2, 3";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    }],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                        PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        }
+                    )))),
+                    SecondaryExpr::Dot(Ident {
+                        name: "world".to_string(),
+                        span: Span::default(),
+                    }),
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(1),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(3),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            })),
+                        },
+                    ]),
+                ]),
             })),
         );
 
