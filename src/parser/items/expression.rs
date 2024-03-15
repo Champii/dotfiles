@@ -1,7 +1,11 @@
 use crate::{
     ast::{Expression, IdentifierPath, Literal, Operand, Operator, PrimaryExpr, UnaryExpr},
     lexer::{Token, TokenType},
-    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
+    parser::{
+        parsable::Parsable,
+        parse_ctx::ParseCtx,
+        util::{expect_token, ParseError},
+    },
 };
 
 impl Parsable for Expression {
@@ -83,6 +87,11 @@ impl Parsable for Operand {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
+        if TokenType::OpenParen == tokens[0].token_type {
+            let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
+            let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
+            return Ok((Operand::Expression(Box::new(expression)), remaining_tokens));
+        }
         if let Ok((literal, remaining_tokens)) = Literal::parse(tokens, parse_ctx) {
             return Ok((Operand::Literal(literal), remaining_tokens));
         }
@@ -132,5 +141,101 @@ impl Parsable for Operator {
                 vec![TokenType::Operator("".to_string())],
             )),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::{
+        ast::{Literal, Operand, PrimaryExpr, UnaryExpr},
+        lexer::Span,
+        parser::util::lex_test,
+    };
+
+    #[test]
+    fn test_parse_expression() {
+        let input = "1 + 2";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(2),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                })))
+            )
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn nested_parenthesis_expression() {
+        let input = "(1 + (2 + 3))";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Expression(Box::new(Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(1),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    }),
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Expression(Box::new(Expression::BinopExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            }),
+                            Operator {
+                                value: "+".to_string(),
+                                span: Span::default(),
+                            },
+                            Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(3),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            })))
+                        ))),
+                        secondaries: None,
+                    })))
+                ))),
+                secondaries: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
     }
 }
