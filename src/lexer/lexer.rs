@@ -93,6 +93,8 @@ impl Lexer {
             ',' => self.token(TokenType::Coma, 1),
             ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
+            '\'' => self.token(TokenType::SimpleQuote, 1),
+            '"' => self.token(TokenType::DoubleQuote, 1),
             c if c.is_alphabetic() => self.ident_or_keyword(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
