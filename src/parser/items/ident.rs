@@ -70,4 +70,14 @@ mod tests {
 
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_ident_path() {
+        let input = "ident::ident";
+        let tokens = lex_test(input);
+        let (ident_path, rest) = IdentifierPath::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(ident_path.path.len(), 2);
+        assert_eq!(rest.len(), 0);
+    }
 }

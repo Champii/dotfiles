@@ -91,11 +91,7 @@ impl Parsable for PrimaryExpr {
         // if operand is literal, cannot be function call
         if let Operand::Literal(_) = primary_expr.operand {
             if !secondaries.is_empty() {
-                let first_secondary = secondaries
-                    .get(0)
-                    .ok_or(ParseError::UnexpectedEof(TokenType::Eof))?;
-
-                if let SecondaryExpr::Arguments(_) = first_secondary {
+                if let SecondaryExpr::Arguments(_) = secondaries[0] {
                     return Ok((primary_expr, remaining_tokens));
                 }
             }
@@ -406,6 +402,29 @@ mod expression {
                 }),
                 secondaries: Some(vec![SecondaryExpr::Dot(Ident {
                     name: "world".to_string(),
+                    span: Span::default(),
+                })]),
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression_with_literal() {
+        let input = "4.test";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(4),
+                    span: Span::default(),
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                    name: "test".to_string(),
                     span: Span::default(),
                 })]),
             })),

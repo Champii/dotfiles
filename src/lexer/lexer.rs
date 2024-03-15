@@ -52,6 +52,13 @@ impl Lexer {
     }
 
     pub fn next(&mut self) -> Result<Token, LexerError> {
+        if self.current_char() == ' ' && self.peek(1) == '.' {
+            let token = self.token(TokenType::SpacedDot, 2);
+            self.position = token.span.end;
+            self.last_token = Some(token.clone());
+            return Ok(token);
+        }
+
         if self.prev_char() != '\n' && self.position != 0 || self.position == self.input.len() {
             self.skip_whitespace();
         } else {
@@ -215,16 +222,20 @@ impl Lexer {
         }
 
         if self.peek(end - start) == '.' {
+            let old_end = end;
             end += 1;
 
             while self.peek(end - start).is_digit(10) {
                 end += 1;
             }
-
-            return self.token(
-                TokenType::Float(self.input[start..end].to_string()),
-                end - start,
-            );
+            if end > old_end + 1 {
+                return self.token(
+                    TokenType::Float(self.input[start..end].to_string()),
+                    end - start,
+                );
+            } else {
+                end = old_end;
+            }
         }
 
         self.token(
