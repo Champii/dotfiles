@@ -1,6 +1,8 @@
 mod block;
+mod expression;
 mod fn_decl;
 mod ident;
+mod literal;
 mod r#macro;
 mod program;
 mod statement;

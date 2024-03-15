@@ -47,36 +47,25 @@ impl Parsable for Ident {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+
+    use crate::parser::util::lex_test;
 
     use super::*;
-    use crate::lexer::Lexer;
-
-    fn lex(input: &str) -> Vec<Token> {
-        Lexer::new(PathBuf::new(), input)
-            .unwrap()
-            .with_newline_at_end(false)
-            .collect()
-            .unwrap()
-    }
 
     #[test]
     fn test_parse_ident() {
         let input = "ident";
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent
+        let tokens = lex_test(input);
         let (ident, rest) = Ident::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
         assert_eq!(ident.name, "ident");
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0].token_type, TokenType::Eof);
+        assert_eq!(rest.len(), 0);
     }
 
     #[test]
     fn test_parse_ident_error() {
         let input = "123";
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent
+        let tokens = lex_test(input);
         let result = Ident::parse(&tokens, &mut ParseCtx::new());
 
         assert!(result.is_err());

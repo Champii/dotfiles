@@ -16,8 +16,13 @@ impl Parsable for Block {
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
             parse_ctx.indent_level += 2;
             let (statements, new_tokens) =
-                parse_vec_of::<Statement>(&tokens[1..], Some(TokenType::Eol), parse_ctx)?;
-            parse_ctx.indent_level -= 2;
+                match parse_vec_of::<Statement>(&tokens[1..], Some(TokenType::Eol), parse_ctx) {
+                    Ok((statements, new_tokens)) => (statements, new_tokens),
+                    Err(e) => {
+                        parse_ctx.indent_level -= 2;
+                        return Err(e);
+                    }
+                };
 
             (statements, new_tokens)
         } else {
@@ -32,40 +37,27 @@ impl Parsable for Block {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
 
     use super::*;
-    use crate::lexer::Lexer;
-
-    fn lex(input: &str) -> Vec<Token> {
-        Lexer::new(PathBuf::new(), input)
-            .unwrap()
-            .with_newline_at_end(false)
-            .collect()
-            .unwrap()
-    }
+    use crate::parser::util::lex_test;
 
     #[test]
     fn test_parse_block() {
         let input = "statement";
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent(0)
+        let tokens = lex_test(input);
         let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
         assert_eq!(block.statements.len(), 1);
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0].token_type, TokenType::Eof);
+        assert_eq!(rest.len(), 0);
     }
 
     #[test]
     fn test_parse_block_with_indent() {
         let input = "\n  statement\n  statement";
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent(0)
+        let tokens = lex_test(input);
         let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
         assert_eq!(block.statements.len(), 2);
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0].token_type, TokenType::Eof);
+        assert_eq!(rest.len(), 0);
     }
 }

@@ -12,4 +12,5 @@ pub enum ParseError {
     UnknownFile(String),
     Lexer(LexerError),
     MacroNoCorrespondance(Ident),
+    IndentMismatch(u8, u8),
 }
