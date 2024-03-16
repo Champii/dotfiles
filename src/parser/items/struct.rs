@@ -104,15 +104,81 @@ impl Parsable for StructInstance {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
-        let (fields, remaining_tokens) = parse_vec_of::<(Ident, Expression)>(
-            remaining_tokens,
-            Some(TokenType::Coma),
-            parse_ctx,
-        )?;
+
+        if let TokenType::Eol = remaining_tokens[0].token_type {
+            parse_ctx.indent_level += 2;
+            let (fields, remaining_tokens) =
+                StructInstanceBlock::parse(&remaining_tokens[1..], parse_ctx)?;
+            parse_ctx.indent_level -= 2;
+
+            Ok((
+                StructInstance {
+                    name: parse_type,
+                    fields: fields.fields.into_iter().collect(),
+                },
+                remaining_tokens,
+            ))
+        } else {
+            let (fields, remaining_tokens) = parse_vec_of::<(Ident, Expression)>(
+                remaining_tokens,
+                Some(TokenType::Coma),
+                parse_ctx,
+            )?;
+
+            Ok((
+                StructInstance {
+                    name: parse_type,
+                    fields: fields.into_iter().collect(),
+                },
+                remaining_tokens,
+            ))
+        }
+    }
+}
+
+struct StructInstanceBlock {
+    fields: Vec<(Ident, Expression)>,
+}
+
+impl Parsable for StructInstanceBlock {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let mut remaining_tokens = tokens;
+        let mut fields = Vec::new();
+
+        loop {
+            if remaining_tokens.is_empty() {
+                break;
+            }
+
+            if let Ok(new_remaining_tokens) =
+                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
+            {
+                remaining_tokens = new_remaining_tokens;
+            } else {
+                break;
+            }
+
+            if let Ok((field, new_remaining_tokens)) =
+                <(Ident, Expression)>::parse(remaining_tokens, parse_ctx)
+            {
+                remaining_tokens = new_remaining_tokens;
+                fields.push(field);
+            } else {
+                break;
+            }
+
+            if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
+                remaining_tokens = new_remaining_tokens;
+            } else {
+                break;
+            }
+        }
 
         Ok((
-            StructInstance {
-                name: parse_type,
+            StructInstanceBlock {
                 fields: fields.into_iter().collect(),
             },
             remaining_tokens,
@@ -205,6 +271,17 @@ mod parse_struct {
     #[test]
     fn test_parse_struct_instance_inline() {
         let input = "Test a: 1, b: 2, c: a + 4";
+        let tokens = lex_test(input);
+        let (struct_instance, rest) = StructInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_instance.name.name, "Test");
+        assert_eq!(struct_instance.fields.len(), 3);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_instance_multiline() {
+        let input = "Test\n  a: 1\n  b: 2\n  c: a + 4";
         let tokens = lex_test(input);
         let (struct_instance, rest) = StructInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
