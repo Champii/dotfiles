@@ -4,6 +4,8 @@ mod fn_decl;
 mod ident;
 mod literal;
 mod r#macro;
+mod parse_type;
 mod program;
 mod statement;
+mod r#struct;
 mod top_level;

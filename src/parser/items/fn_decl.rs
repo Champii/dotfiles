@@ -13,14 +13,29 @@ impl Parsable for FunctionDecl {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let (name, mut remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+        let mut remaining_tokens = tokens;
+        let mut inject_self = false;
+
+        if let TokenType::Arobase = remaining_tokens[0].token_type {
+            remaining_tokens = &remaining_tokens[1..];
+            inject_self = true;
+        }
+
+        let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
 
         let (lambda, remaining_tokens) = LambdaDecl::parse(remaining_tokens, parse_ctx)?;
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        Ok((FunctionDecl { name, lambda }, remaining_tokens))
+        Ok((
+            FunctionDecl {
+                name,
+                lambda,
+                inject_self,
+            },
+            remaining_tokens,
+        ))
     }
 }
 

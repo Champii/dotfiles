@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::lexer::{span::Span, Token, TokenType};
 
-pub const KEYWORDS: [&str; 4] = ["if", "macro", "true", "false"];
+pub const KEYWORDS: [&str; 5] = ["struct", "if", "macro", "true", "false"];
 pub const OPERATORS_CHARS: [char; 9] = ['+', '-', '*', '/', '=', '!', '<', '>', '$'];
 
 #[derive(Debug)]
@@ -105,7 +105,8 @@ impl Lexer {
             '.' => self.token(TokenType::Dot, 1),
             '\'' => self.token(TokenType::SimpleQuote, 1),
             '"' => self.token(TokenType::DoubleQuote, 1),
-            c if c.is_alphabetic() => self.ident_or_keyword(),
+            '@' => self.token(TokenType::Arobase, 1),
+            c if c.is_alphabetic() => self.ident_or_keyword_or_type(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
             c => return Err(LexerError::UnknownToken(c, self.span(1))),
@@ -166,7 +167,7 @@ impl Lexer {
         }
     }
 
-    fn ident_or_keyword(&mut self) -> Token {
+    fn ident_or_keyword_or_type(&mut self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -176,7 +177,9 @@ impl Lexer {
 
         let ident = self.input[start..end].to_string();
 
-        if KEYWORDS.contains(&ident.as_str()) {
+        if self.current_char().is_uppercase() {
+            self.token(TokenType::Type(ident), end - start)
+        } else if KEYWORDS.contains(&ident.as_str()) {
             self.token(TokenType::Keyword(ident), end - start)
         } else {
             self.token(TokenType::Ident(ident), end - start)

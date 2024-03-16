@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::lexer::{Span, Token};
 
 #[derive(Debug, PartialEq)]
@@ -29,6 +31,21 @@ pub enum TopLevelKind {
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),
+    StructDecl(StructDecl),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct StructDecl {
+    pub name: ParseType,
+    pub fields: BTreeMap<Ident, ParseType>,
+    pub methods: BTreeMap<Ident, FunctionDecl>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ParseType {
+    pub name: String,
+    pub generics: Vec<ParseType>,
+    pub span: Span,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -60,6 +77,7 @@ pub struct MacroInvoc {
 pub struct FunctionDecl {
     pub name: Ident,
     pub lambda: LambdaDecl,
+    pub inject_self: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -100,6 +118,8 @@ pub struct PrimaryExpr {
 pub enum Operand {
     Literal(Literal),
     Ident(IdentifierPath),
+    /// Ident prefixed with a @ are desugared to self.ident
+    SelfIdent(Ident),
     LambdaDecl(LambdaDecl),
     Expression(Box<Expression>), // parenthesis
 }
@@ -142,7 +162,7 @@ pub struct Argument {
     pub arg: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Ident {
     pub name: String,
     pub span: Span,
@@ -155,6 +175,18 @@ impl PartialEq for Ident {
 }
 
 impl Eq for Ident {}
+
+impl PartialOrd for Ident {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.name.cmp(&other.name))
+    }
+}
+
+impl Ord for Ident {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.name.cmp(&other.name)
+    }
+}
 
 #[derive(Debug)]
 pub struct Number {

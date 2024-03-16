@@ -1,5 +1,5 @@
 use crate::{
-    ast::{FunctionDecl, MacroDecl, MacroInvoc, TopLevel, TopLevelKind},
+    ast::{FunctionDecl, Ident, MacroDecl, MacroInvoc, StructDecl, TopLevel, TopLevelKind},
     lexer::{Token, TokenType},
     parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
 };
@@ -16,6 +16,16 @@ impl Parsable for TopLevel {
                         TopLevel {
                             ident: macro_decl.name.clone(),
                             kind: TopLevelKind::MacroDecl(macro_decl),
+                        },
+                        new_tokens,
+                    )
+                });
+            } else if keyword == "struct" {
+                return StructDecl::parse(tokens, parse_ctx).map(|(struct_decl, new_tokens)| {
+                    (
+                        TopLevel {
+                            ident: Ident::default(), // FIXME
+                            kind: TopLevelKind::StructDecl(struct_decl),
                         },
                         new_tokens,
                     )

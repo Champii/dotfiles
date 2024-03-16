@@ -1,0 +1,169 @@
+use std::collections::BTreeMap;
+
+use crate::{
+    ast::{FunctionDecl, Ident, ParseType, StructDecl},
+    lexer::{Token, TokenType},
+    parser::{
+        parse_ctx::ParseCtx,
+        util::{expect_token, ParseError},
+        Parsable,
+    },
+};
+
+impl Parsable for StructDecl {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let remaining_tokens = expect_token(tokens, TokenType::Keyword("struct".to_string()))?;
+
+        let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+
+        let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        let mut fields = BTreeMap::new();
+        let mut methods = BTreeMap::new();
+
+        parse_ctx.indent_level += 2;
+
+        loop {
+            if remaining_tokens.is_empty() {
+                break;
+            }
+
+            if let Ok(new_remaining_tokens) =
+                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
+            {
+                remaining_tokens = new_remaining_tokens;
+            } else {
+                break;
+            }
+
+            if let Ok(((name, ty), new_remaining_tokens)) =
+                <(Ident, ParseType)>::parse(remaining_tokens, parse_ctx)
+            {
+                remaining_tokens = new_remaining_tokens;
+                fields.insert(name, ty);
+                continue;
+            }
+
+            if let Ok((method, new_remaining_tokens)) =
+                FunctionDecl::parse(remaining_tokens, parse_ctx)
+            {
+                remaining_tokens = new_remaining_tokens;
+                methods.insert(method.name.clone(), method);
+                continue;
+            }
+
+            break;
+        }
+
+        parse_ctx.indent_level -= 2;
+
+        Ok((
+            StructDecl {
+                name,
+                fields,
+                methods,
+            },
+            remaining_tokens,
+        ))
+    }
+}
+
+impl Parsable for (Ident, ParseType) {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+        let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        Ok(((ident, parse_type), remaining_tokens))
+    }
+}
+
+#[cfg(test)]
+mod parse_struct {
+    use crate::parser::util::lex_test;
+
+    use super::*;
+
+    #[test]
+    fn test_parse_struct() {
+        let input = "struct Test\n";
+        let tokens = lex_test(input);
+        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_decl.name.name, "Test");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_with_generics() {
+        let input = "struct Test T, U\n";
+        let tokens = lex_test(input);
+        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_decl.name.name, "Test");
+        assert_eq!(struct_decl.name.generics.len(), 2);
+        assert_eq!(struct_decl.name.generics[0].name, "T");
+        assert_eq!(struct_decl.name.generics[1].name, "U");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_with_fields() {
+        let input = "struct Test\n  field: Type\n  field2: Type2\n";
+        let tokens = lex_test(input);
+        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_decl.name.name, "Test");
+        assert_eq!(struct_decl.fields.len(), 2);
+        assert_eq!(
+            struct_decl
+                .fields
+                .iter()
+                .find(|(k, v)| k.name == "field")
+                .unwrap()
+                .1
+                .name,
+            "Type"
+        );
+        assert_eq!(
+            struct_decl
+                .fields
+                .iter()
+                .find(|(k, v)| k.name == "field2")
+                .unwrap()
+                .1
+                .name,
+            "Type2"
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_with_methods() {
+        let input = "struct Test\n  new = -> lol\n  @add = -> a\n";
+        let tokens = lex_test(input);
+        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_decl.name.name, "Test");
+        assert_eq!(struct_decl.methods.len(), 2);
+        assert_eq!(
+            struct_decl
+                .methods
+                .iter()
+                .find(|(k, v)| k.name == "new")
+                .unwrap()
+                .1
+                .name
+                .name,
+            "new"
+        );
+        assert_eq!(rest.len(), 0);
+    }
+}

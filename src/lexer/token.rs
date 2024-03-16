@@ -9,6 +9,7 @@ pub struct Token {
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     Ident(String),
+    Type(String),
     Number(String),
     Float(String),
     Operator(String),
@@ -31,6 +32,7 @@ pub enum TokenType {
     DoubleColon,
     Dot,
     SpacedDot,
+    Arobase,
     Indent(u8),
     Eol,
     Eof,
@@ -40,6 +42,7 @@ impl ToString for TokenType {
     fn to_string(&self) -> String {
         match self {
             TokenType::Ident(s) => s.clone(),
+            TokenType::Type(s) => s.clone(),
             TokenType::Number(s) => s.clone(),
             TokenType::Float(s) => s.clone(),
             TokenType::Operator(s) => s.clone(),
@@ -62,6 +65,7 @@ impl ToString for TokenType {
             TokenType::DoubleColon => "::".to_string(),
             TokenType::Dot => ".".to_string(),
             TokenType::SpacedDot => " .".to_string(),
+            TokenType::Arobase => "@".to_string(),
             TokenType::Indent(i) => " ".repeat(*i as usize),
             TokenType::Eol => "\n".to_string(),
             TokenType::Eof => "EOF".to_string(),

@@ -154,6 +154,11 @@ impl Parsable for Operand {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
+        if TokenType::Arobase == tokens[0].token_type {
+            let (expression, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+            return Ok((Operand::SelfIdent(expression), remaining_tokens));
+        }
+
         if TokenType::OpenParen == tokens[0].token_type {
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;

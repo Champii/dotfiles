@@ -13,6 +13,7 @@ pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token],
     let token = tokens
         .get(0)
         .ok_or(ParseError::UnexpectedEof(token_type.clone()))?;
+
     if token.token_type != token_type {
         return Err(ParseError::UnexpectedToken(token.clone(), vec![token_type]));
     }
