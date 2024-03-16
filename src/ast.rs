@@ -59,6 +59,11 @@ pub struct MacroInvoc {
 #[derive(Debug, PartialEq)]
 pub struct FunctionDecl {
     pub name: Ident,
+    pub lambda: LambdaDecl,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct LambdaDecl {
     pub parameters: Vec<Ident>,
     pub body: Block,
 }
@@ -95,6 +100,7 @@ pub struct PrimaryExpr {
 pub enum Operand {
     Literal(Literal),
     Ident(IdentifierPath),
+    LambdaDecl(LambdaDecl),
     Expression(Box<Expression>), // parenthesis
 }
 

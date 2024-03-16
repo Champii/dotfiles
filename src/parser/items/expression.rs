@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        Argument, Expression, Ident, IdentifierPath, Literal, Operand, Operator, PrimaryExpr,
-        SecondaryExpr, UnaryExpr,
+        Argument, Expression, Ident, IdentifierPath, LambdaDecl, Literal, Operand, Operator,
+        PrimaryExpr, SecondaryExpr, UnaryExpr,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -159,8 +159,13 @@ impl Parsable for Operand {
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
             return Ok((Operand::Expression(Box::new(expression)), remaining_tokens));
         }
+
         if let Ok((literal, remaining_tokens)) = Literal::parse(tokens, parse_ctx) {
             return Ok((Operand::Literal(literal), remaining_tokens));
+        }
+
+        if let Ok((lambda, remaining_tokens)) = LambdaDecl::parse(tokens, parse_ctx) {
+            return Ok((Operand::LambdaDecl(lambda), remaining_tokens));
         }
 
         let token = tokens

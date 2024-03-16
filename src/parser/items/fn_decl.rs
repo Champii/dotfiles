@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Block, FunctionDecl, Ident},
+    ast::{Block, FunctionDecl, Ident, LambdaDecl},
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -16,6 +16,21 @@ impl Parsable for FunctionDecl {
         let (name, mut remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
 
+        let (lambda, remaining_tokens) = LambdaDecl::parse(remaining_tokens, parse_ctx)?;
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        Ok((FunctionDecl { name, lambda }, remaining_tokens))
+    }
+}
+
+impl Parsable for LambdaDecl {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let remaining_tokens = tokens;
+
         let (parameters, mut remaining_tokens) =
             parse_vec_of::<Ident>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
@@ -28,46 +43,37 @@ impl Parsable for FunctionDecl {
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
 
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
-
-        Ok((
-            FunctionDecl {
-                name,
-                parameters,
-                body,
-            },
-            remaining_tokens,
-        ))
+        Ok((LambdaDecl { parameters, body }, remaining_tokens))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
-    use crate::lexer::Lexer;
+    use crate::parser::util::lex_test;
 
-    fn lex(input: &str) -> Vec<Token> {
-        Lexer::new(PathBuf::new(), input)
-            .unwrap()
-            .with_newline_at_end(false)
-            .collect()
-            .unwrap()
+    #[test]
+    fn test_parse_function_decl_monoline() {
+        let input = "myfn = -> statement\n";
+        let tokens = lex_test(input);
+        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(function_decl.name.name, "myfn");
+        assert_eq!(function_decl.lambda.parameters.len(), 0);
+        assert_eq!(function_decl.lambda.body.statements.len(), 1);
+        assert_eq!(rest.len(), 0);
     }
 
     #[test]
     fn test_parse_function_decl() {
         let input = "myfn = a, b, c ->\n  statement\n";
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent(0)
+        let tokens = lex_test(input);
         let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
-        assert_eq!(function_decl.parameters.len(), 3);
-        assert_eq!(function_decl.body.statements.len(), 1);
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0].token_type, TokenType::Eof);
+        assert_eq!(function_decl.lambda.parameters.len(), 3);
+        assert_eq!(function_decl.lambda.body.statements.len(), 1);
+        assert_eq!(rest.len(), 0);
     }
 
     #[test]
@@ -76,14 +82,12 @@ mod tests {
   statement
   3 + 3
 "#;
-        let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent(0)
+        let tokens = lex_test(input);
         let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
-        assert_eq!(function_decl.parameters.len(), 3);
-        assert_eq!(function_decl.body.statements.len(), 2);
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0].token_type, TokenType::Eof);
+        assert_eq!(function_decl.lambda.parameters.len(), 3);
+        assert_eq!(function_decl.lambda.body.statements.len(), 2);
+        assert_eq!(rest.len(), 0);
     }
 }

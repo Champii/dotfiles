@@ -24,6 +24,7 @@ impl Parsable for Block {
                     }
                 };
 
+            parse_ctx.indent_level -= 2;
             (statements, new_tokens)
         } else {
             let (statement, remaining_tokens) = Statement::parse(&tokens, parse_ctx)?;

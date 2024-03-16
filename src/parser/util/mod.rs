@@ -20,6 +20,7 @@ pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token],
 }
 
 /// Parse a vector of items of type T: Parsable from the input tokens.
+/// It does not consume the last delimiter token.
 pub fn parse_vec_of<'a, T: Parsable>(
     tokens: &'a [Token],
     delim: Option<TokenType>,
@@ -32,6 +33,7 @@ pub fn parse_vec_of<'a, T: Parsable>(
 
     loop {
         if remaining_tokens.is_empty() {
+            remaining_tokens = remaining_tokens_with_delim;
             break;
         }
 
@@ -60,6 +62,7 @@ pub fn parse_vec_of<'a, T: Parsable>(
 }
 
 /// Consumes tokens until a token of the given type is found.
+/// The last token is NOT INCLUDED
 pub fn consume_tokens_until(tokens: &[Token], token_type: TokenType) -> (Vec<Token>, &[Token]) {
     let mut remaining_tokens = tokens;
     let mut consumed_tokens = Vec::new();
