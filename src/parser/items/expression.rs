@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         Argument, Expression, Ident, IdentifierPath, LambdaDecl, Literal, Operand, Operator,
-        PrimaryExpr, SecondaryExpr, UnaryExpr,
+        PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -157,6 +157,11 @@ impl Parsable for Operand {
         if TokenType::Arobase == tokens[0].token_type {
             let (expression, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
             return Ok((Operand::SelfIdent(expression), remaining_tokens));
+        }
+
+        if let TokenType::Type(_) = tokens[0].token_type {
+            let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
+            return Ok((Operand::StructInstance(instance), remaining_tokens));
         }
 
         if TokenType::OpenParen == tokens[0].token_type {

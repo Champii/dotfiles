@@ -120,8 +120,15 @@ pub enum Operand {
     Ident(IdentifierPath),
     /// Ident prefixed with a @ are desugared to self.ident
     SelfIdent(Ident),
+    StructInstance(StructInstance),
     LambdaDecl(LambdaDecl),
     Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, PartialEq)]
+pub struct StructInstance {
+    pub name: ParseType,
+    pub fields: BTreeMap<Ident, Expression>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

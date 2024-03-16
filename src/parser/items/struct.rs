@@ -1,11 +1,11 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{FunctionDecl, Ident, ParseType, StructDecl},
+    ast::{Expression, FunctionDecl, Ident, ParseType, StructDecl, StructInstance},
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
+        util::{expect_token, parse_vec_of, ParseError},
         Parsable,
     },
 };
@@ -85,6 +85,41 @@ impl Parsable for (Ident, ParseType) {
     }
 }
 
+impl Parsable for (Ident, Expression) {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+        let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+
+        Ok(((ident, expression), remaining_tokens))
+    }
+}
+
+impl Parsable for StructInstance {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
+        let (fields, remaining_tokens) = parse_vec_of::<(Ident, Expression)>(
+            remaining_tokens,
+            Some(TokenType::Coma),
+            parse_ctx,
+        )?;
+
+        Ok((
+            StructInstance {
+                name: parse_type,
+                fields: fields.into_iter().collect(),
+            },
+            remaining_tokens,
+        ))
+    }
+}
+
 #[cfg(test)]
 mod parse_struct {
     use crate::parser::util::lex_test;
@@ -126,7 +161,7 @@ mod parse_struct {
             struct_decl
                 .fields
                 .iter()
-                .find(|(k, v)| k.name == "field")
+                .find(|(k, _v)| k.name == "field")
                 .unwrap()
                 .1
                 .name,
@@ -136,7 +171,7 @@ mod parse_struct {
             struct_decl
                 .fields
                 .iter()
-                .find(|(k, v)| k.name == "field2")
+                .find(|(k, _v)| k.name == "field2")
                 .unwrap()
                 .1
                 .name,
@@ -157,13 +192,24 @@ mod parse_struct {
             struct_decl
                 .methods
                 .iter()
-                .find(|(k, v)| k.name == "new")
+                .find(|(k, _v)| k.name == "new")
                 .unwrap()
                 .1
                 .name
                 .name,
             "new"
         );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_instance_inline() {
+        let input = "Test a: 1, b: 2, c: a + 4";
+        let tokens = lex_test(input);
+        let (struct_instance, rest) = StructInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(struct_instance.name.name, "Test");
+        assert_eq!(struct_instance.fields.len(), 3);
         assert_eq!(rest.len(), 0);
     }
 }
