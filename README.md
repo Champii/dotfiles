@@ -17,7 +17,7 @@ main = -> call return_fn!, 5
 ## Function signature
 
 ```haskell
-add : a => a => a
+add : T => T => T
 add = x, y -> x + y
 ```
 
@@ -74,6 +74,8 @@ some_fumc = x -> x.to_string!
 ```haskell
 struct Hello
   world : String
+
+impl Hello
   new = s -> Hello world: s
   @display = -> @world.print!
 

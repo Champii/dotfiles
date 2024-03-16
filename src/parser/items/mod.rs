@@ -3,6 +3,7 @@ mod r#enum;
 mod expression;
 mod fn_decl;
 mod ident;
+mod r#impl;
 mod literal;
 mod r#macro;
 mod parse_type;

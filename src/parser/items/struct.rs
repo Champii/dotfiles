@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{Expression, FunctionDecl, Ident, ParseType, StructDecl, StructInstance},
+    ast::{Expression, Ident, ParseType, StructDecl, StructInstance},
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
@@ -22,7 +22,6 @@ impl Parsable for StructDecl {
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
         let mut fields = BTreeMap::new();
-        let mut methods = BTreeMap::new();
 
         parse_ctx.indent_level += 2;
 
@@ -47,27 +46,12 @@ impl Parsable for StructDecl {
                 continue;
             }
 
-            if let Ok((method, new_remaining_tokens)) =
-                FunctionDecl::parse(remaining_tokens, parse_ctx)
-            {
-                remaining_tokens = new_remaining_tokens;
-                methods.insert(method.name.clone(), method);
-                continue;
-            }
-
             break;
         }
 
         parse_ctx.indent_level -= 2;
 
-        Ok((
-            StructDecl {
-                name,
-                fields,
-                methods,
-            },
-            remaining_tokens,
-        ))
+        Ok((StructDecl { name, fields }, remaining_tokens))
     }
 }
 
@@ -248,28 +232,6 @@ mod parse_struct {
                 .1
                 .name,
             "Type2"
-        );
-        assert_eq!(rest.len(), 0);
-    }
-
-    #[test]
-    fn test_parse_struct_with_methods() {
-        let input = "struct Test\n  new = -> lol\n  @add = -> a\n";
-        let tokens = lex_test(input);
-        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
-
-        assert_eq!(struct_decl.name.name, "Test");
-        assert_eq!(struct_decl.methods.len(), 2);
-        assert_eq!(
-            struct_decl
-                .methods
-                .iter()
-                .find(|(k, _v)| k.name == "new")
-                .unwrap()
-                .1
-                .name
-                .name,
-            "new"
         );
         assert_eq!(rest.len(), 0);
     }

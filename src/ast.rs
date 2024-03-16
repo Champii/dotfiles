@@ -33,19 +33,25 @@ pub enum TopLevelKind {
     FunctionDecl(FunctionDecl),
     StructDecl(StructDecl),
     EnumDecl(EnumDecl),
+    Impl(Impl),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct StructDecl {
     pub name: ParseType,
     pub fields: BTreeMap<Ident, ParseType>,
-    pub methods: BTreeMap<Ident, FunctionDecl>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct EnumDecl {
     pub name: ParseType,
     pub variants: Vec<ParseType>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Impl {
+    pub name: ParseType,
+    pub methods: BTreeMap<Ident, FunctionDecl>,
 }
 
 #[derive(Debug, PartialEq)]
