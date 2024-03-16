@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        Argument, Expression, Ident, IdentifierPath, LambdaDecl, Literal, Operand, Operator,
-        PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
+        Argument, EnumInstance, Expression, Ident, IdentifierPath, LambdaDecl, Literal, Operand,
+        Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -160,8 +160,13 @@ impl Parsable for Operand {
         }
 
         if let TokenType::Type(_) = tokens[0].token_type {
-            let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
-            return Ok((Operand::StructInstance(instance), remaining_tokens));
+            if let TokenType::DoubleColon = tokens[1].token_type {
+                let (enum_instance, remaining_tokens) = EnumInstance::parse(tokens, parse_ctx)?;
+                return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
+            } else {
+                let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
+                return Ok((Operand::StructInstance(instance), remaining_tokens));
+            }
         }
 
         if TokenType::OpenParen == tokens[0].token_type {

@@ -1,5 +1,7 @@
 use crate::{
-    ast::{FunctionDecl, Ident, MacroDecl, MacroInvoc, StructDecl, TopLevel, TopLevelKind},
+    ast::{
+        EnumDecl, FunctionDecl, Ident, MacroDecl, MacroInvoc, StructDecl, TopLevel, TopLevelKind,
+    },
     lexer::{Token, TokenType},
     parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
 };
@@ -26,6 +28,16 @@ impl Parsable for TopLevel {
                         TopLevel {
                             ident: Ident::default(), // FIXME
                             kind: TopLevelKind::StructDecl(struct_decl),
+                        },
+                        new_tokens,
+                    )
+                });
+            } else if keyword == "enum" {
+                return EnumDecl::parse(tokens, parse_ctx).map(|(enum_decl, new_tokens)| {
+                    (
+                        TopLevel {
+                            ident: Ident::default(), // FIXME
+                            kind: TopLevelKind::EnumDecl(enum_decl),
                         },
                         new_tokens,
                     )

@@ -128,8 +128,16 @@ pub enum Operand {
     /// Ident prefixed with a @ are desugared to self.ident
     SelfIdent(Ident),
     StructInstance(StructInstance),
+    EnumInstance(EnumInstance), // EnumName::Variant expr1, expr2
     LambdaDecl(LambdaDecl),
     Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, PartialEq)]
+pub struct EnumInstance {
+    pub name: ParseType,
+    pub variant: ParseType,
+    pub args: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq)]
