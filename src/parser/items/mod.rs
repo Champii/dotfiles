@@ -1,4 +1,5 @@
 mod block;
+mod r#enum;
 mod expression;
 mod fn_decl;
 mod ident;

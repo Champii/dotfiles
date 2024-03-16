@@ -146,6 +146,7 @@ impl Parsable for StructInstanceBlock {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let mut remaining_tokens = tokens;
+        let mut remaining_tokens_after_match = tokens;
         let mut fields = Vec::new();
 
         loop {
@@ -153,11 +154,14 @@ impl Parsable for StructInstanceBlock {
                 break;
             }
 
+            let tokens_backup = remaining_tokens;
+
             if let Ok(new_remaining_tokens) =
                 expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
             {
                 remaining_tokens = new_remaining_tokens;
             } else {
+                remaining_tokens = remaining_tokens_after_match;
                 break;
             }
 
@@ -165,8 +169,10 @@ impl Parsable for StructInstanceBlock {
                 <(Ident, Expression)>::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+                remaining_tokens_after_match = remaining_tokens;
                 fields.push(field);
             } else {
+                remaining_tokens = tokens_backup;
                 break;
             }
 
