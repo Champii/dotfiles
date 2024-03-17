@@ -143,7 +143,21 @@ pub enum Operand {
     StructInstance(StructInstance),
     EnumInstance(EnumInstance), // EnumName::Variant expr1, expr2
     LambdaDecl(LambdaDecl),
+    If(Box<If>),
     Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, PartialEq)]
+pub struct If {
+    pub condition: Expression,
+    pub then: Block,
+    pub else_: Option<Else>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Else {
+    If(Box<If>),
+    Block(Block),
 }
 
 #[derive(Debug, PartialEq)]
