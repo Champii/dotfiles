@@ -1,7 +1,11 @@
 use crate::{
-    ast::{Expression, Statement},
+    ast::{Assignment, Expression, Statement},
     lexer::{Token, TokenType},
-    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
+    parser::{
+        parsable::Parsable,
+        parse_ctx::ParseCtx,
+        util::{expect_token, ParseError},
+    },
 };
 
 impl Parsable for Statement {
@@ -20,6 +24,23 @@ impl Parsable for Statement {
 
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
+        if remaining_tokens.is_empty() {
+            return Ok((Statement::Expression(expression), remaining_tokens));
+        }
+
+        if let TokenType::Equal = remaining_tokens[0].token_type {
+            let remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
+            let (rhs, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+
+            return Ok((
+                Statement::Assignment(Assignment {
+                    lhs: expression,
+                    rhs,
+                }),
+                remaining_tokens,
+            ));
+        }
+
         Ok((Statement::Expression(expression), remaining_tokens))
     }
 }
@@ -29,7 +50,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        ast::{Literal, Operand, PrimaryExpr, UnaryExpr},
+        ast::{Ident, IdentifierPath, Literal, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr},
         lexer::Span,
         parser::util::lex_test,
     };
@@ -49,6 +70,86 @@ mod tests {
                 }),
                 secondaries: None,
             })))
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_assignment() {
+        let input = "a = 1";
+        let tokens = lex_test(input);
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Assignment(Assignment {
+                lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(crate::ast::IdentifierPath {
+                        path: vec![crate::ast::Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        }],
+                    }),
+                    secondaries: None,
+                })),
+                rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                })),
+            })
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_assignment_complex() {
+        let input = "a.b[2].c = 1";
+        let tokens = lex_test(input);
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Assignment(Assignment {
+                lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(IdentifierPath {
+                        path: vec![Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        },],
+                    }),
+                    secondaries: Some(vec![
+                        SecondaryExpr::Dot(Ident {
+                            name: "b".to_string(),
+                            span: Span::default(),
+                        }),
+                        SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                            })
+                        )),),
+                        SecondaryExpr::Dot(Ident {
+                            name: "c".to_string(),
+                            span: Span::default(),
+                        }),
+                    ]),
+                })),
+                rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                })),
+            })
         );
 
         assert_eq!(rest.len(), 0);

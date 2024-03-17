@@ -106,7 +106,14 @@ pub struct Block {
 
 #[derive(Debug, PartialEq)]
 pub enum Statement {
+    Assignment(Assignment),
     Expression(Expression),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Assignment {
+    pub lhs: Expression,
+    pub rhs: Expression,
 }
 
 #[derive(Debug, PartialEq)]
