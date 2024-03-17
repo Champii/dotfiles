@@ -28,16 +28,19 @@ impl Parsable for Expression {
                 .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
                     "".to_string(),
                 )))?;
-        if let TokenType::Operator(_) = token.token_type {
-            let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
-            let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
-            Ok((
-                Expression::BinopExpr(unary_expr, operator, Box::new(expression)),
-                remaining_tokens,
-            ))
-        } else {
-            Ok((Expression::UnaryExpr(unary_expr), remaining_tokens))
+        match token.token_type {
+            TokenType::Operator(_) | TokenType::StuckOperator(_) => {
+                let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
+                let (expression, remaining_tokens) =
+                    Expression::parse(remaining_tokens, parse_ctx)?;
+
+                Ok((
+                    Expression::BinopExpr(unary_expr, operator, Box::new(expression)),
+                    remaining_tokens,
+                ))
+            }
+            _ => Ok((Expression::UnaryExpr(unary_expr), remaining_tokens)),
         }
     }
 }
@@ -53,7 +56,7 @@ impl Parsable for UnaryExpr {
                 "".to_string(),
             )))?;
 
-        if let TokenType::Operator(_) = token.token_type {
+        if let TokenType::StuckOperator(_) = token.token_type {
             let (operator, remaining_tokens) = Operator::parse(tokens, parse_ctx)?;
             let (unary_expr, remaining_tokens) = UnaryExpr::parse(remaining_tokens, parse_ctx)?;
 
@@ -116,6 +119,17 @@ impl Parsable for SecondaryExpr {
                 "".to_string(),
             )))?;
 
+        // FIXME: Trick to have binop expr parsed
+        match token.token_type {
+            TokenType::Operator(_) | TokenType::StuckOperator(_) => {
+                return Err(ParseError::UnexpectedToken(
+                    token.clone(),
+                    vec![TokenType::Dot, TokenType::OpenBracket, TokenType::OpenParen],
+                ));
+            }
+            _ => {}
+        }
+
         if let TokenType::OpenBracket = token.token_type {
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
@@ -170,6 +184,10 @@ impl Parsable for Operand {
         }
 
         if TokenType::OpenParen == tokens[0].token_type {
+            // first, try to parse function shorthand
+            if let Ok((lambda, remaining_tokens)) = LambdaDecl::parse(tokens, parse_ctx) {
+                return Ok((Operand::LambdaDecl(lambda), remaining_tokens));
+            }
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
             return Ok((Operand::Expression(Box::new(expression)), remaining_tokens));
@@ -216,7 +234,7 @@ impl Parsable for Operator {
             )))?;
 
         match &token.token_type {
-            TokenType::Operator(value) => Ok((
+            TokenType::Operator(value) | TokenType::StuckOperator(value) => Ok((
                 Operator {
                     value: value.clone(),
                     span: token.span.clone(),
@@ -270,6 +288,58 @@ mod expression {
             )
         );
 
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_nested_expression() {
+        let input = "a.a + b + 2";
+        let tokens = lex_test(input);
+        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(IdentifierPath {
+                        path: vec![Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        }],
+                    }),
+                    secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                        name: "a".to_string(),
+                        span: Span::default(),
+                    })]),
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Ident(IdentifierPath {
+                            path: vec![Ident {
+                                name: "b".to_string(),
+                                span: Span::default(),
+                            }],
+                        }),
+                        secondaries: None,
+                    }),
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(2),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                    })))
+                ))
+            )
+        );
         assert_eq!(rest.len(), 0);
     }
 

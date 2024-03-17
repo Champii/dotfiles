@@ -157,14 +157,23 @@ impl Lexer {
             end += 1;
         }
 
-        if self.input[start..end] == *"=" {
+        let token = if self.input[start..end] == *"=" {
             self.token(TokenType::Equal, 1)
         } else {
-            self.token(
-                TokenType::Operator(self.input[start..end].to_string()),
-                end - start,
-            )
-        }
+            if self.input[end..end + 1] == *" " {
+                self.token(
+                    TokenType::Operator(self.input[start..end].to_string()),
+                    end - start,
+                )
+            } else {
+                self.token(
+                    TokenType::StuckOperator(self.input[start..end].to_string()),
+                    end - start,
+                )
+            }
+        };
+
+        token
     }
 
     fn ident_or_keyword_or_type(&mut self) -> Token {

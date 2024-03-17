@@ -4,7 +4,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{expect_token, parse_vec_of, ParseError},
+        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -46,6 +46,10 @@ impl Parsable for LambdaDecl {
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let remaining_tokens = tokens;
 
+        if remaining_tokens[0].token_type == TokenType::OpenParen {
+            return parse_function_shorthand(remaining_tokens, parse_ctx);
+        }
+
         let (parameters, mut remaining_tokens) =
             parse_vec_of::<Ident>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
@@ -60,6 +64,118 @@ impl Parsable for LambdaDecl {
 
         Ok((LambdaDecl { parameters, body }, remaining_tokens))
     }
+}
+
+/// Function shorthands
+/// (+2) : x -> x + 2
+/// (a/) : x -> a / x
+/// (.prop) : x -> x.prop
+
+fn parse_function_shorthand<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+    let remaining_tokens = tokens;
+
+    let remaining_tokens = expect_token(remaining_tokens, TokenType::OpenParen)?;
+
+    // special case of the dot
+    let lambda = match remaining_tokens[0].token_type {
+        TokenType::Operator(_) | TokenType::StuckOperator(_) | TokenType::Dot => {
+            expand_shorthand_prefix_argument(remaining_tokens, parse_ctx)?
+        }
+        _ => expand_shorthand_suffix_argument(remaining_tokens, parse_ctx)?,
+    };
+
+    Ok(lambda)
+}
+
+fn expand_shorthand_prefix_argument<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+    let remaining_tokens = tokens;
+
+    let span = remaining_tokens[0].span.clone();
+
+    let (inner_tokens, remaining_tokens) =
+        consume_tokens_until(remaining_tokens, TokenType::CloseParen);
+
+    let inner_tokens = vec![
+        Token {
+            token_type: TokenType::Ident("x".to_string()),
+            span: span.clone(),
+        },
+        Token {
+            token_type: TokenType::Arrow,
+            span: span.clone(),
+        },
+        Token {
+            token_type: TokenType::Ident("x".to_string()),
+            span: span.clone(),
+        },
+    ]
+    .into_iter()
+    .chain(inner_tokens)
+    .collect::<Vec<_>>();
+
+    let (lambda, other_remaining_tokens) = LambdaDecl::parse(&inner_tokens, parse_ctx)?;
+    if !other_remaining_tokens.is_empty() {
+        return Err(ParseError::UnexpectedToken(
+            other_remaining_tokens[0].clone(),
+            vec![TokenType::CloseParen],
+        ));
+    }
+    let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
+
+    Ok((lambda, remaining_tokens))
+}
+
+fn expand_shorthand_suffix_argument<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+    let remaining_tokens = tokens;
+
+    let span = remaining_tokens[0].span.clone();
+
+    let (inner_tokens, remaining_tokens) =
+        consume_tokens_until(remaining_tokens, TokenType::CloseParen);
+
+    let operator = inner_tokens[inner_tokens.len() - 1].clone();
+    let inner_tokens = inner_tokens[..inner_tokens.len() - 1].to_vec();
+
+    let inner_tokens = vec![
+        Token {
+            token_type: TokenType::Ident("x".to_string()),
+            span: span.clone(),
+        },
+        Token {
+            token_type: TokenType::Arrow,
+            span: span.clone(),
+        },
+    ]
+    .into_iter()
+    .chain(inner_tokens)
+    .chain(vec![
+        operator,
+        Token {
+            token_type: TokenType::Ident("x".to_string()),
+            span: span.clone(),
+        },
+    ])
+    .collect::<Vec<_>>();
+
+    let (lambda, other_remaining_tokens) = LambdaDecl::parse(&inner_tokens, parse_ctx)?;
+    if !other_remaining_tokens.is_empty() {
+        return Err(ParseError::UnexpectedToken(
+            other_remaining_tokens[0].clone(),
+            vec![TokenType::CloseParen],
+        ));
+    }
+    let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
+
+    Ok((lambda, remaining_tokens))
 }
 
 #[cfg(test)]
@@ -103,6 +219,30 @@ mod tests {
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 3);
         assert_eq!(function_decl.lambda.body.statements.len(), 2);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_function_shorthand() {
+        let input = "myfn = (+2)\n";
+        let tokens = lex_test(input);
+        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(function_decl.name.name, "myfn");
+        assert_eq!(function_decl.lambda.parameters.len(), 1);
+        assert_eq!(function_decl.lambda.body.statements.len(), 1);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_function_shorthand_2() {
+        let input = "myfn = (a/)\n";
+        let tokens = lex_test(input);
+        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(function_decl.name.name, "myfn");
+        assert_eq!(function_decl.lambda.parameters.len(), 1);
+        assert_eq!(function_decl.lambda.body.statements.len(), 1);
         assert_eq!(rest.len(), 0);
     }
 }

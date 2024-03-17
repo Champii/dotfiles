@@ -13,6 +13,8 @@ pub enum TokenType {
     Number(String),
     Float(String),
     Operator(String),
+    //Operator that is not followed by a space
+    StuckOperator(String),
     Keyword(String),
     MacroVar(String),
     MacroInvoc(String),
@@ -46,6 +48,7 @@ impl ToString for TokenType {
             TokenType::Number(s) => s.clone(),
             TokenType::Float(s) => s.clone(),
             TokenType::Operator(s) => s.clone(),
+            TokenType::StuckOperator(s) => s.clone(),
             TokenType::Keyword(s) => s.clone(),
             TokenType::MacroVar(s) => s.clone(),
             TokenType::MacroInvoc(s) => s.clone(),
@@ -80,3 +83,12 @@ impl PartialEq for Token {
 }
 
 impl Eq for Token {}
+
+impl From<TokenType> for Token {
+    fn from(token_type: TokenType) -> Self {
+        Self {
+            token_type,
+            span: Span::default(),
+        }
+    }
+}
