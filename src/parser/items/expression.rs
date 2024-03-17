@@ -30,7 +30,7 @@ impl Parsable for Expression {
                 )))?;
 
         match token.token_type {
-            TokenType::Operator(_) | TokenType::StuckOperator(_) => {
+            TokenType::Operator(_) => {
                 let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
                 let (expression, remaining_tokens) =
                     Expression::parse(remaining_tokens, parse_ctx)?;
@@ -118,17 +118,6 @@ impl Parsable for SecondaryExpr {
             .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
                 "".to_string(),
             )))?;
-
-        // FIXME: Trick to have binop expr parsed
-        match token.token_type {
-            TokenType::Operator(_) | TokenType::StuckOperator(_) => {
-                return Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![TokenType::Dot, TokenType::OpenBracket, TokenType::OpenParen],
-                ));
-            }
-            _ => {}
-        }
 
         if let TokenType::OpenBracket = token.token_type {
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;

@@ -116,7 +116,16 @@ fn expand_shorthand_prefix_argument<'a>(
         },
     ]
     .into_iter()
-    .chain(inner_tokens)
+    .chain(inner_tokens.into_iter().map(|token| {
+        if let TokenType::StuckOperator(op) = token.token_type {
+            Token {
+                token_type: TokenType::Operator(op),
+                span: token.span.clone(),
+            }
+        } else {
+            token
+        }
+    }))
     .collect::<Vec<_>>();
 
     let (lambda, other_remaining_tokens) = LambdaDecl::parse(&inner_tokens, parse_ctx)?;
@@ -156,7 +165,16 @@ fn expand_shorthand_suffix_argument<'a>(
         },
     ]
     .into_iter()
-    .chain(inner_tokens)
+    .chain(inner_tokens.into_iter().map(|token| {
+        if let TokenType::StuckOperator(op) = token.token_type {
+            Token {
+                token_type: TokenType::Operator(op),
+                span: token.span.clone(),
+            }
+        } else {
+            token
+        }
+    }))
     .chain(vec![
         operator,
         Token {

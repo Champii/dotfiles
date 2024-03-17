@@ -95,24 +95,27 @@ enum Choice T, U
   Right U
 ```
 
-## Reference/Dereference
+## Automatic Reference/Dereference
 
 ```haskell
 main = ->
   a = 5
-  b = &a
+  #Here b is &Int
+  b = a 
   add a, b
 
-add = a, &b -> a + *b
+#Will detect if one is a reference and autoderef if needed
+add = a, b -> a + b
 ```
 ## Unsafe pointer arithmetic
 
 ```haskell
 main = ->
   unsafe
-    a: *Int8 = 0
+    a = 42
+    p: *Int8 = 0
     # very unsafe
-    *a
+    *p
 ```
 
 ## Pattern matching
@@ -175,7 +178,10 @@ my_dep = [ path = "../my_dep" ]
 
 `lib.rk`  
 ```haskell
+mod my_mod
+
 > my_dep::SomeType
+> my_mod::SomeOtherType
 
 struct MyStruct
   my_field: SomeType
@@ -192,8 +198,13 @@ struct MyStruct
     - Better error management and diagnostic details
   - Parser
     - Adaptative indentation: Scan the first indentation level and set it as default
+    - Operator infix declaration
+    - Variable declaration and overwrite (=)
+    - Pattern matching and destructuring
+    - If/else
+    - For/While
+    - Return
   - Modules and dependancies
     - Basic external module management
-
-
+  - Code formating
 
