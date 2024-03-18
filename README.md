@@ -9,6 +9,17 @@ write_file = ->
    ..close!
 ```
 
+## Named arguments and default value
+
+```haskell
+listen = addr, port = 8000 -> #some code here
+main = ->
+  if something
+    listen "localhost"
+  else if something_else
+    listen port: 8080, addr: "localhost"
+```
+
 ## Functions as first class citizen
 
 ```haskell
@@ -20,7 +31,7 @@ main = -> call return_fn!, 5
 ## Function signature
 
 ```haskell
-add : T => T => T
+add : T -> T -> T
 add = x, y -> x + y
 ```
 
@@ -68,7 +79,7 @@ impl ToString Int
 ## Dynamic trait
 
 ```haskell
-some_func : ToString T => String
+some_func : ToString T -> String
 some_fumc = x -> x.to_string!
 ```
 
@@ -77,6 +88,7 @@ some_fumc = x -> x.to_string!
 ```haskell
 struct Hello
   world : String
+  some_default_field = true
 
 impl Hello
   new = s -> Hello world: s
@@ -209,11 +221,16 @@ struct MyStruct
     - Mod management
     - Import/Export
     - Trait
-    - Async ?
+    - Async?
     - Error bubbling with `?`
     - Empty fn call with `!`
     - Function signature
     - Tuples
+    - Struct default value
+    - Struct default constructor
+    - Chain calls without variables
+    - Multiline dot chaining
+    - Space dot closes function call
   - Desugar
     - Operator precedence
     - Loops into `loop`
