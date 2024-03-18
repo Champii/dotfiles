@@ -22,6 +22,13 @@ impl Parsable for Statement {
             tokens
         };
 
+        if TokenType::Keyword("return".to_string()) == remaining_tokens[0].token_type {
+            let (expression, remaining_tokens) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
+
+            return Ok((Statement::Return(expression), remaining_tokens));
+        }
+
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
         if remaining_tokens.is_empty() {
@@ -150,6 +157,26 @@ mod tests {
                     secondaries: None,
                 })),
             })
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_return() {
+        let input = "return 1";
+        let tokens = lex_test(input);
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Return(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(1),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+            })))
         );
 
         assert_eq!(rest.len(), 0);
