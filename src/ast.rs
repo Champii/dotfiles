@@ -109,6 +109,8 @@ pub enum Statement {
     Assignment(Assignment),
     Expression(Expression),
     Return(Expression),
+    Continue(Expression),
+    Break(Expression),
 }
 
 #[derive(Debug, PartialEq)]

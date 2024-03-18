@@ -200,7 +200,6 @@ struct MyStruct
     - Adaptative indentation: Scan the first indentation level and set it as default
     - Operator infix declaration
     - Pattern matching and destructuring
-    - Return
   - Modules and dependancies
     - Basic external module management
   - Code formating

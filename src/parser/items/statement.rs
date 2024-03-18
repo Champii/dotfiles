@@ -29,6 +29,20 @@ impl Parsable for Statement {
             return Ok((Statement::Return(expression), remaining_tokens));
         }
 
+        if TokenType::Keyword("continue".to_string()) == remaining_tokens[0].token_type {
+            let (expression, remaining_tokens) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
+
+            return Ok((Statement::Continue(expression), remaining_tokens));
+        }
+
+        if TokenType::Keyword("break".to_string()) == remaining_tokens[0].token_type {
+            let (expression, remaining_tokens) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
+
+            return Ok((Statement::Break(expression), remaining_tokens));
+        }
+
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
         if remaining_tokens.is_empty() {
@@ -171,6 +185,46 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Return(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(1),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+            })))
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_continue() {
+        let input = "continue 1";
+        let tokens = lex_test(input);
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Continue(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(1),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+            })))
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_break() {
+        let input = "break 1";
+        let tokens = lex_test(input);
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Break(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Literal(Literal {
                     kind: crate::ast::LiteralKind::Number(1),
                     span: Span::default(),
