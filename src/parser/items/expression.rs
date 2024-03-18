@@ -1,6 +1,6 @@
 use crate::{
     ast::{
-        Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal,
+        Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
         Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
     },
     lexer::{Token, TokenType},
@@ -160,6 +160,14 @@ impl Parsable for Operand {
         if TokenType::Keyword("if".to_string()) == tokens[0].token_type {
             let (if_, remaining_tokens) = If::parse(tokens, parse_ctx)?;
             return Ok((Operand::If(Box::new(if_)), remaining_tokens));
+        }
+
+        if TokenType::Keyword("for".to_string()) == tokens[0].token_type
+            || TokenType::Keyword("while".to_string()) == tokens[0].token_type
+            || TokenType::Keyword("loop".to_string()) == tokens[0].token_type
+        {
+            let (for_, remaining_tokens) = Loop::parse(tokens, parse_ctx)?;
+            return Ok((Operand::Loop(Box::new(for_)), remaining_tokens));
         }
 
         if TokenType::Arobase == tokens[0].token_type {

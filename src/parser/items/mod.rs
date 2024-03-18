@@ -6,6 +6,7 @@ mod ident;
 mod r#if;
 mod r#impl;
 mod literal;
+mod r#loop;
 mod r#macro;
 mod parse_type;
 mod program;

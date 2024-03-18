@@ -144,6 +144,7 @@ pub enum Operand {
     EnumInstance(EnumInstance), // EnumName::Variant expr1, expr2
     LambdaDecl(LambdaDecl),
     If(Box<If>),
+    Loop(Box<Loop>),
     Expression(Box<Expression>), // parenthesis
 }
 
@@ -158,6 +159,13 @@ pub struct If {
 pub enum Else {
     If(Box<If>),
     Block(Block),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Loop {
+    While(Expression, Block),
+    For(Ident, Expression, Block),
+    Loop(Block),
 }
 
 #[derive(Debug, PartialEq)]
