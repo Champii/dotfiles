@@ -1,9 +1,12 @@
 # Desired features
 
-## Automatic single argument (it)
+## Chain calls without defining variable
 
 ```haskell
-some_func = -> it + 2
+write_file = ->
+  File::open "test.txt"?
+   ..write "Hello, World!"?
+   ..close!
 ```
 
 ## Functions as first class citizen
