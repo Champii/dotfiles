@@ -50,8 +50,8 @@ add_mul = mul . add
 ## Custom operators
 
 ```haskell
-infix |> 1
-|> = x, f -> f x
+infix 1 |> = x, f -> f x
+
 main = -> [1, 2, 3] |> map (+2)
 ```
 
@@ -203,7 +203,25 @@ struct MyStruct
     - Adaptative indentation: Scan the first indentation level and set it as default
     - Operator infix declaration
     - Pattern matching and destructuring
+    - Allow empty lines in block and anywhere basically
+    - Allow multiline function arguments
+    - Default arguments and named arguments
+    - Mod management
+    - Import/Export
+    - Trait
+    - Async ?
+    - Error bubbling with `?`
+    - Empty fn call with `!`
+    - Function signature
+    - Tuples
+  - Desugar
+    - Operator precedence
+    - Loops into `loop`
+    - Match into `if`
+    - Dot notation into function calls
+    - Closures into functiondecl
   - Modules and dependancies
     - Basic external module management
-  - Code formating
+  - Code formating ?
+  - Rust FFI
 
