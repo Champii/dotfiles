@@ -183,7 +183,7 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphanumeric() {
+        while self.peek(end - start).is_alphanumeric() || self.peek(end - start) == '_' {
             end += 1;
         }
 
@@ -203,7 +203,7 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphanumeric() {
+        while self.peek(end - start).is_alphanumeric() || self.peek(end - start) == '_' {
             end += 1;
         }
 
@@ -218,7 +218,7 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphanumeric() {
+        while self.peek(end - start).is_alphanumeric() || self.peek(end - start) == '_' {
             end += 1;
         }
 
