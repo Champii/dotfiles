@@ -212,23 +212,23 @@ struct MyStruct
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
   - Parser
+    - Import/Export
+    - Mod management
+    - Comments (end of line ('#') or inline ('/*' '*/')
     - Pattern matching and destructuring
     - Allow multiline function arguments
-    - Default arguments and named arguments
-    - Mod management
-    - Import/Export
-    - Error bubbling with `?`
-    - Empty fn call with `!`
     - Function signature
+    - ParseType must handle parenthesis and function type
     - Tuples
     - Struct default value
     - Struct default constructor
+    - Empty fn call with `!`
     - Chain calls without variables
     - Multiline dot chaining
+    - Default arguments and named arguments
+    - Error bubbling with `?`
     - Space dot closes function call
-    - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
-    - ParseType must handle parenthesis and function type
   - Desugar
     - Operator precedence
     - Operator into function calls

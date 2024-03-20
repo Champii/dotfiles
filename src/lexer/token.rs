@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 use crate::lexer::Span;
 
 #[derive(Debug, Clone)]
@@ -90,5 +92,11 @@ impl From<TokenType> for Token {
             token_type,
             span: Span::default(),
         }
+    }
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.token_type.to_string())
     }
 }
