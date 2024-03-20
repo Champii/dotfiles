@@ -15,9 +15,8 @@ write_file = ->
 listen = addr, port = 8000 -> #some code here
 main = ->
   if something
-    listen "localhost"
-  else if something_else
-    listen port: 8080, addr: "localhost"
+  then listen "localhost"
+  else listen port: 8080, addr: "localhost"
 ```
 
 ## Functions as first class citizen
@@ -226,6 +225,7 @@ struct MyStruct
     - Chain calls without variables
     - Multiline dot chaining
     - Space dot closes function call
+    - Postfix `if` and `loop`
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
     - ParseType must handle parenthesis and function type
