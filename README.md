@@ -217,7 +217,6 @@ struct MyStruct
     - Default arguments and named arguments
     - Mod management
     - Import/Export
-    - Trait
     - Error bubbling with `?`
     - Empty fn call with `!`
     - Function signature
@@ -227,10 +226,12 @@ struct MyStruct
     - Chain calls without variables
     - Multiline dot chaining
     - Space dot closes function call
-    - Comments
+    - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
+    - ParseType must handle parenthesis and function type
   - Desugar
     - Operator precedence
+    - Operator into function calls
     - Loops into `loop`
     - Match into `if`
     - Dot notation into function calls

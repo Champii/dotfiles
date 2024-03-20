@@ -33,6 +33,7 @@ pub enum TopLevelKind {
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),
     StructDecl(StructDecl),
+    TraitDecl(TraitDecl),
     EnumDecl(EnumDecl),
     Impl(Impl),
 }
@@ -41,6 +42,13 @@ pub enum TopLevelKind {
 pub struct StructDecl {
     pub name: ParseType,
     pub fields: BTreeMap<Ident, ParseType>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct TraitDecl {
+    pub name: ParseType,
+    pub methods: BTreeMap<Ident, FunctionDecl>,
+    pub signatures: BTreeMap<Ident, ParseType>,
 }
 
 #[derive(Debug, PartialEq)]

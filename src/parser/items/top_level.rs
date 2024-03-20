@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         EnumDecl, FunctionDecl, Ident, Impl, MacroDecl, MacroInvoc, StructDecl, TopLevel,
-        TopLevelKind,
+        TopLevelKind, TraitDecl,
     },
     lexer::{Token, TokenType},
     parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
@@ -39,6 +39,16 @@ impl Parsable for TopLevel {
                         TopLevel {
                             ident: Ident::default(), // FIXME
                             kind: TopLevelKind::EnumDecl(enum_decl),
+                        },
+                        new_tokens,
+                    )
+                });
+            } else if keyword == "trait" {
+                return TraitDecl::parse(tokens, parse_ctx).map(|(trait_decl, new_tokens)| {
+                    (
+                        TopLevel {
+                            ident: Ident::default(), // FIXME
+                            kind: TopLevelKind::TraitDecl(trait_decl),
                         },
                         new_tokens,
                     )
