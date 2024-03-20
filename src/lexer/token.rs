@@ -73,7 +73,7 @@ impl ToString for TokenType {
             TokenType::Arobase => "@".to_string(),
             TokenType::Indent(i) => " ".repeat(*i as usize),
             TokenType::Eol => "\n".to_string(),
-            TokenType::Eof => "EOF".to_string(),
+            TokenType::Eof => "".to_string(),
         }
     }
 }
