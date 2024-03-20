@@ -53,6 +53,26 @@ impl Parsable for TopLevel {
                         new_tokens,
                     )
                 });
+            } else if keyword == "infix" {
+                if let TokenType::Number(precedence) = &tokens[1].token_type {
+                    let precedence: u8 = precedence.parse().unwrap();
+                    if precedence > 9 {
+                        return Err(ParseError::InvalidPrecedence(precedence, tokens[1].clone()));
+                    }
+                    let (f, new_tokens) = FunctionDecl::parse(&tokens[2..], parse_ctx)?;
+                    return Ok((
+                        TopLevel {
+                            ident: f.name.clone(),
+                            kind: TopLevelKind::InfixOperator(precedence, f),
+                        },
+                        new_tokens,
+                    ));
+                } else {
+                    return Err(ParseError::UnexpectedToken(
+                        tokens[1].clone(),
+                        vec![TokenType::Number("".to_string())],
+                    ));
+                }
             } else {
                 return Err(ParseError::UnexpectedKeyword(
                     tokens[0].clone(),
@@ -93,5 +113,31 @@ impl Parsable for TopLevel {
                 TokenType::Ident("".to_string()),
             ],
         ))
+    }
+}
+
+#[cfg(test)]
+mod parse_top_level {
+    use crate::parser::util::lex_test;
+
+    use super::*;
+
+    #[test]
+    fn parse_infix_operator() {
+        let input = "infix 5 |> = x, f -> f x\n";
+        let tokens = lex_test(input);
+        let (top_level, rest) = TopLevel::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        let (precedence, f_decl) = match top_level.kind {
+            TopLevelKind::InfixOperator(precedence, f_decl) => (precedence, f_decl),
+            _ => panic!(),
+        };
+
+        assert_eq!(precedence, 5);
+        assert_eq!(top_level.ident.name, "|>".to_string());
+        assert_eq!(f_decl.name.name, "|>".to_string());
+        assert_eq!(f_decl.lambda.parameters.len(), 2);
+        assert_eq!(f_decl.lambda.body.statements.len(), 1);
+        assert_eq!(rest.len(), 0);
     }
 }

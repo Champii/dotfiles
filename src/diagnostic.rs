@@ -54,6 +54,15 @@ impl From<ParseError> for Diagnostic {
                 span: ident.span,
                 kind: DiagnosticType::Error,
             },
+            ParseError::InvalidPrecedence(precedence, token) => Diagnostic {
+                message: format!("Invalid precedence: {:?}", precedence),
+                labels: vec![(
+                    format!("Precedence must be between 0 and 9"),
+                    token.span.clone(),
+                )],
+                span: token.span,
+                kind: DiagnosticType::Error,
+            },
             _ => panic!("{:#?}", err),
         }
     }

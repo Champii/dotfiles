@@ -13,4 +13,5 @@ pub enum ParseError {
     Lexer(LexerError),
     MacroNoCorrespondance(Ident),
     IndentMismatch(u8, u8),
+    InvalidPrecedence(u8, Token),
 }

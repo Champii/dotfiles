@@ -28,6 +28,7 @@ pub struct TopLevel {
 
 #[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
+    InfixOperator(u8, FunctionDecl),
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
     FunctionDecl(FunctionDecl),

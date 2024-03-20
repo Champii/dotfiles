@@ -2,11 +2,11 @@ use std::path::PathBuf;
 
 use crate::lexer::{span::Span, Token, TokenType};
 
-pub const KEYWORDS: [&str; 16] = [
+pub const KEYWORDS: [&str; 17] = [
     "struct", "enum", "impl", "if", "then", "else", "for", "in", "while", "loop", "macro", "true",
-    "false", "return", "continue", "break",
+    "false", "return", "continue", "break", "infix",
 ];
-pub const OPERATORS_CHARS: [char; 9] = ['+', '-', '*', '/', '=', '!', '<', '>', '$'];
+pub const OPERATORS_CHARS: [char; 10] = ['+', '-', '*', '/', '=', '!', '<', '>', '$', '|'];
 
 #[derive(Debug)]
 pub enum LexerError {

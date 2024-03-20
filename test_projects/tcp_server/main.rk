@@ -12,15 +12,13 @@ main = ->
 run : () -> Result TcpServer, Error
 run = ->
   server = TcpListener::bind?
-    args 1
-    args 2
-  
+
   server.on_connect socket ->
     socket.write "Hello, World!"
     socket.close!
 
   server.listen!
-  
+
   Ok server
 
 display_html : () -> String

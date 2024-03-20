@@ -37,6 +37,13 @@ impl Parsable for Ident {
                 },
                 &tokens[1..],
             )),
+            TokenType::Operator(op) => Ok((
+                Ident {
+                    name: op.clone(),
+                    span: token.span.clone(),
+                },
+                &tokens[1..],
+            )),
             _ => Err(ParseError::UnexpectedToken(
                 token.clone(),
                 vec![TokenType::Ident("".to_string())],

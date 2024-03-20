@@ -212,8 +212,8 @@ struct MyStruct
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
   - Parser
-    - Adaptative indentation: Scan the first indentation level and set it as default
     - Operator infix declaration
+    - Adaptative indentation: Scan the first indentation level and set it as default
     - Pattern matching and destructuring
     - Allow empty lines in block and anywhere basically
     - Allow multiline function arguments
@@ -221,7 +221,6 @@ struct MyStruct
     - Mod management
     - Import/Export
     - Trait
-    - Async?
     - Error bubbling with `?`
     - Empty fn call with `!`
     - Function signature
@@ -231,6 +230,8 @@ struct MyStruct
     - Chain calls without variables
     - Multiline dot chaining
     - Space dot closes function call
+    - Comments
+    - Async?
   - Desugar
     - Operator precedence
     - Loops into `loop`
