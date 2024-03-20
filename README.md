@@ -213,7 +213,6 @@ struct MyStruct
     - Better error management and diagnostic details
   - Parser
     - Pattern matching and destructuring
-    - Allow empty lines in block and anywhere basically
     - Allow multiline function arguments
     - Default arguments and named arguments
     - Mod management

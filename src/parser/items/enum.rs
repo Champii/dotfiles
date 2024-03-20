@@ -2,7 +2,7 @@ use crate::{
     ast::{EnumDecl, EnumInstance, ParseType},
     lexer::{Token, TokenType},
     parser::{
-        util::{expect_token, parse_vec_of},
+        util::{expect_token, ignore_empty_lines, parse_vec_of},
         Parsable, ParseCtx, ParseError,
     },
 };
@@ -26,6 +26,8 @@ impl Parsable for EnumDecl {
             if remaining_tokens.is_empty() {
                 break;
             }
+
+            remaining_tokens = ignore_empty_lines(remaining_tokens);
 
             let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) else {
                 break;

@@ -4,7 +4,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
+        util::{expect_token, ignore_empty_lines, ParseError},
     },
 };
 
@@ -13,7 +13,8 @@ impl Parsable for Statement {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(tokens);
+        let remaining_tokens = ignore_empty_lines(tokens);
+        let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(remaining_tokens);
 
         if TokenType::Keyword("return".to_string()) == remaining_tokens[0].token_type {
             let (expression, remaining_tokens) =
@@ -218,6 +219,36 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Break(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(1),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+            })))
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_statement_with_emptynewlines() {
+        let input = "\n    \n1";
+        let mut tokens = lex_test(input);
+
+        // Add back the first indent
+        tokens.insert(
+            0,
+            Token {
+                token_type: TokenType::Indent(0),
+                span: Span::default(),
+            },
+        );
+
+        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+
+        assert_eq!(
+            statement,
+            Statement::Expression(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Literal(Literal {
                     kind: crate::ast::LiteralKind::Number(1),
                     span: Span::default(),

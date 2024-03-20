@@ -5,7 +5,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
+        util::{expect_token, ignore_empty_lines, ParseError},
         Parsable,
     },
 };
@@ -29,6 +29,8 @@ impl Parsable for Impl {
             if remaining_tokens.is_empty() {
                 break;
             }
+
+            remaining_tokens = ignore_empty_lines(remaining_tokens);
 
             if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
                 remaining_tokens = new_remaining_tokens;

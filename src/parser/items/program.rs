@@ -3,7 +3,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
+        util::{expect_token, ignore_empty_lines, ParseError},
         Parsable,
     },
 };
@@ -17,17 +17,8 @@ impl Parsable for Program {
         let mut tokens = tokens;
 
         loop {
-            while tokens
-                .get(0)
-                .map(|t| t.token_type == TokenType::Indent(0))
-                .unwrap_or(false)
-                && tokens
-                    .get(1)
-                    .map(|t| t.token_type == TokenType::Eol)
-                    .unwrap_or(false)
-            {
-                tokens = &tokens[2..];
-            }
+            tokens = ignore_empty_lines(&tokens);
+
             if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
                 break;
             }

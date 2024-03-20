@@ -84,6 +84,28 @@ pub fn consume_tokens_until(tokens: &[Token], token_type: TokenType) -> (Vec<Tok
     (consumed_tokens, remaining_tokens)
 }
 
+pub fn ignore_empty_lines(mut tokens: &[Token]) -> &[Token] {
+    while tokens
+        .get(0)
+        .map(|t| {
+            if let TokenType::Indent(_) = t.token_type {
+                true
+            } else {
+                false
+            }
+        })
+        .unwrap_or(false)
+        && tokens
+            .get(1)
+            .map(|t| t.token_type == TokenType::Eol)
+            .unwrap_or(false)
+    {
+        tokens = &tokens[2..];
+    }
+
+    tokens
+}
+
 #[cfg(test)]
 pub fn lex_test(input: &str) -> Vec<Token> {
     use crate::lexer::Lexer;

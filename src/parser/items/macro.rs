@@ -4,7 +4,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
+        util::{consume_tokens_until, expect_token, ignore_empty_lines, parse_vec_of, ParseError},
     },
 };
 
@@ -36,7 +36,9 @@ impl Parsable for MacroEntry {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let (defs, mut remaining_tokens) = parse_macro_head_recursive(tokens, parse_ctx)?;
+        let remaining_tokens = ignore_empty_lines(tokens);
+
+        let (defs, mut remaining_tokens) = parse_macro_head_recursive(remaining_tokens, parse_ctx)?;
 
         remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
@@ -170,7 +172,7 @@ impl Parsable for MacroInvoc {
             if let TokenType::MacroInvoc(ident) = &token.token_type {
                 let (args, remaining_tokens) =
                     consume_tokens_until(&tokens[1..], TokenType::Indent(0));
-                // let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
                 let args = args
                     .iter()
                     .filter(|t| {

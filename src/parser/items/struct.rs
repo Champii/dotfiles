@@ -5,7 +5,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, parse_vec_of, ParseError},
+        util::{expect_token, ignore_empty_lines, parse_vec_of, ParseError},
         Parsable,
     },
 };
@@ -29,6 +29,8 @@ impl Parsable for StructDecl {
             if remaining_tokens.is_empty() {
                 break;
             }
+
+            remaining_tokens = ignore_empty_lines(remaining_tokens);
 
             if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
                 remaining_tokens = new_remaining_tokens;
@@ -135,6 +137,8 @@ impl Parsable for StructInstanceBlock {
             if remaining_tokens.is_empty() {
                 break;
             }
+
+            remaining_tokens = ignore_empty_lines(remaining_tokens);
 
             let tokens_backup = remaining_tokens;
 
