@@ -20,26 +20,24 @@ impl Parsable for EnumDecl {
 
         let mut variants = Vec::new();
 
-        parse_ctx.indent_level += 2;
+        parse_ctx.indent();
 
         loop {
             if remaining_tokens.is_empty() {
                 break;
             }
 
-            if let Ok(new_remaining_tokens) =
-                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
-            {
-                remaining_tokens = new_remaining_tokens;
-            } else {
+            let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) else {
                 break;
-            }
+            };
 
             if let Ok((variant, new_remaining_tokens)) =
-                ParseType::parse(remaining_tokens, parse_ctx)
+                ParseType::parse(new_remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+
                 variants.push(variant);
+
                 if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
                     remaining_tokens = new_remaining_tokens;
                 } else {
@@ -50,7 +48,7 @@ impl Parsable for EnumDecl {
             }
         }
 
-        parse_ctx.indent_level -= 2;
+        parse_ctx.dedent();
 
         Ok((EnumDecl { name, variants }, remaining_tokens))
     }

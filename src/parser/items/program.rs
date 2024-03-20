@@ -86,4 +86,31 @@ test = -> 2"#;
 
         assert!(parse_string(input).is_ok());
     }
+
+    #[test]
+    fn program_with_good_2_indent() {
+        let input = r#"main = ->
+  a
+  2"#;
+
+        assert!(parse_string(input).is_ok());
+    }
+
+    #[test]
+    fn program_with_good_4_indent() {
+        let input = r#"main = ->
+    a
+    2"#;
+
+        assert!(parse_string(input).is_ok());
+    }
+
+    #[test]
+    fn program_with_bad_indent() {
+        let input = r#"main = ->
+    a
+  2"#;
+
+        assert!(parse_string(input).is_err());
+    }
 }

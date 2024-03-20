@@ -63,6 +63,12 @@ impl From<ParseError> for Diagnostic {
                 span: token.span,
                 kind: DiagnosticType::Error,
             },
+            ParseError::IndentMismatch(got, expected) => Diagnostic {
+                message: format!("Indent mismatch: got {}, expected {}", got, expected),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
             _ => panic!("{:#?}", err),
         }
     }

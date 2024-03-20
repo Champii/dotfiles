@@ -14,17 +14,19 @@ impl Parsable for Block {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
-            parse_ctx.indent_level += 2;
+            parse_ctx.indent();
+
             let (statements, new_tokens) =
                 match parse_vec_of::<Statement>(&tokens[1..], Some(TokenType::Eol), parse_ctx) {
                     Ok((statements, new_tokens)) => (statements, new_tokens),
                     Err(e) => {
-                        parse_ctx.indent_level -= 2;
+                        parse_ctx.dedent();
                         return Err(e);
                     }
                 };
 
-            parse_ctx.indent_level -= 2;
+            parse_ctx.dedent();
+
             (statements, new_tokens)
         } else {
             let (statement, remaining_tokens) = Statement::parse(&tokens, parse_ctx)?;

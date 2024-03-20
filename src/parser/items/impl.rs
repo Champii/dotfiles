@@ -23,16 +23,14 @@ impl Parsable for Impl {
 
         let mut methods = BTreeMap::new();
 
-        parse_ctx.indent_level += 2;
+        parse_ctx.indent();
 
         loop {
             if remaining_tokens.is_empty() {
                 break;
             }
 
-            if let Ok(new_remaining_tokens) =
-                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
-            {
+            if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
                 remaining_tokens = new_remaining_tokens;
             } else {
                 break;
@@ -49,7 +47,7 @@ impl Parsable for Impl {
             break;
         }
 
-        parse_ctx.indent_level -= 2;
+        parse_ctx.dedent();
 
         Ok((Impl { name, methods }, remaining_tokens))
     }

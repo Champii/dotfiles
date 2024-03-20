@@ -32,6 +32,7 @@ pub fn parse(mut lexer: Lexer) -> Result<Program, ParseError> {
     println!("{:#?}", tokens);
 
     let mut parse_ctx = parse_ctx::ParseCtx::new();
+    parse_ctx.deduce_indent_step(&tokens);
 
     Program::parse(&tokens, &mut parse_ctx).map(|(program, _)| program)
 }

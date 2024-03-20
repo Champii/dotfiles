@@ -212,8 +212,6 @@ struct MyStruct
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
   - Parser
-    - Operator infix declaration
-    - Adaptative indentation: Scan the first indentation level and set it as default
     - Pattern matching and destructuring
     - Allow empty lines in block and anywhere basically
     - Allow multiline function arguments

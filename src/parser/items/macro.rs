@@ -18,14 +18,14 @@ impl Parsable for MacroDecl {
         let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        parse_ctx.indent_level += 2;
+        parse_ctx.indent();
 
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::Indent(2))?;
+        let remaining_tokens = parse_ctx.consume_indent(remaining_tokens)?;
 
         let (entries, remaining_tokens) =
             parse_vec_of::<MacroEntry>(remaining_tokens, Some(TokenType::Indent(2)), parse_ctx)?;
 
-        parse_ctx.indent_level -= 2;
+        parse_ctx.dedent();
 
         Ok((MacroDecl { name, entries }, remaining_tokens))
     }

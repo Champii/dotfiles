@@ -18,8 +18,11 @@ impl Parsable for If {
         let (condition, mut remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
         if TokenType::Eol == remaining_tokens[0].token_type {
-            if TokenType::Indent(parse_ctx.indent_level) == remaining_tokens[1].token_type {
-                remaining_tokens = &remaining_tokens[2..];
+            let (has_consumed, new_remaining_tokens) =
+                parse_ctx.consume_indent_if_any(&remaining_tokens[1..]);
+
+            if has_consumed {
+                remaining_tokens = new_remaining_tokens;
             }
         }
 
@@ -43,8 +46,11 @@ impl Parsable for If {
         }
 
         if TokenType::Eol == remaining_tokens[0].token_type {
-            if TokenType::Indent(parse_ctx.indent_level) == remaining_tokens[1].token_type {
-                remaining_tokens = &remaining_tokens[2..];
+            let (has_consumed, new_remaining_tokens) =
+                parse_ctx.consume_indent_if_any(&remaining_tokens[1..]);
+
+            if has_consumed {
+                remaining_tokens = new_remaining_tokens;
             }
         }
 

@@ -23,16 +23,14 @@ impl Parsable for StructDecl {
 
         let mut fields = BTreeMap::new();
 
-        parse_ctx.indent_level += 2;
+        parse_ctx.indent();
 
         loop {
             if remaining_tokens.is_empty() {
                 break;
             }
 
-            if let Ok(new_remaining_tokens) =
-                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
-            {
+            if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
                 remaining_tokens = new_remaining_tokens;
             } else {
                 break;
@@ -49,7 +47,7 @@ impl Parsable for StructDecl {
             break;
         }
 
-        parse_ctx.indent_level -= 2;
+        parse_ctx.dedent();
 
         Ok((StructDecl { name, fields }, remaining_tokens))
     }
@@ -90,10 +88,10 @@ impl Parsable for StructInstance {
         let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
 
         if let TokenType::Eol = remaining_tokens[0].token_type {
-            parse_ctx.indent_level += 2;
+            parse_ctx.indent();
             let (fields, remaining_tokens) =
                 StructInstanceBlock::parse(&remaining_tokens[1..], parse_ctx)?;
-            parse_ctx.indent_level -= 2;
+            parse_ctx.dedent();
 
             Ok((
                 StructInstance {
@@ -140,9 +138,7 @@ impl Parsable for StructInstanceBlock {
 
             let tokens_backup = remaining_tokens;
 
-            if let Ok(new_remaining_tokens) =
-                expect_token(remaining_tokens, TokenType::Indent(parse_ctx.indent_level))
-            {
+            if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
                 remaining_tokens = new_remaining_tokens;
             } else {
                 remaining_tokens = remaining_tokens_after_match;

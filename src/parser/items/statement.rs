@@ -13,14 +13,7 @@ impl Parsable for Statement {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        let remaining_tokens = if let TokenType::Indent(level) = tokens[0].token_type {
-            if level != parse_ctx.indent_level {
-                return Err(ParseError::IndentMismatch(level, parse_ctx.indent_level));
-            }
-            &tokens[1..]
-        } else {
-            tokens
-        };
+        let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(tokens);
 
         if TokenType::Keyword("return".to_string()) == remaining_tokens[0].token_type {
             let (expression, remaining_tokens) =
