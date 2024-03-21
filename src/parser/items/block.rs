@@ -4,7 +4,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{expect_token, parse_vec_of, ParseError},
+        util::{expect_token, ParseError},
     },
 };
 

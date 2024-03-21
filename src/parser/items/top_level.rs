@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, StructDecl,
-        TopLevel, TopLevelKind, TraitDecl,
+        EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, Module,
+        StructDecl, TopLevel, TopLevelKind, TraitDecl,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -87,6 +87,16 @@ impl Parsable for TopLevel {
                         vec![TokenType::Number("".to_string())],
                     ));
                 }
+            } else if keyword == "mod" {
+                return Module::parse(tokens, parse_ctx).map(|(module, new_tokens)| {
+                    (
+                        TopLevel {
+                            ident: module.name.clone().unwrap_or_default(),
+                            kind: TopLevelKind::Module(module),
+                        },
+                        new_tokens,
+                    )
+                });
             } else {
                 return Err(ParseError::UnexpectedKeyword(
                     tokens[0].clone(),

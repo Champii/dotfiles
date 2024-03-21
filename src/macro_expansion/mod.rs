@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{MacroDecl, MacroFragment, Program, TopLevel, TopLevelKind},
+    ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
     lexer::{Token, TokenType},
     parser::{Parsable, ParseCtx, ParseError},
 };
@@ -13,14 +13,15 @@ mod macro_arg_matcher;
 
 pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
     let mut depth = 0;
+    let mut module = program.module;
 
-    while program.has_macro_invoc() {
+    while module.has_macro_invoc() {
         let mut decls = HashMap::new();
 
-        for (i, top_level) in program.top_levels.iter().enumerate() {
+        for (i, top_level) in module.top_levels.iter().enumerate() {
             match &top_level.kind {
                 TopLevelKind::MacroInvoc(invocation) => {
-                    let TopLevelKind::MacroDecl(ref decl) = program
+                    let TopLevelKind::MacroDecl(ref decl) = module
                         .top_level_from_ident(&invocation.name.name)
                         .unwrap()
                         .kind
@@ -34,7 +35,7 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
                 _ => (),
             }
         }
-        program = expand_macros_once(program, &decls)?;
+        module = expand_macros_once(module, &decls)?;
 
         depth += 1;
 
@@ -43,14 +44,16 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
         }
     }
 
+    program.module = module;
+
     Ok(program)
 }
 
 fn expand_macros_once(
-    mut program: Program,
+    mut module: Module,
     decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
-) -> Result<Program, ParseError> {
-    let results = program
+) -> Result<Module, ParseError> {
+    let results = module
         .top_levels
         .into_iter()
         .enumerate()
@@ -66,13 +69,13 @@ fn expand_macros_once(
         })
         .collect::<Vec<_>>();
 
-    program.top_levels = vec![];
+    module.top_levels = vec![];
 
     for result in results {
-        program.top_levels.extend(result?);
+        module.top_levels.extend(result?);
     }
 
-    Ok(program)
+    Ok(module)
 }
 
 fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopLevel>, ParseError> {
@@ -88,9 +91,9 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
 
         let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
 
-        let (program, _) = Program::parse(&body, &mut ParseCtx::new())?;
+        let (module, _) = ModuleInner::parse(&body, &mut ParseCtx::new())?;
 
-        top_levels.extend(program.top_levels);
+        top_levels.extend(module.top_levels);
 
         break;
     }

@@ -1,3 +1,5 @@
+use std::{collections::HashSet, path::PathBuf};
+
 use crate::lexer::{Token, TokenType};
 
 use super::ParseError;
@@ -8,6 +10,8 @@ pub struct ParseCtx {
     indent_step: u8,
     _diagnostics: Vec<String>,
     pub inside_argument_list: Vec<bool>,
+    pub files_map: HashSet<PathBuf>,
+    pub current_file: Option<PathBuf>,
 }
 
 impl ParseCtx {
@@ -17,6 +21,8 @@ impl ParseCtx {
             indent_level: 0,
             inside_argument_list: Vec::new(),
             _diagnostics: Vec::new(),
+            files_map: HashSet::new(),
+            current_file: None,
         }
     }
 
@@ -80,5 +86,18 @@ impl ParseCtx {
 
     pub fn indent_step(&self) -> u8 {
         self.indent_step
+    }
+
+    pub fn add_file_relative(&mut self, name: String) {
+        if let Some(current_path) = &self.current_file {
+            let mut path = current_path.clone();
+            path.pop();
+            path.push(name + ".rk");
+            self.files_map.insert(path.clone());
+            self.current_file = Some(path);
+        } else {
+            self.files_map.insert(PathBuf::from(name.clone()));
+            self.current_file = Some(PathBuf::from(name));
+        }
     }
 }

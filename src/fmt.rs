@@ -4,10 +4,7 @@ use std::{
     sync::Mutex,
 };
 
-use crate::{
-    ast::*,
-    lexer::{Span, TokenType},
-};
+use crate::{ast::*, lexer::TokenType};
 
 static INDENT: Mutex<u8> = Mutex::new(0);
 
@@ -34,8 +31,29 @@ fn decrease_indent() {
 
 impl Display for Program {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        for top_level in &self.top_levels {
-            write!(f, "{}\n", top_level)?;
+        write!(f, "{}", self.module)
+    }
+}
+
+impl Display for Module {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(name) = &self.name {
+            write!(f, "mod {}\n", name)?;
+            if !self.is_inline {
+                return Ok(());
+            }
+            increase_indent();
+        }
+        for (i, top_level) in self.top_levels.iter().enumerate() {
+            write!(f, "{}", indent())?;
+            write!(f, "{}", top_level)?;
+            if i < self.top_levels.len() - 1 {
+                write!(f, "\n")?;
+            }
+        }
+
+        if self.name.is_some() {
+            decrease_indent();
         }
 
         Ok(())
@@ -45,6 +63,7 @@ impl Display for Program {
 impl Display for TopLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match &self.kind {
+            TopLevelKind::Module(module) => write!(f, "{}", module),
             TopLevelKind::InfixOperator(precedence, decl) => {
                 write!(f, "infix {} {}", precedence, decl)
             }
@@ -601,6 +620,8 @@ impl Display for Array {
 
 #[cfg(test)]
 mod format {
+    use crate::ast::Program;
+
     #[test]
     fn full_program() {
         let input = r#"> foo::Bar
@@ -658,10 +679,9 @@ main = ->
   a = (.foo)
 
 < MyTrait
-
 "#;
 
-        let program = crate::parser::parse_string(input).unwrap();
+        let program: Program = crate::parser::parse_string(input).unwrap();
 
         println!("{}", input);
         println!("{}", program);

@@ -1,4 +1,4 @@
-use crate::diagnostic::Diagnostic;
+use crate::{ast::Program, diagnostic::Diagnostic};
 
 mod ast;
 mod diagnostic;
@@ -9,7 +9,7 @@ mod parser;
 
 fn main() {
     let file_path = std::env::args().nth(1).unwrap();
-    let ast = match parser::parse_file(file_path.into()) {
+    let ast: Program = match parser::parse_file(file_path.into()) {
         Ok(ast) => ast,
         Err(e) => {
             Diagnostic::from(e).report();

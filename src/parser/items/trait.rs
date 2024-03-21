@@ -1,10 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{
-        EnumDecl, FunctionDecl, Ident, Impl, MacroDecl, MacroInvoc, ParseType, StructDecl,
-        TopLevel, TopLevelKind, TraitDecl,
-    },
+    ast::{FunctionDecl, Ident, ParseType, TraitDecl},
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,

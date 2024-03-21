@@ -4,10 +4,17 @@ use crate::lexer::{Span, Token};
 
 #[derive(Debug, PartialEq)]
 pub struct Program {
-    pub top_levels: Vec<TopLevel>,
+    pub module: Module,
 }
 
-impl Program {
+#[derive(Debug, PartialEq)]
+pub struct Module {
+    pub name: Option<Ident>,
+    pub top_levels: Vec<TopLevel>,
+    pub is_inline: bool,
+}
+
+impl Module {
     pub fn top_level_from_ident(&self, ident: &str) -> Option<&TopLevel> {
         self.top_levels.iter().find(|tl| tl.ident.name == ident)
     }
@@ -20,6 +27,11 @@ impl Program {
     }
 }
 
+// Used to parse the first module without a name
+pub struct ModuleInner {
+    pub top_levels: Vec<TopLevel>,
+}
+
 #[derive(Debug, PartialEq)]
 pub struct TopLevel {
     pub ident: Ident,
@@ -28,6 +40,7 @@ pub struct TopLevel {
 
 #[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
+    Module(Module),
     Import(IdentifierPath),
     Export(IdentifierPath),
     InfixOperator(u8, FunctionDecl),
