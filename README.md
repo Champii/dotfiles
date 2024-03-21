@@ -211,7 +211,6 @@ struct MyStruct
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
   - Parser
-    - Import/Export
     - Mod management
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Pattern matching and destructuring
@@ -231,6 +230,7 @@ struct MyStruct
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
     - Keep newlines (for formating)
+    - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
   - Desugar
     - Operator precedence
     - Operator into function calls
@@ -247,5 +247,6 @@ struct MyStruct
     - trait and impl ordering
     - Empty lines
     - Comments
+    - fix unaryexpr in macro `-2` is transformed into `- 2` and it cause `a -2` to be interpreted as `a - 2`
   - Rust FFI
 

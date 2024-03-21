@@ -28,6 +28,8 @@ pub struct TopLevel {
 
 #[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
+    Import(IdentifierPath),
+    Export(IdentifierPath),
     InfixOperator(u8, FunctionDecl),
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
@@ -63,7 +65,7 @@ pub struct Impl {
     pub methods: BTreeMap<Ident, FunctionDecl>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ParseType {
     pub name: String,
     pub generics: Vec<ParseType>,
@@ -194,8 +196,14 @@ pub struct StructInstance {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum IdentOrType {
+    Ident(Ident),
+    Type(ParseType),
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct IdentifierPath {
-    pub path: Vec<Ident>,
+    pub path: Vec<IdentOrType>,
 }
 
 #[derive(Debug, PartialEq)]

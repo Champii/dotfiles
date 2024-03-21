@@ -14,4 +14,3 @@ mod statement;
 mod r#struct;
 mod top_level;
 mod r#trait;
-

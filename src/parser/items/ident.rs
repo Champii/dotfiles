@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Ident, IdentifierPath},
+    ast::{Ident, IdentOrType, IdentifierPath, ParseType},
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -17,6 +17,21 @@ impl Parsable for IdentifierPath {
             parse_vec_of(&tokens, Some(TokenType::DoubleColon), parse_ctx)?;
 
         Ok((IdentifierPath { path: idents }, remaining_tokens))
+    }
+}
+
+impl Parsable for IdentOrType {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), ParseError> {
+        if let Ok((ident, remaining_tokens)) = Ident::parse(tokens, parse_ctx) {
+            return Ok((IdentOrType::Ident(ident), remaining_tokens));
+        }
+
+        let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
+
+        Ok((IdentOrType::Type(parse_type), remaining_tokens))
     }
 }
 

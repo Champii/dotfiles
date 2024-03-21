@@ -40,8 +40,8 @@ impl Parsable for Loop {
 mod parse_loop {
     use crate::{
         ast::{
-            Block, Expression, Ident, IdentifierPath, Literal, LiteralKind, Loop, Operand,
-            PrimaryExpr, Statement, UnaryExpr,
+            Block, Expression, Ident, IdentOrType, IdentifierPath, Literal, LiteralKind, Loop,
+            Operand, PrimaryExpr, Statement, UnaryExpr,
         },
         parser::{parsable::Parsable, parse_ctx::ParseCtx, util::lex_test},
     };
@@ -61,10 +61,10 @@ mod parse_loop {
                 },
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(IdentifierPath {
-                        path: vec![Ident {
+                        path: vec![IdentOrType::Ident(Ident {
                             name: "y".to_string(),
                             span: tokens[3].span.clone()
-                        }]
+                        })]
                     }),
                     secondaries: None,
                 })),
@@ -95,10 +95,10 @@ mod parse_loop {
             Loop::While(
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(IdentifierPath {
-                        path: vec![Ident {
+                        path: vec![IdentOrType::Ident(Ident {
                             name: "x".to_string(),
                             span: tokens[1].span.clone()
-                        }]
+                        })]
                     }),
                     secondaries: None,
                 })),

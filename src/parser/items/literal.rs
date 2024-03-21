@@ -119,7 +119,7 @@ mod literals {
 
     use super::*;
     use crate::{
-        ast::{Ident, IdentifierPath, Operand, Operator, PrimaryExpr, UnaryExpr},
+        ast::{Ident, IdentOrType, IdentifierPath, Operand, Operator, PrimaryExpr, UnaryExpr},
         lexer::Span,
         parser::util::lex_test,
     };
@@ -237,10 +237,10 @@ mod literals {
                             elements: vec![
                                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                                     operand: Operand::Ident(IdentifierPath {
-                                        path: vec![Ident {
+                                        path: vec![IdentOrType::Ident(Ident {
                                             name: "hello".to_string(),
                                             span: Span::default(),
-                                        }],
+                                        })],
                                     }),
                                     secondaries: None,
                                 })),

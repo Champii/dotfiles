@@ -45,6 +45,8 @@ impl Display for TopLevel {
             TopLevelKind::InfixOperator(precedence, decl) => {
                 write!(f, "infix {} {}", precedence, decl)
             }
+            TopLevelKind::Import(path) => write!(f, "> {}\n", path),
+            TopLevelKind::Export(path) => write!(f, "< {}\n", path),
             TopLevelKind::MacroDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
             TopLevelKind::FunctionDecl(decl) => write!(f, "{}", decl),
@@ -265,6 +267,15 @@ impl Display for IdentifierPath {
     }
 }
 
+impl Display for IdentOrType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            IdentOrType::Ident(ident) => write!(f, "{}", ident),
+            IdentOrType::Type(parse_type) => write!(f, "{}", parse_type),
+        }
+    }
+}
+
 impl Display for Ident {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)
@@ -289,16 +300,13 @@ impl Display for ParseType {
 
 impl Display for FunctionDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ={}\n", self.name, self.lambda)
+        write!(f, "{} = {}\n", self.name, self.lambda)
     }
 }
 
 impl Display for LambdaDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         for (i, param) in self.parameters.iter().enumerate() {
-            if i == 0 {
-                write!(f, " ")?;
-            }
             write!(f, "{}", param)?;
 
             if i < self.parameters.len() - 1 {
@@ -306,7 +314,11 @@ impl Display for LambdaDecl {
             }
         }
 
-        write!(f, " ->")?;
+        if !self.parameters.is_empty() {
+            write!(f, " ")?;
+        }
+
+        write!(f, "->")?;
 
         if self.body.statements.len() <= 1 {
             write!(f, " ")?;
@@ -340,33 +352,6 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
 
     Ok(())
 }
-
-/* impl Display for Block {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mono_statement = self.statements.len() <= 1;
-        if !mono_statement {
-            increase_indent();
-            write!(f, "\n")?;
-        }
-
-        for stmt in &self.statements {
-            if !mono_statement {
-                write!(f, "{}", indent())?;
-            }
-            write!(f, "{}", stmt)?;
-
-            if !mono_statement {
-                write!(f, "\n")?;
-            }
-        }
-
-        if !mono_statement {
-            decrease_indent();
-        }
-
-        Ok(())
-    }
-} */
 
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -583,7 +568,9 @@ impl Display for Array {
 mod format {
     #[test]
     fn full_program() {
-        let input = r#"infix 7 |> = a -> a
+        let input = r#"> foo::Bar
+
+infix 7 |> = a -> a
 
 macro my_macro
   $name:ident $($arg:ident)* =>
@@ -631,6 +618,8 @@ main = ->
   else
     c + d
     b c
+
+< MyTrait
 
 "#;
 

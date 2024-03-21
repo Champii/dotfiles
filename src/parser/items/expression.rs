@@ -255,7 +255,7 @@ impl Parsable for Operator {
 mod expression {
     use super::*;
     use crate::{
-        ast::{Literal, Operand, PrimaryExpr, UnaryExpr},
+        ast::{IdentOrType, Literal, Operand, PrimaryExpr, UnaryExpr},
         lexer::Span,
         parser::util::lex_test,
     };
@@ -304,10 +304,10 @@ mod expression {
             Expression::BinopExpr(
                 UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(IdentifierPath {
-                        path: vec![Ident {
+                        path: vec![IdentOrType::Ident(Ident {
                             name: "a".to_string(),
                             span: Span::default(),
-                        }],
+                        })],
                     }),
                     secondaries: Some(vec![SecondaryExpr::Dot(Ident {
                         name: "a".to_string(),
@@ -321,10 +321,10 @@ mod expression {
                 Box::new(Expression::BinopExpr(
                     UnaryExpr::PrimaryExpr(PrimaryExpr {
                         operand: Operand::Ident(IdentifierPath {
-                            path: vec![Ident {
+                            path: vec![IdentOrType::Ident(Ident {
                                 name: "b".to_string(),
                                 span: Span::default(),
-                            }],
+                            })],
                         }),
                         secondaries: None,
                     }),
@@ -407,10 +407,10 @@ mod expression {
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Ident(IdentifierPath {
-                    path: vec![Ident {
+                    path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
                         span: Span::default(),
-                    }],
+                    })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Arguments(vec![
                     Argument {
@@ -457,10 +457,10 @@ mod expression {
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Ident(IdentifierPath {
-                    path: vec![Ident {
+                    path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
                         span: Span::default(),
-                    }],
+                    })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Indice(Box::new(
                     Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -487,10 +487,10 @@ mod expression {
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Ident(IdentifierPath {
-                    path: vec![Ident {
+                    path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
                         span: Span::default(),
-                    }],
+                    })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Dot(Ident {
                     name: "world".to_string(),
@@ -535,10 +535,10 @@ mod expression {
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Ident(IdentifierPath {
-                    path: vec![Ident {
+                    path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
                         span: Span::default(),
-                    }],
+                    })],
                 }),
                 secondaries: Some(vec![
                     SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(

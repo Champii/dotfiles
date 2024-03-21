@@ -1,10 +1,14 @@
 use crate::{
     ast::{
-        EnumDecl, FunctionDecl, Ident, Impl, MacroDecl, MacroInvoc, StructDecl, TopLevel,
-        TopLevelKind, TraitDecl,
+        EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, StructDecl,
+        TopLevel, TopLevelKind, TraitDecl,
     },
     lexer::{Token, TokenType},
-    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::ParseError},
+    parser::{
+        parsable::Parsable,
+        parse_ctx::ParseCtx,
+        util::{expect_token, ParseError},
+    },
 };
 
 impl Parsable for TopLevel {
@@ -89,6 +93,30 @@ impl Parsable for TopLevel {
                     vec!["macro".to_string()],
                 ));
             }
+        }
+
+        if TokenType::Operator(">".to_string()) == tokens[0].token_type {
+            let (identifier_path, new_tokens) = IdentifierPath::parse(&tokens[1..], parse_ctx)?;
+            let new_tokens = expect_token(new_tokens, TokenType::Eol)?;
+            return Ok((
+                TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Import(identifier_path),
+                },
+                new_tokens,
+            ));
+        }
+
+        if TokenType::Operator("<".to_string()) == tokens[0].token_type {
+            let (identifier_path, new_tokens) = IdentifierPath::parse(&tokens[1..], parse_ctx)?;
+            let new_tokens = expect_token(new_tokens, TokenType::Eol)?;
+            return Ok((
+                TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Export(identifier_path),
+                },
+                new_tokens,
+            ));
         }
 
         if let TokenType::MacroInvoc(_name) = &tokens[0].token_type {

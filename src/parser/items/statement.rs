@@ -65,7 +65,10 @@ mod tests {
 
     use super::*;
     use crate::{
-        ast::{Ident, IdentifierPath, Literal, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr},
+        ast::{
+            Ident, IdentOrType, IdentifierPath, Literal, Operand, PrimaryExpr, SecondaryExpr,
+            UnaryExpr,
+        },
         lexer::Span,
         parser::util::lex_test,
     };
@@ -101,10 +104,10 @@ mod tests {
             Statement::Assignment(Assignment {
                 lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(crate::ast::IdentifierPath {
-                        path: vec![crate::ast::Ident {
+                        path: vec![IdentOrType::Ident(crate::ast::Ident {
                             name: "a".to_string(),
                             span: Span::default(),
-                        }],
+                        })],
                     }),
                     secondaries: None,
                 })),
@@ -132,10 +135,10 @@ mod tests {
             Statement::Assignment(Assignment {
                 lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(IdentifierPath {
-                        path: vec![Ident {
+                        path: vec![IdentOrType::Ident(Ident {
                             name: "a".to_string(),
                             span: Span::default(),
-                        },],
+                        })],
                     }),
                     secondaries: Some(vec![
                         SecondaryExpr::Dot(Ident {
