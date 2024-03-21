@@ -62,7 +62,14 @@ impl Parsable for LambdaDecl {
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
 
-        Ok((LambdaDecl { parameters, body }, remaining_tokens))
+        Ok((
+            LambdaDecl {
+                parameters,
+                body,
+                shorthand_tokens: None,
+            },
+            remaining_tokens,
+        ))
     }
 }
 
@@ -80,14 +87,16 @@ fn parse_function_shorthand<'a>(
     let remaining_tokens = expect_token(remaining_tokens, TokenType::OpenParen)?;
 
     // special case of the dot
-    let lambda = match remaining_tokens[0].token_type {
+    let (mut lambda, remaining_tokens) = match remaining_tokens[0].token_type {
         TokenType::Operator(_) | TokenType::StuckOperator(_) | TokenType::Dot => {
             expand_shorthand_prefix_argument(remaining_tokens, parse_ctx)?
         }
         _ => expand_shorthand_suffix_argument(remaining_tokens, parse_ctx)?,
     };
 
-    Ok(lambda)
+    lambda.shorthand_tokens = Some(tokens[..tokens.len() - remaining_tokens.len()].to_vec());
+
+    Ok((lambda, remaining_tokens))
 }
 
 fn expand_shorthand_prefix_argument<'a>(

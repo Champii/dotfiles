@@ -306,6 +306,14 @@ impl Display for FunctionDecl {
 
 impl Display for LambdaDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(tokens) = &self.shorthand_tokens {
+            for token in tokens {
+                write!(f, "{}", token)?;
+            }
+
+            return Ok(());
+        }
+
         for (i, param) in self.parameters.iter().enumerate() {
             write!(f, "{}", param)?;
 
@@ -594,6 +602,8 @@ impl MyTrait
   baz = a -> a
   foo = a -> a
 
+lambda = (*5)
+
 main = ->
   foo a, b
   foo[a + b + -c]
@@ -618,6 +628,7 @@ main = ->
   else
     c + d
     b c
+  a = (.foo)
 
 < MyTrait
 

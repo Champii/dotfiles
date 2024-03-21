@@ -240,10 +240,12 @@ struct MyStruct
     - Error bubbling with `?`
     - Space dot closes function call
     - Postfix `if` and `loop`
+    - Oneliner for loops (other than postfix)
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
     - Keep newlines (for formating)
     - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
+
   - Desugar
     - Operator precedence
     - Operator into function calls
@@ -254,7 +256,6 @@ struct MyStruct
   - Modules and dependancies
     - Basic external module management
   - Code formating
-    - Handle function shorthand
     - Handle ParseType parenthesis
     - If with no then
     - trait and impl ordering
