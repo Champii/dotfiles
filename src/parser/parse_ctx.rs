@@ -7,6 +7,7 @@ pub struct ParseCtx {
     indent_level: u8,
     indent_step: u8,
     _diagnostics: Vec<String>,
+    pub inside_argument_list: Vec<bool>,
 }
 
 impl ParseCtx {
@@ -14,6 +15,7 @@ impl ParseCtx {
         ParseCtx {
             indent_step: 2,
             indent_level: 0,
+            inside_argument_list: Vec::new(),
             _diagnostics: Vec::new(),
         }
     }

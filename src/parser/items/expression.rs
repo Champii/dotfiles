@@ -127,13 +127,34 @@ impl Parsable for SecondaryExpr {
                 SecondaryExpr::Indice(Box::new(expression)),
                 remaining_tokens,
             ))
-        } else if let TokenType::Dot = token.token_type {
+        } else if TokenType::Dot == token.token_type {
             let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
 
             Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+        } else if TokenType::SpacedDot == token.token_type {
+            let list_idx = parse_ctx.inside_argument_list.len().saturating_sub(1);
+
+            if !parse_ctx.inside_argument_list.is_empty()
+                && parse_ctx.inside_argument_list[list_idx]
+            {
+                parse_ctx.inside_argument_list[list_idx] = false;
+                Err(ParseError::UnexpectedToken(
+                    token.clone(),
+                    vec![TokenType::OpenParen],
+                ))
+            } else {
+                let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+                parse_ctx.inside_argument_list.pop();
+
+                Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+            }
         } else {
+            parse_ctx.inside_argument_list.push(true);
+
             let (arguments, remaining_tokens) =
                 parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)?;
+
+            // parse_ctx.inside_argument_list.pop();
 
             if arguments.is_empty() {
                 return Err(ParseError::UnexpectedToken(

@@ -4,7 +4,10 @@ use std::{
     sync::Mutex,
 };
 
-use crate::{ast::*, lexer::TokenType};
+use crate::{
+    ast::*,
+    lexer::{Span, TokenType},
+};
 
 static INDENT: Mutex<u8> = Mutex::new(0);
 
@@ -424,8 +427,16 @@ impl Display for PrimaryExpr {
         write!(f, "{}", self.operand)?;
 
         if let Some(secondaries) = &self.secondaries {
-            for secondary in secondaries {
+            for (i, secondary) in secondaries.iter().enumerate() {
                 write!(f, "{}", secondary)?;
+                if let SecondaryExpr::Arguments(_) = secondary {
+                    if i < secondaries.len() - 1 {
+                        if let SecondaryExpr::Dot(_) = secondaries[i + 1] {
+                            write!(f, " ")?;
+                            continue;
+                        }
+                    }
+                }
             }
         }
 

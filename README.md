@@ -239,7 +239,6 @@ struct MyStruct
     - Multiline dot chaining
     - Default arguments and named arguments
     - Error bubbling with `?`
-    - Space dot closes function call
     - Postfix `if` and `loop`
     - Oneliner for loops (other than postfix)
     - Comments (end of line ('#') or inline ('/*' '*/')
