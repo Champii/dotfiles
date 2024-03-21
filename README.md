@@ -19,6 +19,19 @@ main = ->
   else listen port: 8080, addr: "localhost"
 ```
 
+## If and loops as expressions
+
+```haskell
+do_something = x ->
+  value = if x > 42 then 42 else x
+  list =
+    while value > 0
+      value++
+  new_list =
+    for item in list
+      item + 2
+```
+
 ## Functions as first class citizen
 
 ```haskell
