@@ -346,7 +346,7 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
     }
 
     for (i, stmt) in block.statements.iter().enumerate() {
-        if !mono_statement {
+        if !mono_statement && Statement::EmptyLine != *stmt {
             write!(f, "{}", indent())?;
         }
         write!(f, "{}", stmt)?;
@@ -371,6 +371,7 @@ impl Display for Statement {
             Statement::Return(expr) => write!(f, "return {}", expr),
             Statement::Continue(expr) => write!(f, "continue {}", expr),
             Statement::Break(expr) => write!(f, "break {}", expr),
+            Statement::EmptyLine => write!(f, ""),
         }
     }
 }

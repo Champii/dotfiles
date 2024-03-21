@@ -123,6 +123,7 @@ pub enum Statement {
     Return(Expression),
     Continue(Expression),
     Break(Expression),
+    EmptyLine, // Empty line, kept for formating
 }
 
 #[derive(Debug, PartialEq)]

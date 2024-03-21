@@ -244,7 +244,6 @@ struct MyStruct
     - Oneliner for loops (other than postfix)
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
-    - Keep newlines (for formating)
     - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
 
   - Desugar

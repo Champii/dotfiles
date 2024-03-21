@@ -27,6 +27,12 @@ impl ParseCtx {
     }
 
     pub fn consume_indent<'a>(&self, tokens: &'a [Token]) -> Result<&'a [Token], ParseError> {
+        if tokens.is_empty() {
+            return Err(ParseError::UnexpectedEof(TokenType::Indent(
+                self.indent_level,
+            )));
+        }
+
         if let TokenType::Indent(level) = tokens[0].token_type {
             if self.indent_level == level {
                 return Ok(&tokens[1..]);

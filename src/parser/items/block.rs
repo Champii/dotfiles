@@ -4,7 +4,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{parse_vec_of, ParseError},
+        util::{expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -13,21 +13,63 @@ impl Parsable for Block {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
+        if tokens.len() == 0 {
+            return Err(ParseError::UnexpectedEof(TokenType::Eol));
+        }
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
             parse_ctx.indent();
 
-            let (statements, new_tokens) =
-                match parse_vec_of::<Statement>(&tokens[1..], Some(TokenType::Eol), parse_ctx) {
-                    Ok((statements, new_tokens)) => (statements, new_tokens),
-                    Err(e) => {
-                        parse_ctx.dedent();
-                        return Err(e);
-                    }
-                };
+            let mut remaining_tokens = &tokens[1..];
+            let mut remaining_tokens_with_leading_newlines = remaining_tokens;
+            let mut statements = vec![];
+            let mut nb_statements_without_leading_newlines = 0;
+
+            loop {
+                if let Ok((statement, new_tokens)) = Statement::parse(remaining_tokens, parse_ctx) {
+                    remaining_tokens = new_tokens;
+                    statements.push(statement);
+                } else {
+                    remaining_tokens = remaining_tokens_with_leading_newlines;
+                    statements = statements
+                        .into_iter()
+                        .take(nb_statements_without_leading_newlines)
+                        .collect();
+                    break;
+                }
+
+                remaining_tokens_with_leading_newlines = remaining_tokens;
+
+                if let Ok(new_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
+                    remaining_tokens = new_tokens;
+                } else {
+                    break;
+                }
+
+                nb_statements_without_leading_newlines = statements.len();
+
+                while remaining_tokens
+                    .get(0)
+                    .map(|t| {
+                        if let TokenType::Indent(_) = t.token_type {
+                            true
+                        } else {
+                            false
+                        }
+                    })
+                    .unwrap_or(false)
+                    && remaining_tokens
+                        .get(1)
+                        .map(|t| t.token_type == TokenType::Eol)
+                        .unwrap_or(false)
+                {
+                    remaining_tokens = &remaining_tokens[2..];
+                    statements.push(Statement::EmptyLine);
+                }
+            }
 
             parse_ctx.dedent();
 
-            (statements, new_tokens)
+            (statements, remaining_tokens)
         } else {
             let (statement, remaining_tokens) = Statement::parse(&tokens, parse_ctx)?;
 

@@ -17,8 +17,8 @@ fn main() {
         }
     };
 
-    println!("{}", ast);
-    std::fs::write(std::env::args().nth(1).unwrap(), ast.to_string()).unwrap();
+    // println!("{}", ast);
+    // std::fs::write(std::env::args().nth(1).unwrap(), ast.to_string()).unwrap();
 
     let ast = match macro_expansion::expand_macros(ast) {
         Ok(ast) => ast,
@@ -29,5 +29,5 @@ fn main() {
     };
 
     println!("{:#?}", ast);
-    println!("{}", ast);
+    // println!("{}", ast);
 }
