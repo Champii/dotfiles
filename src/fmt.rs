@@ -132,6 +132,8 @@ impl Display for MacroEntry {
             if let MacroFragment::Token(token) = fragment {
                 if let TokenType::Indent(_) = token.token_type {
                     write!(f, "{}", fragment)?;
+                } else if let TokenType::StuckOperator(_) = token.token_type {
+                    write!(f, "{}", fragment)?;
                 } else {
                     write!(f, "{}", fragment)?;
 

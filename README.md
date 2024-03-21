@@ -223,6 +223,7 @@ struct MyStruct
     - Macro nested var repetition $($($arg:ident)*)*
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
+
   - Parser
     - Mod management
     - Comments (end of line ('#') or inline ('/*' '*/')
@@ -253,14 +254,16 @@ struct MyStruct
     - Match into `if`
     - Dot notation into function calls
     - Closures into functiondecl
+
   - Modules and dependancies
     - Basic external module management
+
   - Code formating
     - Handle ParseType parenthesis
     - If with no then
     - trait and impl ordering
     - Empty lines
     - Comments
-    - fix unaryexpr in macro `-2` is transformed into `- 2` and it cause `a -2` to be interpreted as `a - 2`
-  - Rust FFI
+
+  - Rust FFI ?
 
