@@ -161,6 +161,15 @@ fn expand_shorthand_suffix_argument<'a>(
         consume_tokens_until(remaining_tokens, TokenType::CloseParen);
 
     let operator = inner_tokens[inner_tokens.len() - 1].clone();
+
+    if let TokenType::Operator(_) | TokenType::StuckOperator(_) = operator.token_type {
+    } else {
+        return Err(ParseError::UnexpectedToken(
+            operator.clone(),
+            vec![TokenType::Operator("".to_string())],
+        ));
+    }
+
     let inner_tokens = inner_tokens[..inner_tokens.len() - 1].to_vec();
 
     let inner_tokens = vec![

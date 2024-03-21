@@ -225,25 +225,27 @@ struct MyStruct
     - Better error management and diagnostic details
 
   - Parser
-    - Mod management
-    - Comments (end of line ('#') or inline ('/*' '*/')
-    - Pattern matching and destructuring
-    - Allow multiline function arguments
-    - Function signature
-    - ParseType must handle parenthesis and function type
-    - Tuples
-    - Struct default value
-    - Struct default constructor
-    - Empty fn call with `!`
-    - Chain calls without variables
-    - Multiline dot chaining
-    - Default arguments and named arguments
-    - Error bubbling with `?`
-    - Postfix `if` and `loop`
-    - Oneliner for loops (other than postfix)
-    - Comments (end of line ('#') or inline ('/*' '*/')
-    - Async?
-    - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
+    - High priority
+      - Mod management
+      - Comments (end of line ('#') or inline ('/*' '*/')
+      - Pattern matching and destructuring
+      - Allow multiline function arguments
+      - Function signature
+      - ParseType must handle parenthesis and function type
+      - Tuples
+      - Empty fn call with `!`
+      - Multiline dot chaining
+
+    - Low priority list:
+      - Struct default constructor
+      - Chain calls without variables
+      - Default arguments and named arguments
+      - Error bubbling with `?`
+      - Postfix `if` and `loop`
+      - Oneliner for loops (other than postfix)
+      - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
+      - Struct default value
+      - Async?
 
   - Desugar
     - Operator precedence
