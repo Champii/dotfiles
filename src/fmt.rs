@@ -116,8 +116,34 @@ impl Display for MacroEntry {
 
         increase_indent();
 
-        for fragment in &self.body {
-            write!(f, "{}", fragment)?;
+        for (i, fragment) in self.body.iter().enumerate() {
+            let next_is_eol = self.body.get(i + 1).map_or(true, |f| {
+                if let MacroFragment::Token(token) = f {
+                    token.token_type == TokenType::Eol
+                } else {
+                    false
+                }
+            });
+
+            let write_space = !next_is_eol && i < self.body.len() - 1;
+
+            if let MacroFragment::Token(token) = fragment {
+                if let TokenType::Indent(_) = token.token_type {
+                    write!(f, "{}", fragment)?;
+                } else {
+                    write!(f, "{}", fragment)?;
+
+                    if write_space && token.token_type != TokenType::Eol {
+                        write!(f, " ")?;
+                    }
+                }
+            } else {
+                write!(f, "{}", fragment)?;
+
+                if write_space {
+                    write!(f, " ")?;
+                }
+            }
         }
 
         decrease_indent();

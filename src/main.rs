@@ -29,4 +29,5 @@ fn main() {
     };
 
     println!("{:#?}", ast);
+    println!("{}", ast);
 }

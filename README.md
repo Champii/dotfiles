@@ -230,6 +230,7 @@ struct MyStruct
     - Postfix `if` and `loop`
     - Comments (end of line ('#') or inline ('/*' '*/')
     - Async?
+    - Keep newlines (for formating)
   - Desugar
     - Operator precedence
     - Operator into function calls
@@ -239,6 +240,12 @@ struct MyStruct
     - Closures into functiondecl
   - Modules and dependancies
     - Basic external module management
-  - Code formating ?
+  - Code formating
+    - Handle function shorthand
+    - Handle ParseType parenthesis
+    - If with no then
+    - trait and impl ordering
+    - Empty lines
+    - Comments
   - Rust FFI
 
