@@ -73,4 +73,12 @@ impl ParseCtx {
             }
         }
     }
+
+    pub fn indent_level(&self) -> u8 {
+        self.indent_level
+    }
+
+    pub fn indent_step(&self) -> u8 {
+        self.indent_step
+    }
 }

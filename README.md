@@ -234,7 +234,6 @@ struct MyStruct
       - ParseType must handle parenthesis and function type
       - Tuples
       - Empty fn call with `!`
-      - Multiline dot chaining
 
     - Low priority list:
       - Struct default constructor

@@ -106,6 +106,24 @@ pub fn ignore_empty_lines(mut tokens: &[Token]) -> &[Token] {
     tokens
 }
 
+pub fn look_ahead(tokens: &[Token], expected: &[TokenType]) -> bool {
+    if tokens.len() < expected.len() {
+        return false;
+    }
+
+    for (i, expected_token) in expected.iter().enumerate() {
+        if let Some(token) = tokens.get(i) {
+            if token.token_type != *expected_token {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    true
+}
+
 #[cfg(test)]
 pub fn lex_test(input: &str) -> Vec<Token> {
     use crate::lexer::Lexer;
