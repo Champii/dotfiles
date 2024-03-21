@@ -261,7 +261,6 @@ struct MyStruct
     - Handle ParseType parenthesis
     - If with no then
     - trait and impl ordering
-    - Empty lines
     - Comments
 
   - Rust FFI ?

@@ -345,10 +345,23 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
         write!(f, "\n")?;
     }
 
-    for (i, stmt) in block.statements.iter().enumerate() {
+    let mut skip_next_empty_lines = false;
+
+    'main: for (i, stmt) in block.statements.iter().enumerate() {
+        while skip_next_empty_lines && Statement::EmptyLine == *stmt {
+            continue 'main;
+        }
+
+        skip_next_empty_lines = false;
+
+        if Statement::EmptyLine == *stmt {
+            skip_next_empty_lines = true;
+        }
+
         if !mono_statement && Statement::EmptyLine != *stmt {
             write!(f, "{}", indent())?;
         }
+
         write!(f, "{}", stmt)?;
 
         if !mono_statement && i < block.statements.len() - 1 {
