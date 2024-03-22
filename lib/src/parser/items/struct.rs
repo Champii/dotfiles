@@ -179,6 +179,7 @@ impl Parsable for StructInstanceBlock {
 #[cfg(test)]
 mod parse_struct {
     use crate::parser::util::lex_test;
+    use crate::Config;
 
     use super::*;
 
@@ -186,7 +187,8 @@ mod parse_struct {
     fn test_parse_struct() {
         let input = "struct Test\n";
         let tokens = lex_test(input);
-        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (struct_decl, rest) =
+            StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(struct_decl.name.name, "Test");
         assert_eq!(rest.len(), 0);
@@ -196,7 +198,8 @@ mod parse_struct {
     fn test_parse_struct_with_generics() {
         let input = "struct Test T, U\n";
         let tokens = lex_test(input);
-        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (struct_decl, rest) =
+            StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(struct_decl.name.name, "Test");
         assert_eq!(struct_decl.name.generics.len(), 2);
@@ -209,7 +212,8 @@ mod parse_struct {
     fn test_parse_struct_with_fields() {
         let input = "struct Test\n  field: Type\n  field2: Type2\n";
         let tokens = lex_test(input);
-        let (struct_decl, rest) = StructDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (struct_decl, rest) =
+            StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(struct_decl.name.name, "Test");
         assert_eq!(struct_decl.fields.len(), 2);
@@ -240,7 +244,8 @@ mod parse_struct {
     fn test_parse_struct_instance_inline() {
         let input = "Test a: 1, b: 2, c: a + 4";
         let tokens = lex_test(input);
-        let (struct_instance, rest) = StructInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (struct_instance, rest) =
+            StructInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(struct_instance.name.name, "Test");
         assert_eq!(struct_instance.fields.len(), 3);
@@ -251,7 +256,8 @@ mod parse_struct {
     fn test_parse_struct_instance_multiline() {
         let input = "Test\n  a: 1\n  b: 2\n  c: a + 4";
         let tokens = lex_test(input);
-        let (struct_instance, rest) = StructInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (struct_instance, rest) =
+            StructInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(struct_instance.name.name, "Test");
         assert_eq!(struct_instance.fields.len(), 3);

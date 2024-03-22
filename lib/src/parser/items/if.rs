@@ -98,13 +98,13 @@ impl Parsable for Else {
 #[cfg(test)]
 mod test_if {
     use super::*;
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     #[test]
     fn test_parse_if_monoline() {
         let input = "if a then 1";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }
@@ -113,7 +113,7 @@ mod test_if {
     fn test_parse_if_else_monoline() {
         let input = "if true then 1 else z";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }
@@ -122,7 +122,7 @@ mod test_if {
     fn test_parse_if_else_if_else_monoline() {
         let input = "if true then 1 else if false then 2 else 3";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }
@@ -131,7 +131,7 @@ mod test_if {
     fn test_parse_if_else_multiline_1() {
         let input = "if true\nthen 1\nelse 2";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }
@@ -140,7 +140,7 @@ mod test_if {
     fn test_parse_if_else_multiline_2() {
         let input = "if true then\n  1\nelse if false then\n  2\nelse 3";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }
@@ -149,7 +149,7 @@ mod test_if {
     fn test_parse_if_else_multiline_3() {
         let input = "if true\n  1\nelse\n  2";
         let tokens = lex_test(input);
-        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(rest.len(), 0);
     }

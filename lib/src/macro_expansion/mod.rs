@@ -4,6 +4,7 @@ use crate::{
     ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
     lexer::{Token, TokenType},
     parser::{Parsable, ParseCtx, ParseError},
+    Config,
 };
 
 use self::{correspondances::Correspondance, macro_arg_matcher::MacroArgMatcher};
@@ -91,7 +92,7 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
 
         let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
 
-        let (module, _) = ModuleInner::parse(&body, &mut ParseCtx::new())?;
+        let (module, _) = ModuleInner::parse(&body, &mut ParseCtx::new(&Config::default()))?;
 
         top_levels.extend(module.top_levels);
 

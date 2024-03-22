@@ -210,7 +210,7 @@ mod tests {
     use std::path::PathBuf;
 
     use super::*;
-    use crate::lexer::Lexer;
+    use crate::{lexer::Lexer, Config};
 
     fn lex(input: &str) -> Vec<Token> {
         Lexer::new(PathBuf::new(), input)
@@ -225,7 +225,8 @@ mod tests {
         let input = "macro mymacro\n  $a:ident =>\n    statement";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
-        let (macro_decl, rest) = MacroDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (macro_decl, rest) =
+            MacroDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(macro_decl.name.name, "mymacro");
         assert_eq!(macro_decl.entries.len(), 1);
@@ -237,7 +238,8 @@ mod tests {
         let input = "$a:ident =>\n    statement";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
-        let (macro_entry, rest) = MacroEntry::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (macro_entry, rest) =
+            MacroEntry::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(macro_entry.defs.len(), 1);
         assert_eq!(rest.len(), 0);
@@ -248,7 +250,8 @@ mod tests {
         let input = "%mymacro\n  a\n  b";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
-        let (macro_invoc, rest) = MacroInvoc::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (macro_invoc, rest) =
+            MacroInvoc::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(macro_invoc.name.name, "mymacro");
         assert_eq!(macro_invoc.args.len(), 3); // FIXME, should be 2

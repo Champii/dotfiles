@@ -1,7 +1,15 @@
-[package]
-name = "new_new_lang"
-version = "0.1.0"
-edition = "2021"
+[profile.release]
+panic = 'abort'
+opt-level = 'z'
+lto = 'thin'
 
-[dependencies]
-ariadne = { version = "0.4.0", features = ["auto-color"] }
+[workspace]
+resolver = "2"
+
+members = [
+  "rockc",
+  "rock",
+  "lib",
+]
+
+default-members = ["rockc"]

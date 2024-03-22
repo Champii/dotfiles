@@ -65,7 +65,6 @@ impl Parsable for Statement {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use crate::{
         ast::{
@@ -74,13 +73,15 @@ mod tests {
         },
         lexer::Span,
         parser::util::lex_test,
+        Config,
     };
 
     #[test]
     fn test_parse_statement() {
         let input = "1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,
@@ -100,7 +101,8 @@ mod tests {
     fn test_parse_assignment() {
         let input = "a = 1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,
@@ -131,7 +133,8 @@ mod tests {
     fn test_parse_assignment_complex() {
         let input = "a.b[2].c = 1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,
@@ -180,7 +183,8 @@ mod tests {
     fn test_parse_return() {
         let input = "return 1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,
@@ -200,7 +204,8 @@ mod tests {
     fn test_parse_continue() {
         let input = "continue 1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,
@@ -220,7 +225,8 @@ mod tests {
     fn test_parse_break() {
         let input = "break 1";
         let tokens = lex_test(input);
-        let (statement, rest) = Statement::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (statement, rest) =
+            Statement::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             statement,

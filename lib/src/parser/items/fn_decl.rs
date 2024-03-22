@@ -217,13 +217,14 @@ fn expand_shorthand_suffix_argument<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     #[test]
     fn test_parse_function_decl_monoline() {
         let input = "myfn = -> statement\n";
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 0);
@@ -235,7 +236,8 @@ mod tests {
     fn test_parse_function_decl() {
         let input = "myfn = a, b, c ->\n  statement\n";
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 3);
@@ -250,7 +252,8 @@ mod tests {
   3 + 3
 "#;
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 3);
@@ -262,7 +265,8 @@ mod tests {
     fn test_parse_function_shorthand() {
         let input = "myfn = (+2)\n";
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 1);
@@ -274,7 +278,8 @@ mod tests {
     fn test_parse_function_shorthand_2() {
         let input = "myfn = (a/)\n";
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "myfn");
         assert_eq!(function_decl.lambda.parameters.len(), 1);
@@ -286,7 +291,8 @@ mod tests {
     fn test_parse_operator_function() {
         let input = "|> = a -> a\n";
         let tokens = lex_test(input);
-        let (function_decl, rest) = FunctionDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (function_decl, rest) =
+            FunctionDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(function_decl.name.name, "|>");
         assert_eq!(function_decl.lambda.parameters.len(), 1);

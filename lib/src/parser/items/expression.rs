@@ -302,13 +302,15 @@ mod expression {
         ast::{IdentOrType, Literal, Operand, PrimaryExpr, UnaryExpr},
         lexer::Span,
         parser::util::lex_test,
+        Config,
     };
 
     #[test]
     fn test_parse_expression() {
         let input = "1 + 2";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -341,7 +343,8 @@ mod expression {
     fn test_parse_nested_expression() {
         let input = "a.a + b + 2";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -393,7 +396,8 @@ mod expression {
     fn nested_parenthesis_expression() {
         let input = "(1 + (2 + 3))";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -445,7 +449,8 @@ mod expression {
     fn call_expression() {
         let input = "hello 1, 2, 3";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -495,7 +500,8 @@ mod expression {
     fn indice_expression() {
         let input = "hello[1]";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -525,7 +531,8 @@ mod expression {
     fn dot_expression() {
         let input = "hello.world";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -550,7 +557,8 @@ mod expression {
     fn dot_expression_with_literal() {
         let input = "4.test";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -573,7 +581,8 @@ mod expression {
     fn complex_secondaries() {
         let input = "hello[1].world 1, 2, 3";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -640,7 +649,8 @@ mod expression {
   .bar
   .baz"#;
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,
@@ -670,7 +680,8 @@ mod expression {
     fn spaced_dot_closes_fn_call() {
         let input = "foo a, b .bar";
         let tokens = lex_test(input);
-        let (expression, rest) = Expression::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             expression,

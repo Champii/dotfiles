@@ -84,13 +84,14 @@ impl Parsable for EnumInstance {
 #[cfg(test)]
 mod parse_enum {
     use super::*;
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     #[test]
     fn test_parse_enum() {
         let input = "enum Type\n  Variant1\n  Variant2";
         let tokens = lex_test(input);
-        let (enum_decl, rest) = EnumDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (enum_decl, rest) =
+            EnumDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(enum_decl.name.name, "Type");
         assert_eq!(enum_decl.variants.len(), 2);
@@ -101,7 +102,8 @@ mod parse_enum {
     fn test_parse_enum_instance() {
         let input = "Type::Variant1";
         let tokens = lex_test(input);
-        let (enum_instance, rest) = EnumInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (enum_instance, rest) =
+            EnumInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(enum_instance.name.name, "Type");
         assert_eq!(enum_instance.variant.name, "Variant1");
@@ -112,7 +114,8 @@ mod parse_enum {
     fn test_parse_enum_instance_with_args() {
         let input = "Type::Variant1 arg1, arg2";
         let tokens = lex_test(input);
-        let (enum_instance, rest) = EnumInstance::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (enum_instance, rest) =
+            EnumInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(enum_instance.name.name, "Type");
         assert_eq!(enum_instance.variant.name, "Variant1");

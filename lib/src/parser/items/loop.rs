@@ -44,13 +44,15 @@ mod parse_loop {
             Operand, PrimaryExpr, Statement, UnaryExpr,
         },
         parser::{parsable::Parsable, parse_ctx::ParseCtx, util::lex_test},
+        Config,
     };
 
     #[test]
     fn parse_for() {
         let input = "for x in y\n  2";
         let tokens = lex_test(input);
-        let (loop_, remaining) = Loop::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (loop_, remaining) =
+            Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             loop_,
@@ -88,7 +90,8 @@ mod parse_loop {
     fn parse_while() {
         let input = "while x\n  2";
         let tokens = lex_test(input);
-        let (loop_, remaining) = Loop::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (loop_, remaining) =
+            Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             loop_,
@@ -122,7 +125,8 @@ mod parse_loop {
     fn parse_loop() {
         let input = "loop\n  2";
         let tokens = lex_test(input);
-        let (loop_, remaining) = Loop::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (loop_, remaining) =
+            Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(
             loop_,

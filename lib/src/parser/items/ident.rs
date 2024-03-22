@@ -70,7 +70,7 @@ impl Parsable for Ident {
 #[cfg(test)]
 mod tests {
 
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     use super::*;
 
@@ -78,7 +78,7 @@ mod tests {
     fn test_parse_ident() {
         let input = "ident";
         let tokens = lex_test(input);
-        let (ident, rest) = Ident::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (ident, rest) = Ident::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(ident.name, "ident");
         assert_eq!(rest.len(), 0);
@@ -88,7 +88,7 @@ mod tests {
     fn test_parse_ident_error() {
         let input = "123";
         let tokens = lex_test(input);
-        let result = Ident::parse(&tokens, &mut ParseCtx::new());
+        let result = Ident::parse(&tokens, &mut ParseCtx::new(&Config::default()));
 
         assert!(result.is_err());
     }
@@ -97,7 +97,8 @@ mod tests {
     fn test_ident_path() {
         let input = "ident::ident";
         let tokens = lex_test(input);
-        let (ident_path, rest) = IdentifierPath::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (ident_path, rest) =
+            IdentifierPath::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(ident_path.path.len(), 2);
         assert_eq!(rest.len(), 0);

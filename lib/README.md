@@ -219,6 +219,9 @@ struct MyStruct
 
 # TODO
 
+  - CLI tool
+  - Error recovery for parser (find the next Indent(0))
+
   - Macros
     - Macro nested var repetition $($($arg:ident)*)*
     - Don't ignore \n and indent for macro args parsing
@@ -234,6 +237,7 @@ struct MyStruct
       - ParseType must handle parenthesis and function type
       - Tuples
       - Empty fn call with `!`
+      - unsafe blocks
 
     - Low priority list:
       - Struct default constructor

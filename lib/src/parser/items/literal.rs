@@ -122,11 +122,13 @@ mod literals {
         ast::{Ident, IdentOrType, IdentifierPath, Operand, Operator, PrimaryExpr, UnaryExpr},
         lexer::Span,
         parser::util::lex_test,
+        Config,
     };
 
     fn parse_literal(input: &str) -> Literal {
         let tokens = lex_test(input);
-        let (literal, remaining_tokens) = Literal::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (literal, remaining_tokens) =
+            Literal::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(remaining_tokens.len(), 0);
 

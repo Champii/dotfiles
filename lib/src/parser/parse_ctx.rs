@@ -1,6 +1,9 @@
 use std::{collections::HashSet, path::PathBuf};
 
-use crate::lexer::{Token, TokenType};
+use crate::{
+    lexer::{Token, TokenType},
+    Config,
+};
 
 use super::ParseError;
 
@@ -12,10 +15,11 @@ pub struct ParseCtx {
     pub inside_argument_list: Vec<bool>,
     pub files_map: HashSet<PathBuf>,
     pub current_file: Option<PathBuf>,
+    pub config: Config,
 }
 
 impl ParseCtx {
-    pub fn new() -> Self {
+    pub fn new(config: &Config) -> Self {
         ParseCtx {
             indent_step: 2,
             indent_level: 0,
@@ -23,6 +27,7 @@ impl ParseCtx {
             _diagnostics: Vec::new(),
             files_map: HashSet::new(),
             current_file: None,
+            config: config.clone(),
         }
     }
 

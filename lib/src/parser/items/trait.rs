@@ -71,7 +71,7 @@ impl Parsable for TraitDecl {
 
 #[cfg(test)]
 mod parse_trait {
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     use super::*;
 
@@ -84,7 +84,8 @@ mod parse_trait {
 "#,
         );
 
-        let (trait_decl, rest) = TraitDecl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (trait_decl, rest) =
+            TraitDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(trait_decl.name.name, "Foo");
         assert_eq!(trait_decl.methods.len(), 1);

@@ -64,12 +64,15 @@ impl Parsable for Module {
             ))
         } else {
             let tokens = expect_token(tokens, TokenType::Eol)?;
+            let old_file_name = parse_ctx.current_file.clone();
             parse_ctx.add_file_relative(name.name.clone());
             let path = parse_ctx.current_file.clone().unwrap();
 
-            let mut module: Module = parse_file::<ModuleInner>(path.clone())?.into();
+            let mut module: Module = parse_file::<ModuleInner>(path.clone(), parse_ctx)?.into();
 
             module.name = Some(name);
+
+            parse_ctx.current_file = old_file_name;
 
             Ok((module, tokens))
         }

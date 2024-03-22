@@ -57,7 +57,7 @@ impl Parsable for Impl {
 
 #[cfg(test)]
 mod parse_struct {
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     use super::*;
 
@@ -65,7 +65,7 @@ mod parse_struct {
     fn test_parse_impl() {
         let input = "impl Test\n";
         let tokens = lex_test(input);
-        let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(r#impl.name.name, "Test");
         assert_eq!(rest.len(), 0);
@@ -75,7 +75,7 @@ mod parse_struct {
     fn test_parse_impl_with_methods() {
         let input = "impl Test\n  new = -> lol\n  @add = -> a\n";
         let tokens = lex_test(input);
-        let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(r#impl.name.name, "Test");
         assert_eq!(r#impl.methods.len(), 2);

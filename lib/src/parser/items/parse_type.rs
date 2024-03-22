@@ -41,7 +41,7 @@ impl Parsable for ParseType {
 }
 #[cfg(test)]
 mod parse_type {
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     use super::*;
 
@@ -49,7 +49,8 @@ mod parse_type {
     fn test_parse_type() {
         let input = "Type";
         let tokens = lex_test(input);
-        let (parse_type, rest) = ParseType::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(parse_type.name, "Type");
         assert_eq!(rest.len(), 0);
@@ -59,7 +60,8 @@ mod parse_type {
     fn test_parse_type_with_generics() {
         let input = "Type Generics";
         let tokens = lex_test(input);
-        let (parse_type, rest) = ParseType::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(parse_type.name, "Type");
         assert_eq!(parse_type.generics.len(), 1);
@@ -71,7 +73,8 @@ mod parse_type {
     fn test_parse_type_with_multiple_generics() {
         let input = "Type Generics, Generics2";
         let tokens = lex_test(input);
-        let (parse_type, rest) = ParseType::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(parse_type.name, "Type");
         assert_eq!(parse_type.generics.len(), 2);

@@ -84,13 +84,13 @@ impl Parsable for Block {
 mod tests {
 
     use super::*;
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     #[test]
     fn test_parse_block() {
         let input = "statement";
         let tokens = lex_test(input);
-        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(block.statements.len(), 1);
         assert_eq!(rest.len(), 0);
@@ -100,7 +100,7 @@ mod tests {
     fn test_parse_block_with_indent() {
         let input = "\n  statement\n  statement";
         let tokens = lex_test(input);
-        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(block.statements.len(), 2);
         assert_eq!(rest.len(), 0);

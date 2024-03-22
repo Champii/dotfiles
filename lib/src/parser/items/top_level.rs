@@ -166,7 +166,7 @@ impl Parsable for TopLevel {
 
 #[cfg(test)]
 mod parse_top_level {
-    use crate::parser::util::lex_test;
+    use crate::{parser::util::lex_test, Config};
 
     use super::*;
 
@@ -174,7 +174,8 @@ mod parse_top_level {
     fn parse_infix_operator() {
         let input = "infix 5 |> = x, f -> f x\n";
         let tokens = lex_test(input);
-        let (top_level, rest) = TopLevel::parse(&tokens, &mut ParseCtx::new()).unwrap();
+        let (top_level, rest) =
+            TopLevel::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         let (precedence, f_decl) = match top_level.kind {
             TopLevelKind::InfixOperator(precedence, f_decl) => (precedence, f_decl),
