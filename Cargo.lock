@@ -163,6 +163,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 
 [[package]]
+name = "paste"
+version = "1.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -183,12 +189,16 @@ dependencies = [
 [[package]]
 name = "rock"
 version = "0.1.0"
+dependencies = [
+ "clap",
+]
 
 [[package]]
 name = "rock-lib"
 version = "0.1.0"
 dependencies = [
  "ariadne",
+ "paste",
 ]
 
 [[package]]

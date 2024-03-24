@@ -1,0 +1,351 @@
+use paste::paste;
+
+use crate::ast::tree::*;
+
+macro_rules! walk_list {
+    ($visitor:expr, $method:ident, $list:expr) => {
+        for elem in $list {
+            elem.visit($visitor);
+        }
+    };
+
+    ($visitor:expr, $method:ident, $list:expr, $($extra_args:expr),*) => {
+        for elem in $list {
+            $visitor.$method(elem, $($extra_args,)*)
+        }
+    }
+}
+
+macro_rules! walk_map {
+    ($visitor:expr, $list:expr) => {
+        for (k, elem) in $list {
+            k.visit($visitor);
+            elem.visit($visitor);
+        }
+    };
+}
+
+macro_rules! generate_visitor_trait {
+    ($(
+        $name:ty
+    )+) => {
+        pub trait Visitor<'ast>: Sized {
+            fn visit_name(&mut self, _name: &str) {}
+
+            fn visit_primitive<T>(&mut self, _val: T)
+            where
+                T: std::fmt::Debug,
+            {}
+
+            paste! {
+                $(
+                    fn [<visit_ $name:snake>](&mut self, node: &'ast $name) {
+                        [<walk_ $name:snake>](self, node);
+                    }
+                )+
+            }
+        }
+
+        $(
+            impl $name {
+                pub fn visit<'ast, T: Visitor<'ast>>(&'ast self, visitor: &mut T) {
+                    paste! {
+                        visitor.[<visit_ $name:snake>](self);
+                    }
+                }
+            }
+        )+
+    };
+}
+
+generate_visitor_trait!(
+    Program
+    Module
+    TopLevel
+    MacroDecl
+    MacroInvoc
+    TraitDecl
+    Impl
+    EnumDecl
+    FunctionDecl
+    LambdaDecl
+    Block
+    StructDecl
+    Ident
+    Assignment
+    IdentifierPath
+    Statement
+    Loop
+    Expression
+    If
+    Else
+    UnaryExpr
+    Operator
+    PrimaryExpr
+    SecondaryExpr
+    Operand
+    Argument
+    Literal
+    StructInstance
+    EnumInstance
+    Array
+    ParseType
+    IdentOrType
+);
+
+pub fn walk_root<'a, V: Visitor<'a>>(visitor: &mut V, root: &'a Program) {
+    visitor.visit_module(&root.module);
+}
+
+pub fn walk_module<'a, V: Visitor<'a>>(visitor: &mut V, _mod: &'a Module) {
+    walk_list!(visitor, visit_top_level, &_mod.top_levels);
+}
+
+pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLevel) {
+    match &top_level.kind {
+        TopLevelKind::Module(m) => visitor.visit_module(m),
+        TopLevelKind::Import(ident_path) => visitor.visit_identifier_path(ident_path),
+        TopLevelKind::Export(ident_path) => visitor.visit_identifier_path(ident_path),
+        TopLevelKind::InfixOperator(_precedence, fn_decl) => visitor.visit_function_decl(fn_decl),
+        TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
+        TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
+        TopLevelKind::FunctionDecl(f) => visitor.visit_function_decl(f),
+        TopLevelKind::StructDecl(i) => visitor.visit_struct_decl(i),
+        TopLevelKind::TraitDecl(t) => visitor.visit_trait_decl(t),
+        TopLevelKind::EnumDecl(e) => visitor.visit_enum_decl(e),
+        TopLevelKind::Impl(i) => visitor.visit_impl(i),
+    };
+}
+
+pub fn walk_struct_decl<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructDecl) {
+    visitor.visit_parse_type(&s.name);
+
+    walk_map!(visitor, &s.fields);
+}
+
+pub fn walk_trait<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
+    visitor.visit_parse_type(&t.name);
+
+    walk_map!(visitor, &t.methods);
+
+    walk_map!(visitor, &t.signatures);
+}
+
+pub fn walk_impl<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a Impl) {
+    visitor.visit_parse_type(&i.name);
+
+    walk_map!(visitor, &i.methods);
+}
+
+pub fn walk_function_decl<'a, V: Visitor<'a>>(visitor: &mut V, function_decl: &'a FunctionDecl) {
+    visitor.visit_ident(&function_decl.name);
+
+    visitor.visit_lambda_decl(&function_decl.lambda);
+}
+
+pub fn walk_ident_or_type<'a, V: Visitor<'a>>(visitor: &mut V, ident: &'a IdentOrType) {
+    match ident {
+        IdentOrType::Ident(ident) => visitor.visit_ident(ident),
+        IdentOrType::Type(ty) => visitor.visit_parse_type(ty),
+    }
+}
+
+pub fn walk_identifier_path<'a, V: Visitor<'a>>(
+    visitor: &mut V,
+    identifier_path: &'a IdentifierPath,
+) {
+    walk_list!(visitor, visit_ident, &identifier_path.path);
+}
+
+pub fn walk_ident<'a, V: Visitor<'a>>(visitor: &mut V, identifier: &'a Ident) {
+    visitor.visit_name(&identifier.name);
+}
+
+pub fn walk_block<'a, V: Visitor<'a>>(visitor: &mut V, body: &'a Block) {
+    walk_list!(visitor, visit_statement, &body.statements);
+}
+
+pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statement) {
+    match &statement {
+        Statement::Assignment(assign) => visitor.visit_assignment(assign),
+        Statement::Expression(expr) => visitor.visit_expression(expr),
+        Statement::Return(expr) => visitor.visit_expression(expr),
+        Statement::Continue(expr) => visitor.visit_expression(expr),
+        Statement::Break(expr) => visitor.visit_expression(expr),
+        Statement::EmptyLine => {}
+    }
+}
+
+pub fn walk_assignment<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a Assignment) {
+    visitor.visit_expression(&assign.lhs);
+    visitor.visit_expression(&assign.rhs);
+}
+
+pub fn walk_for<'a, V: Visitor<'a>>(visitor: &mut V, for_loop: &'a Loop) {
+    match for_loop {
+        Loop::For(ident, condition, block) => {
+            visitor.visit_ident(ident);
+            visitor.visit_expression(condition);
+            visitor.visit_block(block);
+        }
+        Loop::While(expr, block) => {
+            visitor.visit_expression(expr);
+            visitor.visit_block(block);
+        }
+        Loop::Loop(loop_) => visitor.visit_block(loop_),
+    }
+}
+
+pub fn walk_if<'a, V: Visitor<'a>>(visitor: &mut V, r#if: &'a If) {
+    visitor.visit_expression(&r#if.condition);
+
+    visitor.visit_block(&r#if.then);
+
+    if let Some(r#else) = &r#if.else_ {
+        visitor.visit_else(r#else);
+    }
+}
+
+pub fn walk_else<'a, V: Visitor<'a>>(visitor: &mut V, r#else: &'a Else) {
+    match r#else {
+        Else::If(if_) => visitor.visit_if(if_),
+        Else::Block(block) => visitor.visit_block(block),
+    }
+}
+
+pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression) {
+    match &expr {
+        Expression::BinopExpr(unary, operator, expr) => {
+            visitor.visit_unary_expr(unary);
+            visitor.visit_operator(operator);
+            visitor.visit_expression(&*expr);
+        }
+        Expression::UnaryExpr(unary) => visitor.visit_unary_expr(unary),
+    }
+}
+
+pub fn walk_struct_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructInstance) {
+    visitor.visit_parse_type(&s.name);
+
+    walk_map!(visitor, &s.fields);
+}
+
+pub fn walk_unary_expr<'a, V: Visitor<'a>>(visitor: &mut V, unary: &'a UnaryExpr) {
+    match unary {
+        UnaryExpr::PrimaryExpr(primary) => visitor.visit_primary_expr(primary),
+        UnaryExpr::UnaryExpr(op, unary) => {
+            visitor.visit_operator(op);
+            visitor.visit_unary_expr(&*unary);
+        }
+    }
+}
+
+pub fn walk_primary_expr<'a, V: Visitor<'a>>(visitor: &mut V, primary: &'a PrimaryExpr) {
+    visitor.visit_operand(&primary.operand);
+
+    if let Some(secondaries) = &primary.secondaries {
+        walk_list!(visitor, visit_secondary_expr, secondaries);
+    }
+}
+
+pub fn walk_secondary_expr<'a, V: Visitor<'a>>(visitor: &mut V, secondary: &'a SecondaryExpr) {
+    match secondary {
+        SecondaryExpr::Arguments(args) => {
+            walk_list!(visitor, visit_argument, args);
+        }
+        SecondaryExpr::Indice(expr) => {
+            visitor.visit_expression(expr);
+        }
+        SecondaryExpr::Dot(expr) => {
+            visitor.visit_ident(expr);
+        }
+    }
+}
+
+pub fn walk_operator<'a, V: Visitor<'a>>(_visitor: &mut V, _operator: &'a Operator) {}
+
+pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
+    match &operand {
+        Operand::Literal(l) => visitor.visit_literal(l),
+        Operand::Ident(i) => visitor.visit_identifier_path(i),
+        Operand::SelfIdent(i) => visitor.visit_ident(i),
+        Operand::StructInstance(s) => visitor.visit_struct_instance(s),
+        Operand::EnumInstance(e) => visitor.visit_enum_instance(e),
+        Operand::LambdaDecl(l) => visitor.visit_lambda_decl(l),
+        Operand::If(i) => visitor.visit_if(i),
+        Operand::Loop(l) => visitor.visit_loop(l),
+        Operand::Expression(e) => visitor.visit_expression(&*e),
+    }
+}
+
+pub fn walk_enum_instance<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumInstance) {
+    visitor.visit_parse_type(&e.name);
+    visitor.visit_parse_type(&e.variant);
+
+    walk_list!(visitor, visit_expression, &e.args);
+}
+
+pub fn walk_argument<'a, V: Visitor<'a>>(visitor: &mut V, argument: &'a Argument) {
+    visitor.visit_expression(&argument.arg);
+}
+
+pub fn walk_literal<'a, V: Visitor<'a>>(visitor: &mut V, literal: &'a Literal) {
+    match &literal.kind {
+        LiteralKind::Number(n) => visitor.visit_primitive(n),
+        LiteralKind::Float(f) => visitor.visit_primitive(f),
+        LiteralKind::String(s) => visitor.visit_primitive(s),
+        LiteralKind::Bool(b) => visitor.visit_primitive(b),
+        LiteralKind::Array(arr) => visitor.visit_array(arr),
+        LiteralKind::Char(c) => visitor.visit_primitive(c),
+    }
+}
+
+pub fn walk_array<'a, V: Visitor<'a>>(visitor: &mut V, arr: &'a Array) {
+    walk_list!(visitor, visit_expression, &arr.elements);
+}
+
+pub fn walk_parse_type<'a, V: Visitor<'a>>(visitor: &mut V, ty: &'a ParseType) {
+    visitor.visit_primitive(&ty.name);
+    walk_list!(visitor, visit_parse_type, &ty.generics);
+}
+
+pub fn walk_loop<'a, V: Visitor<'a>>(visitor: &mut V, loop_: &'a Loop) {
+    match loop_ {
+        Loop::For(ident, condition, block) => {
+            visitor.visit_ident(ident);
+            visitor.visit_expression(condition);
+            visitor.visit_block(block);
+        }
+        Loop::While(expr, block) => {
+            visitor.visit_expression(expr);
+            visitor.visit_block(block);
+        }
+        Loop::Loop(block) => visitor.visit_block(block),
+    }
+}
+
+pub fn walk_lambda_decl<'a, V: Visitor<'a>>(visitor: &mut V, lambda: &'a LambdaDecl) {
+    walk_list!(visitor, visit_ident_or_type, &lambda.parameters);
+    visitor.visit_block(&lambda.body);
+}
+
+pub fn walk_enum_decl<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumDecl) {
+    visitor.visit_parse_type(&e.name);
+    walk_list!(visitor, visit_parse_type, &e.variants);
+}
+
+pub fn walk_trait_decl<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
+    visitor.visit_parse_type(&t.name);
+
+    walk_map!(visitor, &t.methods);
+
+    walk_map!(visitor, &t.signatures);
+}
+
+pub fn walk_macro_decl<'a, V: Visitor<'a>>(_visitor: &mut V, _m: &'a MacroDecl) {}
+
+pub fn walk_macro_invoc<'a, V: Visitor<'a>>(_visitor: &mut V, _m: &'a MacroInvoc) {}
+
+pub fn walk_program<'a, V: Visitor<'a>>(visitor: &mut V, program: &'a Program) {
+    visitor.visit_module(&program.module);
+}

@@ -22,7 +22,7 @@ fn run() -> Result<(), Box<dyn Error>> {
 pub struct Config {
     #[arg(long)]
     entry_file: PathBuf,
-    #[arg(long)]
+    #[arg(long, default_value = "build")]
     output_dir: PathBuf,
     #[arg(long, default_value = "")]
     debug_print: String,

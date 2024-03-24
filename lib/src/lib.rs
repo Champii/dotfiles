@@ -49,3 +49,19 @@ pub fn compile(config: &Config) {
         println!("{:#?}", ast);
     }
 }
+
+pub fn format(config: &Config) {
+    let ast: Program = match parser::parse_root_file(&config) {
+        Ok(ast) => ast,
+        Err(e) => {
+            Diagnostic::from(e).report();
+            return;
+        }
+    };
+
+    if config.has_debug_print("ast") {
+        println!("{:#?}", ast);
+    }
+
+    std::fs::write(std::env::args().nth(1).unwrap(), ast.to_string()).unwrap();
+}
