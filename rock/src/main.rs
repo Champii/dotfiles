@@ -26,7 +26,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn build(config: &Config) {
+fn build(_config: &Config) {
     let entry_file = "src/main.rk";
 
     let out = std::process::Command::new("rockc")
@@ -39,7 +39,7 @@ fn build(config: &Config) {
     println!("{}", String::from_utf8_lossy(&out.stderr));
 }
 
-fn format(config: &Config) {
+fn format(_config: &Config) {
     let entry_file = "src/main.rk";
     let mut rockc_config = rock_lib::Config::default();
     rockc_config.entry_file = PathBuf::from(entry_file);
@@ -72,7 +72,6 @@ impl<'a> Visitor<'a> for AstFormater {
             std::fs::write(path, module.to_string()).unwrap();
         }
 
-        println!("Inline: {}", module.is_inline);
         walk_module(self, module);
     }
 }
