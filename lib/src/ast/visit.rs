@@ -60,6 +60,7 @@ macro_rules! generate_visitor_trait {
 
 generate_visitor_trait!(
     Program
+    ModuleDecl
     Module
     TopLevel
     MacroDecl
@@ -97,13 +98,21 @@ pub fn walk_root<'a, V: Visitor<'a>>(visitor: &mut V, root: &'a Program) {
     visitor.visit_module(&root.module);
 }
 
-pub fn walk_module<'a, V: Visitor<'a>>(visitor: &mut V, _mod: &'a Module) {
-    walk_list!(visitor, visit_top_level, &_mod.top_levels);
+pub fn walk_module<'a, V: Visitor<'a>>(visitor: &mut V, r#mod: &'a Module) {
+    if let Some(name) = &r#mod.name {
+        visitor.visit_ident(name);
+    }
+
+    walk_list!(visitor, visit_top_level, &r#mod.top_levels);
+}
+
+pub fn walk_module_decl<'a, V: Visitor<'a>>(visitor: &mut V, module_decl: &'a ModuleDecl) {
+    visitor.visit_module(&module_decl.0);
 }
 
 pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLevel) {
     match &top_level.kind {
-        TopLevelKind::Module(m) => visitor.visit_module(m),
+        TopLevelKind::Module(m) => visitor.visit_module_decl(m),
         TopLevelKind::Import(ident_path) => visitor.visit_identifier_path(ident_path),
         TopLevelKind::Export(ident_path) => visitor.visit_identifier_path(ident_path),
         TopLevelKind::InfixOperator(_precedence, fn_decl) => visitor.visit_function_decl(fn_decl),

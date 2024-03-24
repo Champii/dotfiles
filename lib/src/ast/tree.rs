@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::lexer::{Span, Token};
 
@@ -8,10 +8,14 @@ pub struct Program {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct ModuleDecl(pub Module);
+
+#[derive(Debug, PartialEq)]
 pub struct Module {
     pub name: Option<Ident>,
     pub top_levels: Vec<TopLevel>,
     pub is_inline: bool,
+    pub filepath: Option<PathBuf>,
 }
 
 impl Module {
@@ -40,7 +44,7 @@ pub struct TopLevel {
 
 #[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
-    Module(Module),
+    Module(ModuleDecl),
     Import(IdentifierPath),
     Export(IdentifierPath),
     InfixOperator(u8, FunctionDecl),

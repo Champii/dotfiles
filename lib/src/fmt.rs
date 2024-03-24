@@ -35,15 +35,22 @@ impl Display for Program {
     }
 }
 
+impl Display for ModuleDecl {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(name) = &self.0.name {
+            write!(f, "mod {}\n", name)?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Display for Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if let Some(name) = &self.name {
-            write!(f, "mod {}\n", name)?;
-            if !self.is_inline {
-                return Ok(());
-            }
+        if self.is_inline {
             increase_indent();
         }
+
         for (i, top_level) in self.top_levels.iter().enumerate() {
             write!(f, "{}", indent())?;
             write!(f, "{}", top_level)?;
@@ -52,7 +59,7 @@ impl Display for Module {
             }
         }
 
-        if self.name.is_some() {
+        if self.is_inline {
             decrease_indent();
         }
 

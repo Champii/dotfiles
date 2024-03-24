@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, Module,
-        StructDecl, TopLevel, TopLevelKind, TraitDecl,
+        ModuleDecl, StructDecl, TopLevel, TopLevelKind, TraitDecl,
     },
     lexer::{Token, TokenType},
     parser::{
@@ -92,7 +92,7 @@ impl Parsable for TopLevel {
                     (
                         TopLevel {
                             ident: module.name.clone().unwrap_or_default(),
-                            kind: TopLevelKind::Module(module),
+                            kind: TopLevelKind::Module(ModuleDecl(module)),
                         },
                         new_tokens,
                     )

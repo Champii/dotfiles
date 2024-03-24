@@ -14,21 +14,18 @@ impl Parsable for Program {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), ParseError> {
-        parse_ctx.add_file_relative("./main.rk".to_string());
+        parse_ctx.add_file_relative("./src/main.rk".to_string());
 
         let (module, tokens) = ModuleInner::parse(tokens, parse_ctx)?;
+        let mut module: Module = module.into();
+        module.filepath = Some(parse_ctx.current_file.clone().unwrap());
 
         let remaining_tokens = expect_token(tokens, TokenType::Eof)?;
 
         if !remaining_tokens.is_empty() {
             return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()));
         }
-        Ok((
-            Program {
-                module: module.into(),
-            },
-            tokens,
-        ))
+        Ok((Program { module }, tokens))
     }
 }
 
@@ -54,22 +51,26 @@ impl Parsable for Module {
             let (module_inner, tokens) = ModuleInner::parse(tokens, parse_ctx)?;
 
             parse_ctx.dedent();
+
             Ok((
                 Module {
                     name: Some(name),
                     top_levels: module_inner.top_levels,
                     is_inline: true,
+                    filepath: None,
                 },
                 tokens,
             ))
         } else {
             let tokens = expect_token(tokens, TokenType::Eol)?;
             let old_file_name = parse_ctx.current_file.clone();
+
             parse_ctx.add_file_relative(name.name.clone());
             let path = parse_ctx.current_file.clone().unwrap();
 
             let mut module: Module = parse_file::<ModuleInner>(path.clone(), parse_ctx)?.into();
 
+            module.filepath = Some(path);
             module.name = Some(name);
 
             parse_ctx.current_file = old_file_name;
@@ -85,6 +86,7 @@ impl From<ModuleInner> for Module {
             name: None,
             top_levels: module_inner.top_levels,
             is_inline: false,
+            filepath: None,
         }
     }
 }

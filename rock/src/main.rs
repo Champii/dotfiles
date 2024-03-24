@@ -1,6 +1,10 @@
 use std::{error::Error, path::PathBuf};
 
 use clap::{Parser, Subcommand};
+use rock_lib::ast::{
+    visit::{walk_module, Visitor},
+    Module, Program,
+};
 
 fn main() {
     if let Err(e) = run() {
@@ -13,7 +17,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     let config = Config::parse();
 
     match config.command {
-        Command::Format => todo!(),
+        Command::Format => format(&config),
         Command::Build => build(&config),
         Command::Run => todo!(),
         Command::Test => todo!(),
@@ -25,7 +29,6 @@ fn run() -> Result<(), Box<dyn Error>> {
 fn build(config: &Config) {
     let entry_file = "src/main.rk";
 
-    println!("compiling crate");
     let out = std::process::Command::new("rockc")
         .arg("--entry-file")
         .arg(entry_file)
@@ -34,6 +37,16 @@ fn build(config: &Config) {
 
     println!("{}", String::from_utf8_lossy(&out.stdout));
     println!("{}", String::from_utf8_lossy(&out.stderr));
+}
+
+fn format(config: &Config) {
+    let entry_file = "src/main.rk";
+    let mut rockc_config = rock_lib::Config::default();
+    rockc_config.entry_file = PathBuf::from(entry_file);
+
+    let program: Program = rock_lib::parser::parse_root_file(&rockc_config).unwrap();
+
+    program.visit(&mut AstFormater);
 }
 
 #[derive(Parser, Debug)]
@@ -49,4 +62,17 @@ pub enum Command {
     Build,
     Run,
     Test,
+}
+
+struct AstFormater;
+
+impl<'a> Visitor<'a> for AstFormater {
+    fn visit_module(&mut self, module: &'a Module) {
+        if let Some(path) = &module.filepath {
+            std::fs::write(path, module.to_string()).unwrap();
+        }
+
+        println!("Inline: {}", module.is_inline);
+        walk_module(self, module);
+    }
 }
