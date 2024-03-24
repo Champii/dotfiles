@@ -21,6 +21,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         Command::Build => build(&config),
         Command::Run => todo!(),
         Command::Test => todo!(),
+        Command::Expand => expand(&config),
     }
 
     Ok(())
@@ -49,6 +50,17 @@ fn format(_config: &Config) {
     program.visit(&mut AstFormater);
 }
 
+fn expand(_config: &Config) {
+    let entry_file = "src/main.rk";
+    let mut rockc_config = rock_lib::Config::default();
+    rockc_config.entry_file = PathBuf::from(entry_file);
+
+    let program: Program = rock_lib::parser::parse_root_file(&rockc_config).unwrap();
+    let expanded = rock_lib::macro_expansion::expand_macros(program).unwrap();
+
+    expanded.visit(&mut ExpandedPrint);
+}
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Config {
@@ -62,6 +74,7 @@ pub enum Command {
     Build,
     Run,
     Test,
+    Expand,
 }
 
 struct AstFormater;
@@ -72,6 +85,18 @@ impl<'a> Visitor<'a> for AstFormater {
             std::fs::write(path, module.to_string()).unwrap();
         }
 
+        walk_module(self, module);
+    }
+}
+
+struct ExpandedPrint;
+
+impl<'a> Visitor<'a> for ExpandedPrint {
+    fn visit_module(&mut self, module: &'a Module) {
+        if let Some(name) = &module.name {
+            println!("### {}: ###\n", name.to_string());
+        }
+        println!("{}", module.to_string());
         walk_module(self, module);
     }
 }

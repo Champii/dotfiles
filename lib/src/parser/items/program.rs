@@ -19,6 +19,10 @@ impl Parsable for Program {
         let (module, tokens) = ModuleInner::parse(tokens, parse_ctx)?;
         let mut module: Module = module.into();
         module.filepath = Some(parse_ctx.current_file.clone().unwrap());
+        module.name = Some(Ident {
+            name: "main".to_string(),
+            span: Default::default(),
+        });
 
         let remaining_tokens = expect_token(tokens, TokenType::Eof)?;
 
