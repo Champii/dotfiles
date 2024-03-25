@@ -83,6 +83,7 @@ impl Display for TopLevel {
             TopLevelKind::TraitDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::Impl(impl_) => write!(f, "{}", impl_),
+            TopLevelKind::Comment(comment) => write!(f, "#{}\n", comment),
         }
     }
 }

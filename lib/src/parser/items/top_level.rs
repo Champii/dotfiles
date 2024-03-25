@@ -105,6 +105,17 @@ impl Parsable for TopLevel {
             }
         }
 
+        if let TokenType::Comment(s) = &tokens[0].token_type {
+            let tokens = expect_token(&tokens[1..], TokenType::Eol)?;
+            return Ok((
+                TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Comment(s.clone()),
+                },
+                tokens,
+            ));
+        }
+
         if TokenType::Operator(">".to_string()) == tokens[0].token_type {
             let (identifier_path, new_tokens) = IdentifierPath::parse(&tokens[1..], parse_ctx)?;
             let new_tokens = expect_token(new_tokens, TokenType::Eol)?;

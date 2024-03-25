@@ -123,6 +123,7 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevelKind::TraitDecl(t) => visitor.visit_trait_decl(t),
         TopLevelKind::EnumDecl(e) => visitor.visit_enum_decl(e),
         TopLevelKind::Impl(i) => visitor.visit_impl(i),
+        TopLevelKind::Comment(_) => {}
     };
 }
 

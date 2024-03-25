@@ -36,8 +36,12 @@ fn build(_config: &Config) {
         .output()
         .expect("failed to execute process");
 
-    println!("{}", String::from_utf8_lossy(&out.stdout));
-    println!("{}", String::from_utf8_lossy(&out.stderr));
+    if !out.stdout.is_empty() {
+        println!("{}", String::from_utf8_lossy(&out.stdout));
+    }
+    if !out.stderr.is_empty() {
+        println!("{}", String::from_utf8_lossy(&out.stderr));
+    }
 }
 
 fn format(_config: &Config) {

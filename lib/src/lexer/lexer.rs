@@ -109,6 +109,7 @@ impl Lexer {
             '\'' => self.token(TokenType::SimpleQuote, 1),
             '"' => self.token(TokenType::DoubleQuote, 1),
             '@' => self.token(TokenType::Arobase, 1),
+            '#' => self.comment(),
             c if c.is_alphabetic() => self.ident_or_keyword_or_type(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
@@ -209,6 +210,20 @@ impl Lexer {
 
         self.token(
             TokenType::MacroVar(self.input[start..end].to_string()),
+            end - start,
+        )
+    }
+
+    fn comment(&mut self) -> Token {
+        let start = self.position;
+        let mut end = self.position;
+
+        while self.peek(end - start) != '\n' {
+            end += 1;
+        }
+
+        self.token(
+            TokenType::Comment(self.input[start + 1..end].to_string()),
             end - start,
         )
     }

@@ -55,6 +55,7 @@ pub enum TopLevelKind {
     TraitDecl(TraitDecl),
     EnumDecl(EnumDecl),
     Impl(Impl),
+    Comment(String),
 }
 
 #[derive(Debug, PartialEq)]
