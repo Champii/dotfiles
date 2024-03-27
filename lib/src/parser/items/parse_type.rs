@@ -1,5 +1,6 @@
 use crate::{
     ast::ParseType,
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
@@ -12,7 +13,7 @@ impl Parsable for ParseType {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Type("".to_string())))?;
@@ -23,7 +24,8 @@ impl Parsable for ParseType {
                 return Err(ParseError::UnexpectedToken(
                     token.clone(),
                     vec![TokenType::Ident("".to_string())],
-                ))
+                )
+                .into())
             }
         };
 

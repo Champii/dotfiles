@@ -3,6 +3,7 @@ use crate::{
         EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, Module,
         ModuleDecl, StructDecl, TopLevel, TopLevelKind, TraitDecl,
     },
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -15,7 +16,7 @@ impl Parsable for TopLevel {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if let TokenType::Keyword(keyword) = &tokens[0].token_type {
             if keyword == "macro" {
                 return MacroDecl::parse(tokens, parse_ctx).map(|(macro_decl, new_tokens)| {
@@ -71,7 +72,9 @@ impl Parsable for TopLevel {
                 if let TokenType::Number(precedence) = &tokens[1].token_type {
                     let precedence: u8 = precedence.parse().unwrap();
                     if precedence > 9 {
-                        return Err(ParseError::InvalidPrecedence(precedence, tokens[1].clone()));
+                        return Err(
+                            ParseError::InvalidPrecedence(precedence, tokens[1].clone()).into()
+                        );
                     }
                     let (f, new_tokens) = FunctionDecl::parse(&tokens[2..], parse_ctx)?;
                     return Ok((
@@ -85,7 +88,8 @@ impl Parsable for TopLevel {
                     return Err(ParseError::UnexpectedToken(
                         tokens[1].clone(),
                         vec![TokenType::Number("".to_string())],
-                    ));
+                    )
+                    .into());
                 }
             } else if keyword == "mod" {
                 return Module::parse(tokens, parse_ctx).map(|(module, new_tokens)| {
@@ -101,7 +105,8 @@ impl Parsable for TopLevel {
                 return Err(ParseError::UnexpectedKeyword(
                     tokens[0].clone(),
                     vec!["macro".to_string()],
-                ));
+                )
+                .into());
             }
         }
 
@@ -171,7 +176,8 @@ impl Parsable for TopLevel {
                 TokenType::MacroInvoc("".to_string()),
                 TokenType::Ident("".to_string()),
             ],
-        ))
+        )
+        .into())
     }
 }
 

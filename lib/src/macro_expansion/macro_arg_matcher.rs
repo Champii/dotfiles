@@ -1,6 +1,7 @@
 use crate::{
     ast::{Expression, Ident, MacroFragment},
-    lexer::{Span, Token, TokenType},
+    diagnostic::Diagnostics,
+    lexer::{Token, TokenType},
     parser::{Parsable, ParseError},
 };
 
@@ -17,6 +18,7 @@ struct MacroThread<'a> {
 pub struct MacroArgMatcher<'a> {
     threads: Vec<MacroThread<'a>>,
     must_be_completed: bool,
+    args: &'a [Token],
 }
 
 impl<'a> MacroArgMatcher<'a> {
@@ -27,19 +29,21 @@ impl<'a> MacroArgMatcher<'a> {
                 tokens: thread,
                 correspondances: Correspondance::new(),
             }],
+            args,
             must_be_completed: false,
         }
     }
 
-    pub fn run(&mut self) -> Result<Correspondance, ParseError> {
+    pub fn run(&mut self) -> Result<Correspondance, Diagnostics> {
         self.must_be_completed = true;
         let (correspondances, _) = self.match_threads()?;
 
         Ok(correspondances)
     }
 
-    fn match_threads(&mut self) -> Result<(Correspondance, &'a [Token]), ParseError> {
+    fn match_threads(&mut self) -> Result<(Correspondance, &'a [Token]), Diagnostics> {
         let mut new_threads = self.threads.clone();
+        let mut most_advanced_arg_idx = 0;
 
         while !has_one_solution(new_threads.clone(), self.must_be_completed)
             && !new_threads.is_empty()
@@ -66,6 +70,11 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
+                            } else {
+                                let last_found_arg = self.args.len() - thread.args.len();
+                                if last_found_arg > most_advanced_arg_idx {
+                                    most_advanced_arg_idx = last_found_arg;
+                                }
                             }
                         }
                         MacroFragment::Expr(name) => {
@@ -84,6 +93,28 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
+                            } else {
+                                let last_found_arg = self.args.len() - thread.args.len();
+                                if last_found_arg > most_advanced_arg_idx {
+                                    most_advanced_arg_idx = last_found_arg;
+                                }
+                            }
+                        }
+                        MacroFragment::Type(name) => {
+                            if let TokenType::Type(_) = arg.token_type {
+                                thread
+                                    .correspondances
+                                    .insert_direct(name.name.clone(), vec![arg.clone()]);
+                                new_new_threads.push(MacroThread {
+                                    args: &thread.args[1..],
+                                    tokens: tokens[1..].to_vec(),
+                                    correspondances: thread.correspondances.clone(),
+                                });
+                            } else {
+                                let last_found_arg = self.args.len() - thread.args.len();
+                                if last_found_arg > most_advanced_arg_idx {
+                                    most_advanced_arg_idx = last_found_arg;
+                                }
                             }
                         }
                         MacroFragment::Token(t) => {
@@ -93,6 +124,11 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
+                            } else {
+                                let last_found_arg = self.args.len() - thread.args.len();
+                                if last_found_arg > most_advanced_arg_idx {
+                                    most_advanced_arg_idx = last_found_arg;
+                                }
                             }
                         }
                         MacroFragment::Repetition(repetition) => {
@@ -144,13 +180,16 @@ impl<'a> MacroArgMatcher<'a> {
             new_threads = new_new_threads.clone();
         }
 
+        let last_found_arg = self.args[most_advanced_arg_idx].clone();
+
         if let Some(thread) = get_correspondances_thread(new_threads.clone()) {
             Ok((thread.correspondances.clone(), thread.args))
         } else {
             Err(ParseError::MacroNoCorrespondance(Ident {
                 name: "macro".to_string(),
-                span: Span::default(),
-            }))
+                span: last_found_arg.span.clone(),
+            })
+            .into())
         }
     }
 }

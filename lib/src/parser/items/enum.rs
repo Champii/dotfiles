@@ -1,9 +1,10 @@
 use crate::{
     ast::{EnumDecl, EnumInstance, ParseType},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         util::{expect_token, ignore_empty_lines, parse_vec_of},
-        Parsable, ParseCtx, ParseError,
+        Parsable, ParseCtx,
     },
 };
 
@@ -11,7 +12,7 @@ impl Parsable for EnumDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("enum".to_string()))?;
 
         let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
@@ -60,7 +61,7 @@ impl Parsable for EnumInstance {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (name, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::DoubleColon)?;

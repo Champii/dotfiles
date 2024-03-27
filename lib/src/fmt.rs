@@ -192,6 +192,7 @@ impl Display for MacroFragment {
         match self {
             MacroFragment::Ident(ident) => write!(f, "${}", ident),
             MacroFragment::Expr(ident) => write!(f, "${}", ident),
+            MacroFragment::Type(ident) => write!(f, "${}", ident),
             MacroFragment::Token(token) => {
                 if let TokenType::Indent(_) = token.token_type {
                     write!(f, "{}", indent())?;
@@ -218,6 +219,7 @@ impl Display for HeadMacroFragment {
         match &self.0 {
             MacroFragment::Ident(ident) => write!(f, "${}:ident", ident),
             MacroFragment::Expr(ident) => write!(f, "${}:expr", ident),
+            MacroFragment::Type(ident) => write!(f, "${}:ty", ident),
             MacroFragment::Token(token) => write!(f, "{}", token),
             MacroFragment::Repetition(fragments) => {
                 write!(f, "$(")?;

@@ -2,10 +2,11 @@ use std::collections::BTreeMap;
 
 use crate::{
     ast::{Expression, Ident, ParseType, StructDecl, StructInstance},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ignore_empty_lines, parse_vec_of, ParseError},
+        util::{expect_token, ignore_empty_lines, parse_vec_of},
         Parsable,
     },
 };
@@ -14,7 +15,7 @@ impl Parsable for StructDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("struct".to_string()))?;
 
         let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
@@ -59,7 +60,7 @@ impl Parsable for (Ident, ParseType) {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
         let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
@@ -73,7 +74,7 @@ impl Parsable for (Ident, Expression) {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
@@ -86,8 +87,18 @@ impl Parsable for StructInstance {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
+
+        if remaining_tokens.is_empty() {
+            return Ok((
+                StructInstance {
+                    name: parse_type,
+                    fields: BTreeMap::new(),
+                },
+                remaining_tokens,
+            ));
+        }
 
         if let TokenType::Eol = remaining_tokens[0].token_type {
             parse_ctx.indent();
@@ -128,7 +139,7 @@ impl Parsable for StructInstanceBlock {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining_tokens = tokens;
         let mut remaining_tokens_after_match = tokens;
         let mut fields = Vec::new();

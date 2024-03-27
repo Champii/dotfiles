@@ -5,13 +5,14 @@ mod util;
 
 use std::path::PathBuf;
 
+use crate::diagnostic::Diagnostics;
 use crate::lexer::Lexer;
 use crate::Config;
 pub use parsable::Parsable;
 pub use parse_ctx::ParseCtx;
 pub use util::ParseError;
 
-pub fn parse_root_file<T: Parsable>(config: &Config) -> Result<T, ParseError> {
+pub fn parse_root_file<T: Parsable>(config: &Config) -> Result<T, Diagnostics> {
     let file_path = config.entry_file.clone();
 
     let file = std::fs::read_to_string(file_path.clone())
@@ -25,7 +26,7 @@ pub fn parse_root_file<T: Parsable>(config: &Config) -> Result<T, ParseError> {
 pub fn parse_file<T: Parsable>(
     file_path: PathBuf,
     parse_ctx: &mut ParseCtx,
-) -> Result<T, ParseError> {
+) -> Result<T, Diagnostics> {
     let file = std::fs::read_to_string(file_path.clone())
         .map_err(|_e| ParseError::UnknownFile(file_path.to_str().unwrap().to_string()))?;
 
@@ -35,13 +36,13 @@ pub fn parse_file<T: Parsable>(
 }
 
 #[allow(dead_code)]
-pub fn parse_string<T: Parsable>(input: &str) -> Result<T, ParseError> {
+pub fn parse_string<T: Parsable>(input: &str) -> Result<T, Diagnostics> {
     let lexer = Lexer::new(PathBuf::new(), input).map_err(ParseError::Lexer)?;
 
     parse(lexer, &mut ParseCtx::new(&Config::default()))
 }
 
-pub fn parse<T: Parsable>(mut lexer: Lexer, parse_ctx: &mut ParseCtx) -> Result<T, ParseError> {
+pub fn parse<T: Parsable>(mut lexer: Lexer, parse_ctx: &mut ParseCtx) -> Result<T, Diagnostics> {
     let tokens = lexer.collect().map_err(ParseError::Lexer)?;
 
     if parse_ctx.config.has_debug_print("tokens") {

@@ -1,5 +1,6 @@
 use crate::{
     ast::{Block, Statement},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,9 +13,9 @@ impl Parsable for Block {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if tokens.len() == 0 {
-            return Err(ParseError::UnexpectedEof(TokenType::Eol));
+            return Err(ParseError::UnexpectedEof(TokenType::Eol).into());
         }
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
             parse_ctx.indent();

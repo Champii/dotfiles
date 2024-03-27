@@ -2,10 +2,11 @@ use std::collections::BTreeMap;
 
 use crate::{
     ast::{FunctionDecl, Impl, ParseType},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ignore_empty_lines, ParseError},
+        util::{expect_token, ignore_empty_lines},
         Parsable,
     },
 };
@@ -14,7 +15,7 @@ impl Parsable for Impl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("impl".to_string()))?;
 
         let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;

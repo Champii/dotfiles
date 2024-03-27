@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{ast::Program, diagnostic::Diagnostic};
+use crate::ast::Program;
 pub mod ast;
 mod diagnostic;
 mod fmt;
@@ -26,7 +26,7 @@ pub fn compile(config: &Config) {
     let ast: Program = match parser::parse_root_file(&config) {
         Ok(ast) => ast,
         Err(e) => {
-            Diagnostic::from(e).report();
+            e.report();
             return;
         }
     };
@@ -38,7 +38,7 @@ pub fn compile(config: &Config) {
     let ast = match macro_expansion::expand_macros(ast) {
         Ok(ast) => ast,
         Err(e) => {
-            Diagnostic::from(e).report();
+            e.report();
             return;
         }
     };

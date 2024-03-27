@@ -1,5 +1,6 @@
 use crate::{
     ast::{Ident, IdentOrType, IdentifierPath, ParseType},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,7 +13,7 @@ impl Parsable for IdentifierPath {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (idents, remaining_tokens) =
             parse_vec_of(&tokens, Some(TokenType::DoubleColon), parse_ctx)?;
 
@@ -24,7 +25,7 @@ impl Parsable for IdentOrType {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if let Ok((ident, remaining_tokens)) = Ident::parse(tokens, parse_ctx) {
             return Ok((IdentOrType::Ident(ident), remaining_tokens));
         }
@@ -39,7 +40,7 @@ impl Parsable for Ident {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Ident("".to_string())))?;
@@ -62,7 +63,8 @@ impl Parsable for Ident {
             _ => Err(ParseError::UnexpectedToken(
                 token.clone(),
                 vec![TokenType::Ident("".to_string())],
-            )),
+            )
+            .into()),
         }
     }
 }

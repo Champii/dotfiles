@@ -1,18 +1,15 @@
 use crate::{
     ast::{Block, Expression, Ident, Loop},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
-    parser::{
-        parsable::Parsable,
-        parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
-    },
+    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::expect_token},
 };
 
 impl Parsable for Loop {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining = tokens;
 
         if TokenType::Keyword("for".to_string()) == remaining[0].token_type {

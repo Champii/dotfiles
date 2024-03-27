@@ -1,5 +1,6 @@
 use crate::{
     ast::{Block, FunctionDecl, Ident, LambdaDecl},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,7 +13,7 @@ impl Parsable for FunctionDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining_tokens = tokens;
         let mut inject_self = false;
 
@@ -43,7 +44,7 @@ impl Parsable for LambdaDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = tokens;
 
         if remaining_tokens[0].token_type == TokenType::OpenParen {
@@ -81,7 +82,7 @@ impl Parsable for LambdaDecl {
 fn parse_function_shorthand<'a>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
-) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+) -> Result<(LambdaDecl, &'a [Token]), Diagnostics> {
     let remaining_tokens = tokens;
 
     let remaining_tokens = expect_token(remaining_tokens, TokenType::OpenParen)?;
@@ -102,7 +103,7 @@ fn parse_function_shorthand<'a>(
 fn expand_shorthand_prefix_argument<'a>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
-) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+) -> Result<(LambdaDecl, &'a [Token]), Diagnostics> {
     let remaining_tokens = tokens;
 
     let span = remaining_tokens[0].span.clone();
@@ -142,7 +143,8 @@ fn expand_shorthand_prefix_argument<'a>(
         return Err(ParseError::UnexpectedToken(
             other_remaining_tokens[0].clone(),
             vec![TokenType::CloseParen],
-        ));
+        )
+        .into());
     }
     let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 
@@ -152,7 +154,7 @@ fn expand_shorthand_prefix_argument<'a>(
 fn expand_shorthand_suffix_argument<'a>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
-) -> Result<(LambdaDecl, &'a [Token]), ParseError> {
+) -> Result<(LambdaDecl, &'a [Token]), Diagnostics> {
     let remaining_tokens = tokens;
 
     let span = remaining_tokens[0].span.clone();
@@ -167,7 +169,8 @@ fn expand_shorthand_suffix_argument<'a>(
         return Err(ParseError::UnexpectedToken(
             operator.clone(),
             vec![TokenType::Operator("".to_string())],
-        ));
+        )
+        .into());
     }
 
     let inner_tokens = inner_tokens[..inner_tokens.len() - 1].to_vec();
@@ -207,7 +210,8 @@ fn expand_shorthand_suffix_argument<'a>(
         return Err(ParseError::UnexpectedToken(
             other_remaining_tokens[0].clone(),
             vec![TokenType::CloseParen],
-        ));
+        )
+        .into());
     }
     let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 

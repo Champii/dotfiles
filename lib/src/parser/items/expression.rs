@@ -3,6 +3,7 @@ use crate::{
         Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
         Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
     },
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -15,7 +16,7 @@ impl Parsable for Expression {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens, parse_ctx)?;
 
         if remaining_tokens.is_empty() {
@@ -49,7 +50,7 @@ impl Parsable for UnaryExpr {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
@@ -76,7 +77,7 @@ impl Parsable for PrimaryExpr {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (operand, remaining_tokens) = Operand::parse(tokens, parse_ctx)?;
 
         let mut primary_expr = PrimaryExpr {
@@ -112,7 +113,7 @@ impl Parsable for SecondaryExpr {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
@@ -133,10 +134,7 @@ impl Parsable for SecondaryExpr {
                 && parse_ctx.inside_argument_list[list_idx]
             {
                 parse_ctx.inside_argument_list[list_idx] = false;
-                Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![TokenType::OpenParen],
-                ))
+                Err(ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into())
             } else {
                 let (ident, remaining_tokens) = Ident::parse(&tokens[3..], parse_ctx)?;
 
@@ -161,10 +159,7 @@ impl Parsable for SecondaryExpr {
                 && parse_ctx.inside_argument_list[list_idx]
             {
                 parse_ctx.inside_argument_list[list_idx] = false;
-                Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![TokenType::OpenParen],
-                ))
+                Err(ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into())
             } else {
                 let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
                 parse_ctx.inside_argument_list.pop();
@@ -180,10 +175,9 @@ impl Parsable for SecondaryExpr {
             parse_ctx.inside_argument_list.pop();
 
             if arguments.is_empty() {
-                return Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![TokenType::OpenParen],
-                ));
+                return Err(
+                    ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into(),
+                );
             }
 
             let arguments = arguments
@@ -200,7 +194,7 @@ impl Parsable for Operand {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if TokenType::Keyword("if".to_string()) == tokens[0].token_type {
             let (if_, remaining_tokens) = If::parse(tokens, parse_ctx)?;
             return Ok((Operand::If(Box::new(if_)), remaining_tokens));
@@ -220,9 +214,14 @@ impl Parsable for Operand {
         }
 
         if let TokenType::Type(_) = tokens[0].token_type {
-            if let TokenType::DoubleColon = tokens[1].token_type {
-                let (enum_instance, remaining_tokens) = EnumInstance::parse(tokens, parse_ctx)?;
-                return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
+            if tokens.len() > 1 {
+                if let TokenType::DoubleColon = tokens[1].token_type {
+                    let (enum_instance, remaining_tokens) = EnumInstance::parse(tokens, parse_ctx)?;
+                    return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
+                } else {
+                    let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
+                    return Ok((Operand::StructInstance(instance), remaining_tokens));
+                }
             } else {
                 let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
                 return Ok((Operand::StructInstance(instance), remaining_tokens));
@@ -263,7 +262,8 @@ impl Parsable for Operand {
                     TokenType::MacroInvoc("".to_string()),
                     TokenType::Number("".to_string()),
                 ],
-            )),
+            )
+            .into()),
         }
     }
 }
@@ -272,7 +272,7 @@ impl Parsable for Operator {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
@@ -290,7 +290,8 @@ impl Parsable for Operator {
             _ => Err(ParseError::UnexpectedToken(
                 token.clone(),
                 vec![TokenType::Operator("".to_string())],
-            )),
+            )
+            .into()),
         }
     }
 }

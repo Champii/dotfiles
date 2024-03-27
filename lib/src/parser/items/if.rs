@@ -1,18 +1,15 @@
 use crate::{
     ast::{Block, Else, Expression, If},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
-    parser::{
-        parsable::Parsable,
-        parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
-    },
+    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::expect_token},
 };
 
 impl Parsable for If {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("if".to_string()))?;
 
         let (condition, mut remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
@@ -77,7 +74,7 @@ impl Parsable for Else {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("else".to_string()))?;
 
         if let TokenType::Keyword(keyword) = &remaining_tokens[0].token_type {

@@ -1,5 +1,6 @@
 use crate::{
     ast::{Array, Expression, Literal, LiteralKind},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,7 +13,7 @@ impl Parsable for Literal {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut tokens = tokens;
 
         let token = tokens
@@ -53,7 +54,8 @@ impl Parsable for Literal {
                 return Err(ParseError::UnexpectedToken(
                     token.clone(),
                     vec![TokenType::Number("".to_string())],
-                ))
+                )
+                .into())
             }
         };
 
@@ -71,7 +73,7 @@ impl Parsable for String {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::DoubleQuote)?;
 
         let (inner_tokens, remaining_tokens) =
@@ -92,16 +94,15 @@ impl Parsable for char {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining_tokens = expect_token(tokens, TokenType::SimpleQuote)?;
 
         let inner_token = remaining_tokens[0].clone();
 
         if format!("{}", inner_token.token_type.to_string()).len() > 1 {
-            return Err(ParseError::UnexpectedToken(
-                inner_token,
-                vec![TokenType::SimpleQuote],
-            ));
+            return Err(
+                ParseError::UnexpectedToken(inner_token, vec![TokenType::SimpleQuote]).into(),
+            );
         }
         remaining_tokens = &remaining_tokens[1..];
 

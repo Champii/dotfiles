@@ -59,8 +59,20 @@ fn expand(_config: &Config) {
     let mut rockc_config = rock_lib::Config::default();
     rockc_config.entry_file = PathBuf::from(entry_file);
 
-    let program: Program = rock_lib::parser::parse_root_file(&rockc_config).unwrap();
-    let expanded = rock_lib::macro_expansion::expand_macros(program).unwrap();
+    let program: Program = match rock_lib::parser::parse_root_file(&rockc_config) {
+        Ok(program) => program,
+        Err(e) => {
+            e.report();
+            std::process::exit(1);
+        }
+    };
+    let expanded = match rock_lib::macro_expansion::expand_macros(program) {
+        Ok(expanded) => expanded,
+        Err(e) => {
+            e.report();
+            std::process::exit(1);
+        }
+    };
 
     expanded.visit(&mut ExpandedPrint);
 }

@@ -106,6 +106,7 @@ pub struct MacroEntry {
 pub enum MacroFragment {
     Ident(Ident),
     Expr(Ident),
+    Type(Ident),
     Token(Token),
     Repetition(Vec<MacroFragment>),
 }

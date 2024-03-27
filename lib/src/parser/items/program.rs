@@ -1,5 +1,6 @@
 use crate::{
     ast::{Ident, Module, ModuleInner, Program, TopLevel},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
@@ -13,7 +14,7 @@ impl Parsable for Program {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         parse_ctx.add_file_relative("./src/main.rk".to_string());
 
         let (module, tokens) = ModuleInner::parse(tokens, parse_ctx)?;
@@ -27,8 +28,9 @@ impl Parsable for Program {
         let remaining_tokens = expect_token(tokens, TokenType::Eof)?;
 
         if !remaining_tokens.is_empty() {
-            return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()));
+            return Err(ParseError::LeftoverTokens(remaining_tokens.to_vec()).into());
         }
+
         Ok((Program { module }, tokens))
     }
 }
@@ -37,7 +39,7 @@ impl Parsable for Module {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let tokens = expect_token(tokens, TokenType::Keyword("mod".to_string()))?;
         let (name, tokens) = Ident::parse(tokens, parse_ctx)?;
 
@@ -99,7 +101,7 @@ impl Parsable for ModuleInner {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut top_levels = Vec::new();
         let mut tokens = tokens;
 

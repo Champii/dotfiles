@@ -2,19 +2,16 @@ use std::collections::BTreeMap;
 
 use crate::{
     ast::{FunctionDecl, Ident, ParseType, TraitDecl},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
-    parser::{
-        parsable::Parsable,
-        parse_ctx::ParseCtx,
-        util::{expect_token, ParseError},
-    },
+    parser::{parsable::Parsable, parse_ctx::ParseCtx, util::expect_token},
 };
 
 impl Parsable for TraitDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("trait".to_string()))?;
 
         let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;

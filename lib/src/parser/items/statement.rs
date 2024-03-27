@@ -1,5 +1,6 @@
 use crate::{
     ast::{Assignment, Expression, Statement},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,9 +13,9 @@ impl Parsable for Statement {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if tokens.len() == 0 {
-            return Err(ParseError::UnexpectedEof(TokenType::Eol));
+            return Err(ParseError::UnexpectedEof(TokenType::Eol).into());
         }
         // let remaining_tokens = ignore_empty_lines(tokens);
         let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(tokens);

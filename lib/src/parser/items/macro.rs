@@ -1,5 +1,6 @@
 use crate::{
     ast::{Ident, MacroDecl, MacroEntry, MacroFragment, MacroInvoc},
+    diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
     parser::{
         parsable::Parsable,
@@ -12,7 +13,7 @@ impl Parsable for MacroDecl {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("macro".to_string()))?;
 
         let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
@@ -35,7 +36,7 @@ impl Parsable for MacroEntry {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = ignore_empty_lines(tokens);
 
         let (defs, mut remaining_tokens) = parse_macro_head_recursive(remaining_tokens, parse_ctx)?;
@@ -59,7 +60,7 @@ impl Parsable for MacroEntry {
 fn parse_macro_head_recursive<'a>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<MacroFragment>, &'a [Token]), ParseError> {
+) -> Result<(Vec<MacroFragment>, &'a [Token]), Diagnostics> {
     let mut defs = Vec::new();
     let mut remaining_tokens = tokens;
 
@@ -76,7 +77,8 @@ fn parse_macro_head_recursive<'a>(
                     return Err(ParseError::UnexpectedToken(
                         remaining_tokens.get(1).unwrap().clone(),
                         vec![TokenType::Colon],
-                    ));
+                    )
+                    .into());
                 }
 
                 if remaining_tokens.get(2).unwrap().token_type
@@ -93,6 +95,13 @@ fn parse_macro_head_recursive<'a>(
                         name: name.clone(),
                         span: token.span.clone(),
                     }));
+                } else if remaining_tokens.get(2).unwrap().token_type
+                    == TokenType::Ident("ty".to_string())
+                {
+                    defs.push(MacroFragment::Type(Ident {
+                        name: name.clone(),
+                        span: token.span.clone(),
+                    }));
                 } else {
                     return Err(ParseError::UnexpectedToken(
                         remaining_tokens.get(2).unwrap().clone(),
@@ -101,7 +110,8 @@ fn parse_macro_head_recursive<'a>(
                             TokenType::Ident("expr".to_string()),
                             TokenType::Ident("type".to_string()),
                         ],
-                    ));
+                    )
+                    .into());
                 }
 
                 skip_until = 3;
@@ -134,7 +144,7 @@ fn parse_macro_head_recursive<'a>(
 fn parse_macro_block_recursive<'a>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<MacroFragment>, &'a [Token]), ParseError> {
+) -> Result<(Vec<MacroFragment>, &'a [Token]), Diagnostics> {
     let mut block = Vec::new();
     let mut remaining_tokens = tokens;
 
@@ -183,7 +193,7 @@ impl Parsable for MacroInvoc {
     fn parse<'a>(
         tokens: &'a [Token],
         _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), ParseError> {
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if let Some(token) = tokens.get(0) {
             if let TokenType::MacroInvoc(ident) = &token.token_type {
                 let (args, remaining_tokens) =
@@ -215,9 +225,7 @@ impl Parsable for MacroInvoc {
             }
         }
 
-        Err(ParseError::UnexpectedEof(TokenType::MacroInvoc(
-            "".to_string(),
-        )))
+        Err(ParseError::UnexpectedEof(TokenType::MacroInvoc("".to_string())).into())
     }
 }
 

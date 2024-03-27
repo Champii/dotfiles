@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use crate::{
     ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
-    parser::{Parsable, ParseCtx, ParseError},
+    parser::{Parsable, ParseCtx},
     Config,
 };
 
@@ -12,7 +13,7 @@ use self::{correspondances::Correspondance, macro_arg_matcher::MacroArgMatcher};
 mod correspondances;
 mod macro_arg_matcher;
 
-pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
+pub fn expand_macros(mut program: Program) -> Result<Program, Diagnostics> {
     let mut depth = 0;
     let mut module = program.module;
 
@@ -53,7 +54,7 @@ pub fn expand_macros(mut program: Program) -> Result<Program, ParseError> {
 fn expand_macros_once(
     mut module: Module,
     decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
-) -> Result<Module, ParseError> {
+) -> Result<Module, Diagnostics> {
     let results = module
         .top_levels
         .into_iter()
@@ -79,15 +80,23 @@ fn expand_macros_once(
     Ok(module)
 }
 
-fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopLevel>, ParseError> {
+fn expand_top_level(
+    macro_decl: &MacroDecl,
+    args: Vec<Token>,
+) -> Result<Vec<TopLevel>, Diagnostics> {
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
+    let mut diagnostics = Diagnostics::default();
 
     for entry in entries {
         let defs = &entry.defs;
         let mut macro_matcher = MacroArgMatcher::new(&args, defs.clone());
-        let Ok(correspondances) = macro_matcher.run() else {
-            continue;
+        let correspondances = match macro_matcher.run() {
+            Ok(correspondances) => correspondances,
+            Err(diags) => {
+                diagnostics.merge(diags);
+                continue;
+            }
         };
 
         let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
@@ -102,7 +111,7 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
     }
 
     if top_levels.is_empty() {
-        return Err(ParseError::MacroNoCorrespondance(macro_decl.name.clone()));
+        return Err(diagnostics);
     }
 
     Ok(top_levels)
@@ -115,18 +124,7 @@ fn replace_body_variables(
 ) -> Vec<Vec<Token>> {
     body.iter()
         .map(|fragment| match &fragment {
-            MacroFragment::Ident(name) => {
-                if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
-                {
-                    corresp.clone()
-                } else {
-                    vec![vec![Token {
-                        token_type: TokenType::MacroVar(name.name.clone()),
-                        span: name.span.clone(),
-                    }]]
-                }
-            }
-            MacroFragment::Expr(name) => {
+            MacroFragment::Ident(name) | MacroFragment::Expr(name) | MacroFragment::Type(name) => {
                 if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
                 {
                     corresp.clone()
