@@ -92,6 +92,8 @@ fn expand_top_level(macro_decl: &MacroDecl, args: Vec<Token>) -> Result<Vec<TopL
 
         let body = replace_body_variables(entry.body.clone(), &correspondances, 0);
 
+        let body = body.into_iter().flatten().collect::<Vec<_>>();
+
         let (module, _) = ModuleInner::parse(&body, &mut ParseCtx::new(&Config::default()))?;
 
         top_levels.extend(module.top_levels);
@@ -110,7 +112,7 @@ fn replace_body_variables(
     body: Vec<MacroFragment>,
     correspondances: &Correspondance,
     correspondance_level: usize,
-) -> Vec<Token> {
+) -> Vec<Vec<Token>> {
     body.iter()
         .map(|fragment| match &fragment {
             MacroFragment::Ident(name) => {
@@ -118,13 +120,24 @@ fn replace_body_variables(
                 {
                     corresp.clone()
                 } else {
-                    vec![Token {
+                    vec![vec![Token {
                         token_type: TokenType::MacroVar(name.name.clone()),
                         span: name.span.clone(),
-                    }]
+                    }]]
                 }
             }
-            MacroFragment::Token(token) => vec![token.clone()],
+            MacroFragment::Expr(name) => {
+                if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
+                {
+                    corresp.clone()
+                } else {
+                    vec![vec![Token {
+                        token_type: TokenType::MacroVar(name.name.clone()),
+                        span: name.span.clone(),
+                    }]]
+                }
+            }
+            MacroFragment::Token(token) => vec![vec![token.clone()]],
             MacroFragment::Repetition(repetition) => {
                 let repetition_names = repetition
                     .iter()
@@ -321,6 +334,29 @@ a = -> 1"#;
         let expanded = expand_macros(input_program).unwrap();
 
         let expected_program = parse_string(expected).unwrap();
+
+        assert_eq!(expanded, expected_program);
+    }
+
+    #[test]
+    fn parse_macro_expr() {
+        let input = r#"macro mymacro
+  $a:expr =>
+    main = -> $a
+%mymacro 1 + 2"#;
+
+        let expected = r#"macro mymacro
+  $a:expr =>
+    main = -> $a
+main = -> 1 + 2"#;
+
+        let input_program = parse_string(input).unwrap();
+
+        let expanded = expand_macros(input_program).unwrap();
+        println!("{}", expanded);
+
+        let expected_program = parse_string(expected).unwrap();
+        println!("{}", expected_program);
 
         assert_eq!(expanded, expected_program);
     }

@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::lexer::Token;
 #[derive(Debug, Clone)]
 pub struct Correspondance {
-    pub entries: BTreeMap<String, Vec<Token>>,
+    pub entries: BTreeMap<String, Vec<Vec<Token>>>,
     pub nested_corresp_keys: Vec<Vec<String>>,
     pub nested_corresp: Vec<Correspondance>,
 }
@@ -17,11 +17,11 @@ impl Correspondance {
         }
     }
 
-    pub fn insert_direct(&mut self, name: String, token: Token) {
-        let entry = self.entries.entry(name).or_insert(vec![token.clone()]);
+    pub fn insert_direct(&mut self, name: String, tokens: Vec<Token>) {
+        let entry = self.entries.entry(name).or_insert(vec![tokens.clone()]);
 
-        if !entry.contains(&token) {
-            entry.push(token);
+        if !entry.contains(&tokens) {
+            entry.push(tokens);
         }
     }
 
@@ -59,7 +59,7 @@ impl Correspondance {
             .collect()
     }
 
-    pub fn get(&self, name: &str, max_level: usize) -> Option<Vec<Token>> {
+    pub fn get(&self, name: &str, max_level: usize) -> Option<Vec<Vec<Token>>> {
         if max_level == 0 {
             return self.entries.get(name).cloned();
         } else {

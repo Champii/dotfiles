@@ -105,6 +105,7 @@ pub struct MacroEntry {
 #[derive(Debug, PartialEq, Clone)]
 pub enum MacroFragment {
     Ident(Ident),
+    Expr(Ident),
     Token(Token),
     Repetition(Vec<MacroFragment>),
 }

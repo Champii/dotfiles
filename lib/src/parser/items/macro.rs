@@ -86,6 +86,22 @@ fn parse_macro_head_recursive<'a>(
                         name: name.clone(),
                         span: token.span.clone(),
                     }));
+                } else if remaining_tokens.get(2).unwrap().token_type
+                    == TokenType::Ident("expr".to_string())
+                {
+                    defs.push(MacroFragment::Expr(Ident {
+                        name: name.clone(),
+                        span: token.span.clone(),
+                    }));
+                } else {
+                    return Err(ParseError::UnexpectedToken(
+                        remaining_tokens.get(2).unwrap().clone(),
+                        vec![
+                            TokenType::Ident("ident".to_string()),
+                            TokenType::Ident("expr".to_string()),
+                            TokenType::Ident("type".to_string()),
+                        ],
+                    ));
                 }
 
                 skip_until = 3;

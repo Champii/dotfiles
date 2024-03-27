@@ -191,6 +191,7 @@ impl Display for MacroFragment {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             MacroFragment::Ident(ident) => write!(f, "${}", ident),
+            MacroFragment::Expr(ident) => write!(f, "${}", ident),
             MacroFragment::Token(token) => {
                 if let TokenType::Indent(_) = token.token_type {
                     write!(f, "{}", indent())?;
@@ -216,6 +217,7 @@ impl Display for HeadMacroFragment {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match &self.0 {
             MacroFragment::Ident(ident) => write!(f, "${}:ident", ident),
+            MacroFragment::Expr(ident) => write!(f, "${}:expr", ident),
             MacroFragment::Token(token) => write!(f, "{}", token),
             MacroFragment::Repetition(fragments) => {
                 write!(f, "$(")?;
