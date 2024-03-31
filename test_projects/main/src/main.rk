@@ -1,15 +1,15 @@
+extern free : Ptr T -> ()
+
 struct Lol
   mdr: Tata
 
 main : () -> ()
 main = x -> x
 
-extern free: Ptr T -> ()
-
 trait Num
   + : T -> T -> T
 
 impl Num Int
-  + = a, b -> %IAdd a, b
+  + = a, b -> %IAdd a b
 
 main = -> (0, "a")

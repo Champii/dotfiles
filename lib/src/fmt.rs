@@ -260,7 +260,7 @@ impl Display for TraitDecl {
 
         for (name, signature) in &self.signatures {
             write!(f, "{}", indent())?;
-            write!(f, "{}: {}\n", name, signature)?;
+            write!(f, "{} : {}\n", name, signature)?;
         }
 
         for (_, method) in &self.methods {
