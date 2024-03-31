@@ -121,7 +121,11 @@ impl Parsable for SecondaryExpr {
                 "".to_string(),
             )))?;
 
-        if look_ahead(
+        if TokenType::Operator("!".to_string()) == token.token_type
+            || TokenType::StuckOperator("!".to_string()) == token.token_type
+        {
+            Ok((SecondaryExpr::Arguments(vec![]), &tokens[1..]))
+        } else if look_ahead(
             tokens,
             &vec![
                 TokenType::Eol,

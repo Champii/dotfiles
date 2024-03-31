@@ -231,7 +231,6 @@ struct MyStruct
     - High priority
       - Allow multiline function arguments
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Empty fn call with `!`
       - unsafe blocks
       - InfixOperator must declare the operator first then have a separated item for the fn decl
 

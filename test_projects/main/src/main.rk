@@ -15,6 +15,7 @@ impl Num Int
 main = -> (0, "a")
 
 toto = ->
+  main!
   a = 2
   (a, b) = (1, 2)
   Result::Ok a = lol
