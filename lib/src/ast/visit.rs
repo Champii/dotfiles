@@ -90,6 +90,7 @@ generate_visitor_trait!(
     Literal
     StructInstance
     EnumInstance
+    NativeOperator
     Array
     ParseType
     ParseTypeInner
@@ -291,6 +292,7 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::SelfIdent(i) => visitor.visit_ident(i),
         Operand::StructInstance(s) => visitor.visit_struct_instance(s),
         Operand::EnumInstance(e) => visitor.visit_enum_instance(e),
+        Operand::NativeOperator(n) => visitor.visit_native_operator(n),
         Operand::LambdaDecl(l) => visitor.visit_lambda_decl(l),
         Operand::If(i) => visitor.visit_if(i),
         Operand::Loop(l) => visitor.visit_loop(l),
@@ -303,6 +305,12 @@ pub fn walk_enum_instance<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumInstan
     visitor.visit_parse_type_inner(&e.variant);
 
     walk_list!(visitor, visit_expression, &e.args);
+}
+
+pub fn walk_native_operator<'a, V: Visitor<'a>>(visitor: &mut V, n: &'a NativeOperator) {
+    visitor.visit_name(&n.name);
+
+    walk_list!(visitor, visit_expression, &n.args);
 }
 
 pub fn walk_argument<'a, V: Visitor<'a>>(visitor: &mut V, argument: &'a Argument) {

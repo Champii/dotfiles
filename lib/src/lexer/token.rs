@@ -18,6 +18,7 @@ pub enum TokenType {
     Comment(String),
     //Operator that is not followed by a space
     StuckOperator(String),
+    NativeOperator(String),
     Keyword(String),
     MacroVar(String),
     MacroInvoc(String),
@@ -53,6 +54,7 @@ impl ToString for TokenType {
             TokenType::Operator(s) => s.clone(),
             TokenType::Comment(s) => s.clone(),
             TokenType::StuckOperator(s) => s.clone(),
+            TokenType::NativeOperator(s) => s.clone(),
             TokenType::Keyword(s) => s.clone(),
             TokenType::MacroVar(s) => s.clone(),
             TokenType::MacroInvoc(s) => s.clone(),

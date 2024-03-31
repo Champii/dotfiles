@@ -229,7 +229,6 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Native Operators
       - Tuples
       - Pattern matching and destructuring
       - Allow multiline function arguments

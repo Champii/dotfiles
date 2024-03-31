@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
-        Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
+        NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -253,6 +253,10 @@ impl Parsable for Operand {
             return Ok((Operand::LambdaDecl(lambda), remaining_tokens));
         }
 
+        if let Ok((native_operator, remaining_tokens)) = NativeOperator::parse(tokens, parse_ctx) {
+            return Ok((Operand::NativeOperator(native_operator), remaining_tokens));
+        }
+
         let token = tokens
             .get(0)
             .ok_or(ParseError::UnexpectedEof(TokenType::Ident("".to_string())))?;
@@ -269,6 +273,39 @@ impl Parsable for Operand {
                     TokenType::MacroInvoc("".to_string()),
                     TokenType::Number("".to_string()),
                 ],
+            )
+            .into()),
+        }
+    }
+}
+
+impl Parsable for NativeOperator {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        _parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                "".to_string(),
+            )))?;
+
+        match &token.token_type {
+            TokenType::NativeOperator(name) => {
+                let (args, remaining_tokens) =
+                    parse_vec_of(&tokens[1..], Some(TokenType::Coma), _parse_ctx)?;
+
+                Ok((
+                    NativeOperator {
+                        name: name.clone(),
+                        args,
+                    },
+                    remaining_tokens,
+                ))
+            }
+            _ => Err(ParseError::UnexpectedToken(
+                token.clone(),
+                vec![TokenType::Operator("".to_string())],
             )
             .into()),
         }

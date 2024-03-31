@@ -1,8 +1,14 @@
 struct Lol
   mdr: Tata
 
-main : Lol -> (Lol, [Mdr], [(Toto A -> Mdr B -> (Lol))])
+main : () -> ()
 main = x -> x
 
 extern free: Ptr T -> ()
+
+trait Num
+  + : T -> T -> T
+
+impl Num Int
+  + = a, b -> %IAdd a, b
 

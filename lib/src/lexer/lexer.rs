@@ -96,7 +96,12 @@ impl Lexer {
             '$' if self.peek(1).is_alphabetic() => self.macro_var(),
             '$' if self.peek(1) == '(' => self.token(TokenType::MacroRepeatOpen, 2),
             ')' if self.peek(1) == '*' => self.token(TokenType::MacroRepeatClose, 2),
-            '%' if self.peek(1).is_alphabetic() => self.macro_invoc(),
+            '%' if self.peek(1).is_alphabetic() && self.peek(1).is_lowercase() => {
+                self.macro_invoc()
+            }
+            '%' if self.peek(1).is_alphabetic() && self.peek(1).is_uppercase() => {
+                self.native_operator()
+            }
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
@@ -239,6 +244,21 @@ impl Lexer {
 
         self.token(
             TokenType::MacroInvoc(self.input[start..end].to_string()),
+            end - start,
+        )
+    }
+
+    fn native_operator(&mut self) -> Token {
+        self.position += 1;
+        let start = self.position;
+        let mut end = self.position;
+
+        while self.peek(end - start).is_alphabetic() || self.peek(end - start) == '_' {
+            end += 1;
+        }
+
+        self.token(
+            TokenType::NativeOperator(self.input[start..end].to_string()),
             end - start,
         )
     }

@@ -543,12 +543,25 @@ impl Display for Operand {
             Operand::Ident(ident) => write!(f, "{}", ident),
             Operand::SelfIdent(ident) => write!(f, "{}", ident),
             Operand::StructInstance(inst) => write!(f, "{}", inst),
+            Operand::NativeOperator(op) => write!(f, "{}", op),
             Operand::EnumInstance(inst) => write!(f, "{}", inst),
             Operand::LambdaDecl(decl) => write!(f, "{}", decl),
             Operand::If(if_) => write!(f, "{}", if_),
             Operand::Loop(loop_) => write!(f, "{}", loop_),
             Operand::Expression(expr) => write!(f, "({})", expr),
         }
+    }
+}
+
+impl Display for NativeOperator {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "%{}", self.name)?;
+
+        for arg in &self.args {
+            write!(f, " {}", arg)?;
+        }
+
+        Ok(())
     }
 }
 
