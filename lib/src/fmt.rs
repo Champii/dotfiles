@@ -682,6 +682,12 @@ impl Display for SecondaryExpr {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             SecondaryExpr::Arguments(args) => {
+                if args.is_empty() {
+                    write!(f, "!")?;
+
+                    return Ok(());
+                }
+
                 for (i, arg) in args.iter().enumerate() {
                     write!(f, " {}", arg)?;
 

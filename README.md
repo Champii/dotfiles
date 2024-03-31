@@ -229,12 +229,12 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Allow multiline function arguments
       - Comments (end of line ('#') or inline ('/*' '*/')
       - unsafe blocks
       - InfixOperator must declare the operator first then have a separated item for the fn decl
 
     - Low priority list:
+      - Allow multiline function arguments
       - Struct default constructor
       - Chain calls without variables
       - Default arguments and named arguments
@@ -257,7 +257,6 @@ struct MyStruct
     - Basic external module management
 
   - Code formating
-    - Handle ParseType parenthesis
     - If with no then
     - trait and impl ordering
     - Comments

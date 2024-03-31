@@ -1,9 +1,10 @@
 extern free : Ptr T -> ()
 
 struct Lol
-  mdr: Tata
+  mdr : Tata
 
 main : () -> ()
+
 main = x -> x
 
 trait Num
