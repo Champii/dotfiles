@@ -1,7 +1,8 @@
 use crate::{
     ast::{
         Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
-        NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, UnaryExpr,
+        NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, Tuple,
+        UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -237,7 +238,9 @@ impl Parsable for Operand {
 
         if TokenType::OpenParen == tokens[0].token_type {
             // first, try to parse function shorthand
-            if let Ok((lambda, remaining_tokens)) = LambdaDecl::parse(tokens, parse_ctx) {
+            if let Ok((tuple, remaining_tokens)) = Tuple::parse(tokens, parse_ctx) {
+                return Ok((Operand::Tuple(tuple), remaining_tokens));
+            } else if let Ok((lambda, remaining_tokens)) = LambdaDecl::parse(tokens, parse_ctx) {
                 return Ok((Operand::LambdaDecl(lambda), remaining_tokens));
             }
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
@@ -276,6 +279,30 @@ impl Parsable for Operand {
             )
             .into()),
         }
+    }
+}
+
+impl Parsable for Tuple {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let remaining_tokens = expect_token(tokens, TokenType::OpenParen)?;
+
+        let (elements, remaining_tokens) =
+            parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+
+        if elements.len() < 2 {
+            return Err(ParseError::UnexpectedToken(
+                remaining_tokens[0].clone(),
+                vec![TokenType::Coma, TokenType::CloseParen],
+            )
+            .into());
+        }
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
+
+        Ok((Tuple { elements }, remaining_tokens))
     }
 }
 
@@ -767,6 +794,47 @@ mod expression {
                         span: Span::default(),
                     })
                 ]),
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn tuple() {
+        let input = "(1, 2, 3)";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Tuple(Tuple {
+                    elements: vec![
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(2),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(3),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                        })),
+                    ],
+                }),
+                secondaries: None,
             })),
         );
         assert_eq!(rest.len(), 0);

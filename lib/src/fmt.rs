@@ -546,10 +546,27 @@ impl Display for Operand {
             Operand::NativeOperator(op) => write!(f, "{}", op),
             Operand::EnumInstance(inst) => write!(f, "{}", inst),
             Operand::LambdaDecl(decl) => write!(f, "{}", decl),
+            Operand::Tuple(tuple) => write!(f, "{}", tuple),
             Operand::If(if_) => write!(f, "{}", if_),
             Operand::Loop(loop_) => write!(f, "{}", loop_),
             Operand::Expression(expr) => write!(f, "({})", expr),
         }
+    }
+}
+
+impl Display for Tuple {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "(")?;
+
+        for (i, expr) in self.elements.iter().enumerate() {
+            write!(f, "{}", expr)?;
+
+            if i < self.elements.len() - 1 {
+                write!(f, ", ")?;
+            }
+        }
+
+        write!(f, ")")
     }
 }
 

@@ -12,3 +12,4 @@ trait Num
 impl Num Int
   + = a, b -> %IAdd a, b
 
+main = -> (0, "a")

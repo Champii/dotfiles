@@ -91,6 +91,7 @@ generate_visitor_trait!(
     StructInstance
     EnumInstance
     NativeOperator
+    Tuple
     Array
     ParseType
     ParseTypeInner
@@ -294,10 +295,15 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::EnumInstance(e) => visitor.visit_enum_instance(e),
         Operand::NativeOperator(n) => visitor.visit_native_operator(n),
         Operand::LambdaDecl(l) => visitor.visit_lambda_decl(l),
+        Operand::Tuple(t) => visitor.visit_tuple(t),
         Operand::If(i) => visitor.visit_if(i),
         Operand::Loop(l) => visitor.visit_loop(l),
         Operand::Expression(e) => visitor.visit_expression(&*e),
     }
+}
+
+pub fn walk_tuple<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a Tuple) {
+    walk_list!(visitor, visit_expression, &t.elements);
 }
 
 pub fn walk_enum_instance<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumInstance) {

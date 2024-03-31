@@ -196,10 +196,16 @@ pub enum Operand {
     StructInstance(StructInstance),
     EnumInstance(EnumInstance), // EnumName::Variant expr1, expr2
     LambdaDecl(LambdaDecl),
+    Tuple(Tuple),
     NativeOperator(NativeOperator),
     If(Box<If>),
     Loop(Box<Loop>),
     Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Tuple {
+    pub elements: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq)]
