@@ -563,7 +563,7 @@ impl Display for Match {
 
         for arm in &self.arms {
             write!(f, "{}", indent())?;
-            write!(f, "{}", arm)?;
+            write!(f, "{}\n", arm)?;
         }
 
         decrease_indent();
@@ -574,7 +574,7 @@ impl Display for Match {
 
 impl Display for MatchArm {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} => ", self.pattern)?;
+        write!(f, "{} -> ", self.pattern)?;
         display_block(&self.body, false, f)
     }
 }
@@ -621,7 +621,7 @@ impl Display for ArrayPattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             ArrayPattern::Pattern(pattern) => write!(f, "{}", pattern),
-            ArrayPattern::Rest(ident) => write!(f, "...{}", ident),
+            ArrayPattern::Rest(ident) => write!(f, "..{}", ident),
         }
     }
 }
@@ -744,7 +744,17 @@ impl Display for StructInstance {
 
 impl Display for EnumInstance {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}::{}", self.name, self.variant)
+        write!(f, "{}::{}", self.name, self.variant)?;
+
+        for (i, arg) in self.args.iter().enumerate() {
+            write!(f, " {}", arg)?;
+
+            if i < self.args.len() - 1 {
+                write!(f, ",")?;
+            }
+        }
+
+        Ok(())
     }
 }
 
