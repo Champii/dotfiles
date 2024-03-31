@@ -98,7 +98,7 @@ impl Display for StructDecl {
 
         for (name, field) in &self.fields {
             write!(f, "{}", indent())?;
-            write!(f, "{}: {}\n", name, field)?;
+            write!(f, "{} : {}\n", name, field)?;
         }
 
         decrease_indent();
@@ -548,8 +548,57 @@ impl Display for Operand {
             Operand::LambdaDecl(decl) => write!(f, "{}", decl),
             Operand::Tuple(tuple) => write!(f, "{}", tuple),
             Operand::If(if_) => write!(f, "{}", if_),
+            Operand::Match(match_) => write!(f, "{}", match_),
             Operand::Loop(loop_) => write!(f, "{}", loop_),
             Operand::Expression(expr) => write!(f, "({})", expr),
+        }
+    }
+}
+
+impl Display for Match {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "match {}\n", self.expr)?;
+
+        increase_indent();
+
+        for arm in &self.arms {
+            write!(f, "{}", indent())?;
+            write!(f, "{}", arm)?;
+        }
+
+        decrease_indent();
+
+        Ok(())
+    }
+}
+
+impl Display for MatchArm {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{} => ", self.pattern)?;
+        display_block(&self.body, false, f)
+    }
+}
+
+impl Display for MatchPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            MatchPattern::Ident(ident) => write!(f, "{}", ident),
+            MatchPattern::Tuple(patterns) => {
+                write!(f, "(")?;
+
+                for (i, pattern) in patterns.iter().enumerate() {
+                    write!(f, "{}", pattern)?;
+
+                    if i < patterns.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+
+                write!(f, ")")
+            }
+            MatchPattern::EnumInstance(inst) => write!(f, "{}", inst),
+            MatchPattern::StructInstance(inst) => write!(f, "{}", inst),
+            MatchPattern::Wildcard => write!(f, "_"),
         }
     }
 }
@@ -739,14 +788,14 @@ macro my_macro
 %my_macro lol
 
 struct MyStruct
-  field: Int
+  field : Int
 
 enum MyEnum
   Foo Bar
   Baz
 
 trait MyTrait
-  foo: Bar
+  foo : Bar
   baz = a -> a
 
 impl MyTrait

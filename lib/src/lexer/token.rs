@@ -40,6 +40,7 @@ pub enum TokenType {
     SpacedDot,
     Arobase,
     Indent(u8),
+    Underscore,
     Eol,
     Eof,
 }
@@ -76,6 +77,7 @@ impl ToString for TokenType {
             TokenType::SpacedDot => " .".to_string(),
             TokenType::Arobase => "@".to_string(),
             TokenType::Indent(i) => " ".repeat(*i as usize),
+            TokenType::Underscore => "_".to_string(),
             TokenType::Eol => "\n".to_string(),
             TokenType::Eof => "".to_string(),
         }

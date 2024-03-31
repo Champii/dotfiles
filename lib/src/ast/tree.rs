@@ -199,8 +199,30 @@ pub enum Operand {
     Tuple(Tuple),
     NativeOperator(NativeOperator),
     If(Box<If>),
+    Match(Box<Match>),
     Loop(Box<Loop>),
     Expression(Box<Expression>), // parenthesis
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Match {
+    pub expr: Expression,
+    pub arms: Vec<MatchArm>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct MatchArm {
+    pub pattern: MatchPattern,
+    pub body: Block,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum MatchPattern {
+    Ident(Ident),
+    Tuple(Vec<MatchPattern>),
+    EnumInstance(EnumInstance),
+    StructInstance(StructInstance),
+    Wildcard,
 }
 
 #[derive(Debug, PartialEq)]

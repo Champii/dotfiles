@@ -1,8 +1,8 @@
 use crate::{
     ast::{
         Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
-        NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance, Tuple,
-        UnaryExpr,
+        Match, NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance,
+        Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -207,6 +207,11 @@ impl Parsable for Operand {
         {
             let (for_, remaining_tokens) = Loop::parse(tokens, parse_ctx)?;
             return Ok((Operand::Loop(Box::new(for_)), remaining_tokens));
+        }
+
+        if TokenType::Keyword("match".to_string()) == tokens[0].token_type {
+            let (match_, remaining_tokens) = Match::parse(tokens, parse_ctx)?;
+            return Ok((Operand::Match(Box::new(match_)), remaining_tokens));
         }
 
         if TokenType::Arobase == tokens[0].token_type {

@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use crate::lexer::{span::Span, Token, TokenType};
 
-pub const KEYWORDS: [&str; 20] = [
+pub const KEYWORDS: [&str; 21] = [
     "struct", "enum", "trait", "impl", "if", "then", "else", "for", "in", "while", "loop", "macro",
-    "true", "false", "return", "continue", "break", "infix", "mod", "extern",
+    "true", "false", "return", "continue", "break", "infix", "mod", "extern", "match",
 ];
 pub const OPERATORS_CHARS: [char; 10] = ['+', '-', '*', '/', '=', '!', '<', '>', '$', '|'];
 
@@ -115,6 +115,7 @@ impl Lexer {
             '"' => self.token(TokenType::DoubleQuote, 1),
             '@' => self.token(TokenType::Arobase, 1),
             '#' => self.comment(),
+            '_' => self.token(TokenType::Underscore, 1),
             c if c.is_alphabetic() => self.ident_or_keyword_or_type(),
             c if c.is_digit(10) => self.number(),
             '\0' => self.token(TokenType::Eof, 1),

@@ -8,6 +8,7 @@ mod r#impl;
 mod literal;
 mod r#loop;
 mod r#macro;
+mod r#match;
 mod parse_type;
 mod program;
 mod statement;

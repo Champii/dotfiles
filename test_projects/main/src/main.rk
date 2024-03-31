@@ -13,3 +13,11 @@ impl Num Int
   + = a, b -> %IAdd a b
 
 main = -> (0, "a")
+
+toto = ->
+  a = 2
+  match a
+    a -> 2
+    (a, b) -> a + b
+    _ -> 0
+

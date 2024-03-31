@@ -81,6 +81,9 @@ generate_visitor_trait!(
     Expression
     If
     Else
+    Match
+    MatchArm
+    MatchPattern
     UnaryExpr
     Operator
     PrimaryExpr
@@ -299,6 +302,28 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::If(i) => visitor.visit_if(i),
         Operand::Loop(l) => visitor.visit_loop(l),
         Operand::Expression(e) => visitor.visit_expression(&*e),
+        Operand::Match(m) => visitor.visit_match(m),
+    }
+}
+
+pub fn walk_match<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a Match) {
+    visitor.visit_expression(&m.expr);
+
+    walk_list!(visitor, visit_match_arm, &m.arms);
+}
+
+pub fn walk_match_arm<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchArm) {
+    visitor.visit_match_pattern(&m.pattern);
+    visitor.visit_block(&m.body);
+}
+
+pub fn walk_match_pattern<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchPattern) {
+    match m {
+        MatchPattern::Ident(ident) => visitor.visit_ident(ident),
+        MatchPattern::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
+        MatchPattern::EnumInstance(e) => visitor.visit_enum_instance(e),
+        MatchPattern::StructInstance(s) => visitor.visit_struct_instance(s),
+        MatchPattern::Wildcard => {}
     }
 }
 
