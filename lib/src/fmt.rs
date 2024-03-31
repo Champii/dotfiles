@@ -78,6 +78,7 @@ impl Display for TopLevel {
             TopLevelKind::Export(path) => write!(f, "< {}\n", path),
             TopLevelKind::MacroDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
+            TopLevelKind::Extern(sig) => write!(f, "extern {}", sig),
             TopLevelKind::FunctionSig(sig) => write!(f, "{}", sig),
             TopLevelKind::FunctionDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::StructDecl(decl) => write!(f, "{}", decl),

@@ -120,6 +120,7 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevelKind::InfixOperator(_precedence, fn_decl) => visitor.visit_function_decl(fn_decl),
         TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
         TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
+        TopLevelKind::Extern(sig) => visitor.visit_function_sig(sig),
         TopLevelKind::FunctionSig(sig) => visitor.visit_function_sig(sig),
         TopLevelKind::FunctionDecl(f) => visitor.visit_function_decl(f),
         TopLevelKind::StructDecl(i) => visitor.visit_struct_decl(i),

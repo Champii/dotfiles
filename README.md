@@ -229,7 +229,6 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Extern fn
       - Native Operators
       - Tuples
       - Pattern matching and destructuring

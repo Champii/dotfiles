@@ -47,7 +47,7 @@ pub enum TopLevelKind {
     Module(ModuleDecl),
     Import(IdentifierPath),
     Export(IdentifierPath),
-    // Extern(FunctionSig),
+    Extern(FunctionSig),
     InfixOperator(u8, FunctionDecl),
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),

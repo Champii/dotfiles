@@ -101,6 +101,18 @@ impl Parsable for TopLevel {
                         new_tokens,
                     )
                 });
+            } else if keyword == "extern" {
+                return FunctionSig::parse(&tokens[1..], parse_ctx).map(
+                    |(function_sig, new_tokens)| {
+                        (
+                            TopLevel {
+                                ident: function_sig.name.clone(),
+                                kind: TopLevelKind::Extern(function_sig),
+                            },
+                            new_tokens,
+                        )
+                    },
+                );
             } else {
                 return Err(ParseError::UnexpectedKeyword(
                     tokens[0].clone(),

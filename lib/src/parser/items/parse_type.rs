@@ -256,4 +256,37 @@ mod parse_type {
         assert_eq!(parse_type.to_string(), "(A -> B) -> C");
         assert_eq!(rest.len(), 0);
     }
+
+    #[test]
+    fn test_parse_tuple_type() {
+        let input = "(A, B)";
+        let tokens = lex_test(input);
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(parse_type.to_string(), "(A, B)");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_unit_type() {
+        let input = "()";
+        let tokens = lex_test(input);
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(parse_type.to_string(), "()");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_array_type() {
+        let input = "[A]";
+        let tokens = lex_test(input);
+        let (parse_type, rest) =
+            ParseType::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(parse_type.to_string(), "[A]");
+        assert_eq!(rest.len(), 0);
+    }
 }
