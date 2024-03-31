@@ -78,6 +78,7 @@ impl Display for TopLevel {
             TopLevelKind::Export(path) => write!(f, "< {}\n", path),
             TopLevelKind::MacroDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
+            TopLevelKind::FunctionSig(sig) => write!(f, "{}", sig),
             TopLevelKind::FunctionDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::StructDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::TraitDecl(decl) => write!(f, "{}", decl),
@@ -384,6 +385,12 @@ impl Display for ParseTypeInner {
         }
 
         Ok(())
+    }
+}
+
+impl Display for FunctionSig {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{} : {}\n", self.name, self.sig)
     }
 }
 

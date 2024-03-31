@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        EnumDecl, FunctionDecl, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc, Module,
-        ModuleDecl, StructDecl, TopLevel, TopLevelKind, TraitDecl,
+        EnumDecl, FunctionDecl, FunctionSig, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc,
+        Module, ModuleDecl, StructDecl, TopLevel, TopLevelKind, TraitDecl,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -158,15 +158,29 @@ impl Parsable for TopLevel {
         }
 
         if let TokenType::Ident(_name) = &tokens[0].token_type {
-            return FunctionDecl::parse(tokens, parse_ctx).map(|(function_decl, new_tokens)| {
-                (
-                    TopLevel {
-                        ident: function_decl.name.clone(),
-                        kind: TopLevelKind::FunctionDecl(function_decl),
+            if let TokenType::Equal = tokens[1].token_type {
+                return FunctionDecl::parse(tokens, parse_ctx).map(
+                    |(function_decl, new_tokens)| {
+                        (
+                            TopLevel {
+                                ident: function_decl.name.clone(),
+                                kind: TopLevelKind::FunctionDecl(function_decl),
+                            },
+                            new_tokens,
+                        )
                     },
-                    new_tokens,
-                )
-            });
+                );
+            } else if let TokenType::Colon = tokens[1].token_type {
+                return FunctionSig::parse(tokens, parse_ctx).map(|(function_sig, new_tokens)| {
+                    (
+                        TopLevel {
+                            ident: function_sig.name.clone(),
+                            kind: TopLevelKind::FunctionSig(function_sig),
+                        },
+                        new_tokens,
+                    )
+                });
+            }
         }
 
         Err(ParseError::UnexpectedToken(

@@ -69,6 +69,7 @@ generate_visitor_trait!(
     Impl
     EnumDecl
     FunctionDecl
+    FunctionSig
     LambdaDecl
     Block
     StructDecl
@@ -119,6 +120,7 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevelKind::InfixOperator(_precedence, fn_decl) => visitor.visit_function_decl(fn_decl),
         TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
         TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
+        TopLevelKind::FunctionSig(sig) => visitor.visit_function_sig(sig),
         TopLevelKind::FunctionDecl(f) => visitor.visit_function_decl(f),
         TopLevelKind::StructDecl(i) => visitor.visit_struct_decl(i),
         TopLevelKind::TraitDecl(t) => visitor.visit_trait_decl(t),
@@ -146,6 +148,12 @@ pub fn walk_impl<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a Impl) {
     visitor.visit_parse_type_inner(&i.name);
 
     walk_map!(visitor, &i.methods);
+}
+
+pub fn walk_function_sig<'a, V: Visitor<'a>>(visitor: &mut V, function_sig: &'a FunctionSig) {
+    visitor.visit_ident(&function_sig.name);
+
+    visitor.visit_parse_type(&function_sig.sig);
 }
 
 pub fn walk_function_decl<'a, V: Visitor<'a>>(visitor: &mut V, function_decl: &'a FunctionDecl) {

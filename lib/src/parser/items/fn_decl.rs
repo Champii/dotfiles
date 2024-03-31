@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Block, FunctionDecl, Ident, LambdaDecl},
+    ast::{Block, FunctionDecl, FunctionSig, Ident, LambdaDecl, ParseType},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -216,6 +216,25 @@ fn expand_shorthand_suffix_argument<'a>(
     let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 
     Ok((lambda, remaining_tokens))
+}
+
+impl<'a> Parsable for FunctionSig {
+    fn parse<'b>(
+        tokens: &'b [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'b [Token]), Diagnostics> {
+        let remaining_tokens = tokens;
+
+        let (name, remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+
+        let (sig, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        Ok((FunctionSig { name, sig }, remaining_tokens))
+    }
 }
 
 #[cfg(test)]

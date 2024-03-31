@@ -51,6 +51,7 @@ pub enum TopLevelKind {
     InfixOperator(u8, FunctionDecl),
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
+    FunctionSig(FunctionSig),
     FunctionDecl(FunctionDecl),
     StructDecl(StructDecl),
     TraitDecl(TraitDecl),
