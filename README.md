@@ -229,7 +229,6 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Pattern matching and destructuring
       - Allow multiline function arguments
       - Comments (end of line ('#') or inline ('/*' '*/')
       - Empty fn call with `!`

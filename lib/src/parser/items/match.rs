@@ -1,5 +1,8 @@
 use crate::{
-    ast::{Block, Expression, Ident, Match, MatchArm, MatchPattern},
+    ast::{
+        ArrayPattern, Block, EnumPattern, Expression, Ident, Literal, Match, MatchArm,
+        MatchPattern, ParseTypeInner,
+    },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -15,7 +18,6 @@ impl Parsable for Match {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        println!("remaining_tokens: {:?}", tokens);
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("match".to_string()))?;
 
         let (expr, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
@@ -62,12 +64,25 @@ impl Parsable for MatchPattern {
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 
             Ok((MatchPattern::Tuple(patterns), remaining_tokens))
+        } else if let TokenType::OpenBracket = tokens[0].token_type {
+            let (patterns, remaining_tokens) =
+                parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
+
+            let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
+
+            Ok((MatchPattern::Array(patterns), remaining_tokens))
+        } else if let TokenType::Type(_) = tokens[0].token_type {
+            let (enum_inst, remaining_tokens) = EnumPattern::parse(tokens, parse_ctx)?;
+
+            Ok((MatchPattern::EnumInstance(enum_inst), remaining_tokens))
         } else if let TokenType::Ident(_) = tokens[0].token_type {
             let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
 
             Ok((MatchPattern::Ident(ident), remaining_tokens))
         } else if let TokenType::Underscore = tokens[0].token_type {
             Ok((MatchPattern::Wildcard, &tokens[1..]))
+        } else if let Ok((literal, remaining_tokens)) = Literal::parse(tokens, parse_ctx) {
+            Ok((MatchPattern::Literal(literal), remaining_tokens))
         } else {
             return Err(ParseError::UnexpectedToken(
                 tokens[0].clone(),
@@ -81,6 +96,54 @@ impl Parsable for MatchPattern {
         }
     }
 }
+
+impl Parsable for ArrayPattern {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        if (TokenType::Dot == tokens[0].token_type || TokenType::SpacedDot == tokens[0].token_type)
+            && TokenType::Dot == tokens[1].token_type
+        {
+            let (ident, remaining_tokens) = Ident::parse(&tokens[2..], parse_ctx)?;
+            return Ok((ArrayPattern::Rest(ident), remaining_tokens));
+        } else if let Ok((pattern, remaining_tokens)) = MatchPattern::parse(tokens, parse_ctx) {
+            return Ok((ArrayPattern::Pattern(pattern), remaining_tokens));
+        } else {
+            Err(ParseError::UnexpectedToken(
+                tokens[0].clone(),
+                vec![TokenType::Dot, TokenType::OpenBracket],
+            )
+            .into())
+        }
+    }
+}
+
+impl Parsable for EnumPattern {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let (name, remaining_tokens) = ParseTypeInner::parse(tokens, parse_ctx)?;
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::DoubleColon)?;
+
+        let (variant, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
+
+        let (args, remaining_tokens) =
+            parse_vec_of(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+
+        Ok((
+            EnumPattern {
+                name,
+                variant,
+                args,
+            },
+            remaining_tokens,
+        ))
+    }
+}
+
 #[cfg(test)]
 mod r#match {
     use super::*;

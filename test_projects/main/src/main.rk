@@ -16,8 +16,11 @@ main = -> (0, "a")
 
 toto = ->
   a = 2
+  (a, b) = (1, 2)
+  Result::Ok a = lol
   match a
     a -> 2
-    (a, b) -> a + b
+    (a, 2) -> a + b
+    [lol, ..mdr] -> 0
     _ -> 0
 

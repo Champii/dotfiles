@@ -219,10 +219,25 @@ pub struct MatchArm {
 #[derive(Debug, PartialEq)]
 pub enum MatchPattern {
     Ident(Ident),
+    Literal(Literal),
     Tuple(Vec<MatchPattern>),
-    EnumInstance(EnumInstance),
+    Array(Vec<ArrayPattern>),
+    EnumInstance(EnumPattern),
     StructInstance(StructInstance),
     Wildcard,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum ArrayPattern {
+    Pattern(MatchPattern),
+    Rest(Ident),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct EnumPattern {
+    pub name: ParseTypeInner,
+    pub variant: ParseTypeInner,
+    pub args: Vec<MatchPattern>,
 }
 
 #[derive(Debug, PartialEq)]

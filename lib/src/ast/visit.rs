@@ -84,6 +84,8 @@ generate_visitor_trait!(
     Match
     MatchArm
     MatchPattern
+    EnumPattern
+    ArrayPattern
     UnaryExpr
     Operator
     PrimaryExpr
@@ -320,10 +322,26 @@ pub fn walk_match_arm<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchArm) {
 pub fn walk_match_pattern<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchPattern) {
     match m {
         MatchPattern::Ident(ident) => visitor.visit_ident(ident),
+        MatchPattern::Literal(l) => visitor.visit_literal(l),
         MatchPattern::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
-        MatchPattern::EnumInstance(e) => visitor.visit_enum_instance(e),
+        MatchPattern::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
+        MatchPattern::EnumInstance(e) => visitor.visit_enum_pattern(e),
         MatchPattern::StructInstance(s) => visitor.visit_struct_instance(s),
         MatchPattern::Wildcard => {}
+    }
+}
+
+pub fn walk_enum_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumPattern) {
+    visitor.visit_parse_type_inner(&e.name);
+    visitor.visit_parse_type_inner(&e.variant);
+
+    walk_list!(visitor, visit_match_pattern, &e.args);
+}
+
+pub fn walk_array_pattern<'a, V: Visitor<'a>>(visitor: &mut V, a: &'a ArrayPattern) {
+    match a {
+        ArrayPattern::Pattern(p) => visitor.visit_match_pattern(p),
+        ArrayPattern::Rest(ident) => visitor.visit_ident(ident),
     }
 }
 

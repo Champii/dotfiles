@@ -583,6 +583,7 @@ impl Display for MatchPattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             MatchPattern::Ident(ident) => write!(f, "{}", ident),
+            MatchPattern::Literal(lit) => write!(f, "{}", lit),
             MatchPattern::Tuple(patterns) => {
                 write!(f, "(")?;
 
@@ -596,10 +597,56 @@ impl Display for MatchPattern {
 
                 write!(f, ")")
             }
+            MatchPattern::Array(patterns) => {
+                write!(f, "[")?;
+
+                for (i, pattern) in patterns.iter().enumerate() {
+                    write!(f, "{}", pattern)?;
+
+                    if i < patterns.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+
+                write!(f, "]")
+            }
             MatchPattern::EnumInstance(inst) => write!(f, "{}", inst),
             MatchPattern::StructInstance(inst) => write!(f, "{}", inst),
             MatchPattern::Wildcard => write!(f, "_"),
         }
+    }
+}
+
+impl Display for ArrayPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ArrayPattern::Pattern(pattern) => write!(f, "{}", pattern),
+            ArrayPattern::Rest(ident) => write!(f, "...{}", ident),
+        }
+    }
+}
+
+impl Display for EnumPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}::{}", self.name, self.variant)?;
+
+        if !self.args.is_empty() {
+            write!(f, "(")?;
+        }
+
+        for (i, arg) in self.args.iter().enumerate() {
+            write!(f, "{}", arg)?;
+
+            if i < self.args.len() - 1 {
+                write!(f, ", ")?;
+            }
+        }
+
+        if !self.args.is_empty() {
+            write!(f, ")")?;
+        }
+
+        Ok(())
     }
 }
 
