@@ -25,4 +25,6 @@ toto = ->
     (a, 2) -> a + b
     [lol, ..mdr] -> 0
     _ -> 0
-
+  a = 2
+  unsafe
+    a = 2

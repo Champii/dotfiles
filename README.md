@@ -230,10 +230,11 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - unsafe blocks
       - InfixOperator must declare the operator first then have a separated item for the fn decl
 
     - Low priority list:
+      - Match arm binding like `foo @ (a, b) -> a + b`
+      - Match if like `(a, b) if a == b -> a + b`
       - Allow multiline function arguments
       - Struct default constructor
       - Chain calls without variables

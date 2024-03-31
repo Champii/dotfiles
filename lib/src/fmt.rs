@@ -551,6 +551,10 @@ impl Display for Operand {
             Operand::Match(match_) => write!(f, "{}", match_),
             Operand::Loop(loop_) => write!(f, "{}", loop_),
             Operand::Expression(expr) => write!(f, "({})", expr),
+            Operand::Unsafe(block) => {
+                write!(f, "unsafe")?;
+                display_block(block, true, f)
+            }
         }
     }
 }
@@ -561,9 +565,13 @@ impl Display for Match {
 
         increase_indent();
 
-        for arm in &self.arms {
+        for (i, arm) in self.arms.iter().enumerate() {
             write!(f, "{}", indent())?;
-            write!(f, "{}\n", arm)?;
+            write!(f, "{}", arm)?;
+
+            if i < self.arms.len() - 1 {
+                write!(f, "\n")?;
+            }
         }
 
         decrease_indent();

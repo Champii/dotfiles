@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        Argument, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal, Loop,
-        Match, NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance,
+        Argument, Block, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal,
+        Loop, Match, NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance,
         Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
@@ -216,6 +216,11 @@ impl Parsable for Operand {
         if TokenType::Keyword("match".to_string()) == tokens[0].token_type {
             let (match_, remaining_tokens) = Match::parse(tokens, parse_ctx)?;
             return Ok((Operand::Match(Box::new(match_)), remaining_tokens));
+        }
+
+        if TokenType::Keyword("unsafe".to_string()) == tokens[0].token_type {
+            let (block, remaining_tokens) = Block::parse(&tokens[1..], parse_ctx)?;
+            return Ok((Operand::Unsafe(block), remaining_tokens));
         }
 
         if TokenType::Arobase == tokens[0].token_type {

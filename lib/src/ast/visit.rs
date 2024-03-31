@@ -305,6 +305,7 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::Loop(l) => visitor.visit_loop(l),
         Operand::Expression(e) => visitor.visit_expression(&*e),
         Operand::Match(m) => visitor.visit_match(m),
+        Operand::Unsafe(block) => visitor.visit_block(block),
     }
 }
 

@@ -201,6 +201,7 @@ pub enum Operand {
     If(Box<If>),
     Match(Box<Match>),
     Loop(Box<Loop>),
+    Unsafe(Block),
     Expression(Box<Expression>), // parenthesis
 }
 
