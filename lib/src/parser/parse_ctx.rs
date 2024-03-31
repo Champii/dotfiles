@@ -16,6 +16,8 @@ pub struct ParseCtx {
     pub files_map: HashSet<PathBuf>,
     pub current_file: Option<PathBuf>,
     pub config: Config,
+    /// This is to handle nested fn type declarations
+    pub is_inside_fn_type_decl: bool,
 }
 
 impl ParseCtx {
@@ -28,6 +30,7 @@ impl ParseCtx {
             files_map: HashSet::new(),
             current_file: None,
             config: config.clone(),
+            is_inside_fn_type_decl: false,
         }
     }
 

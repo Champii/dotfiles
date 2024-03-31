@@ -47,6 +47,7 @@ pub enum TopLevelKind {
     Module(ModuleDecl),
     Import(IdentifierPath),
     Export(IdentifierPath),
+    // Extern(FunctionSig),
     InfixOperator(u8, FunctionDecl),
     MacroDecl(MacroDecl),
     MacroInvoc(MacroInvoc),
@@ -60,31 +61,40 @@ pub enum TopLevelKind {
 
 #[derive(Debug, PartialEq)]
 pub struct StructDecl {
-    pub name: ParseType,
+    pub name: ParseTypeInner,
     pub fields: BTreeMap<Ident, ParseType>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct TraitDecl {
-    pub name: ParseType,
+    pub name: ParseTypeInner,
     pub methods: BTreeMap<Ident, FunctionDecl>,
     pub signatures: BTreeMap<Ident, ParseType>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct EnumDecl {
-    pub name: ParseType,
-    pub variants: Vec<ParseType>,
+    pub name: ParseTypeInner,
+    pub variants: Vec<ParseTypeInner>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Impl {
-    pub name: ParseType,
+    pub name: ParseTypeInner,
     pub methods: BTreeMap<Ident, FunctionDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ParseType {
+pub enum ParseType {
+    Function(Vec<ParseType>),
+    Type(ParseTypeInner),
+    Array(Box<ParseType>),
+    Tuple(Vec<ParseType>),
+    Unit,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParseTypeInner {
     pub name: String,
     pub generics: Vec<ParseType>,
     pub span: Span,
@@ -115,6 +125,12 @@ pub enum MacroFragment {
 pub struct MacroInvoc {
     pub name: Ident,
     pub args: Vec<Token>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FunctionSig {
+    pub name: Ident,
+    pub sig: ParseType,
 }
 
 #[derive(Debug, PartialEq)]
@@ -206,14 +222,14 @@ pub enum Loop {
 
 #[derive(Debug, PartialEq)]
 pub struct EnumInstance {
-    pub name: ParseType,
-    pub variant: ParseType,
+    pub name: ParseTypeInner,
+    pub variant: ParseTypeInner,
     pub args: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct StructInstance {
-    pub name: ParseType,
+    pub name: ParseTypeInner,
     pub fields: BTreeMap<Ident, Expression>,
 }
 

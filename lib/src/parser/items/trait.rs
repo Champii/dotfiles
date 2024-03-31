@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{FunctionDecl, Ident, ParseType, TraitDecl},
+    ast::{FunctionDecl, Ident, ParseType, ParseTypeInner, TraitDecl},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{parsable::Parsable, parse_ctx::ParseCtx, util::expect_token},
@@ -14,7 +14,7 @@ impl Parsable for TraitDecl {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("trait".to_string()))?;
 
-        let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let (name, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 

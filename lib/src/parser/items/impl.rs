@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{FunctionDecl, Impl, ParseType},
+    ast::{FunctionDecl, Impl, ParseTypeInner},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -18,7 +18,7 @@ impl Parsable for Impl {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("impl".to_string()))?;
 
-        let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let (name, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
@@ -68,7 +68,7 @@ mod parse_struct {
         let tokens = lex_test(input);
         let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(r#impl.name.name, "Test");
+        assert_eq!(r#impl.name.to_string(), "Test");
         assert_eq!(rest.len(), 0);
     }
 
@@ -78,7 +78,7 @@ mod parse_struct {
         let tokens = lex_test(input);
         let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(r#impl.name.name, "Test");
+        assert_eq!(r#impl.name.to_string(), "Test");
         assert_eq!(r#impl.methods.len(), 2);
         assert_eq!(
             r#impl

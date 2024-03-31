@@ -216,8 +216,15 @@ impl Parsable for Operand {
         if let TokenType::Type(_) = tokens[0].token_type {
             if tokens.len() > 1 {
                 if let TokenType::DoubleColon = tokens[1].token_type {
-                    let (enum_instance, remaining_tokens) = EnumInstance::parse(tokens, parse_ctx)?;
-                    return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
+                    if let Ok((enum_instance, remaining_tokens)) =
+                        EnumInstance::parse(tokens, parse_ctx)
+                    {
+                        return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
+                    } else if let Ok((ident_path, remaining_tokens)) =
+                        IdentifierPath::parse(tokens, parse_ctx)
+                    {
+                        return Ok((Operand::Ident(ident_path), remaining_tokens));
+                    }
                 } else {
                     let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
                     return Ok((Operand::StructInstance(instance), remaining_tokens));

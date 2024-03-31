@@ -318,7 +318,60 @@ impl Display for Ident {
     }
 }
 
+static IS_INSIDE_FN_DECL: Mutex<bool> = Mutex::new(false);
+
 impl Display for ParseType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut has_toggled_inside_fn_type_decl = false;
+
+        match self {
+            ParseType::Function(types) => {
+                if IS_INSIDE_FN_DECL.lock().unwrap().clone() {
+                    write!(f, "(")?;
+                } else {
+                    has_toggled_inside_fn_type_decl = true;
+                    *IS_INSIDE_FN_DECL.lock().unwrap() = true;
+                }
+
+                for (i, inner) in types.iter().enumerate() {
+                    write!(f, "{}", inner)?;
+
+                    if i < types.len() - 1 {
+                        write!(f, " -> ")?;
+                    }
+                }
+
+                if has_toggled_inside_fn_type_decl {
+                    *IS_INSIDE_FN_DECL.lock().unwrap() = false;
+                }
+
+                if IS_INSIDE_FN_DECL.lock().unwrap().clone() {
+                    write!(f, ")")?;
+                }
+
+                Ok(())
+            }
+            ParseType::Array(inner) => write!(f, "[{}]", inner),
+            ParseType::Tuple(types) => {
+                write!(f, "(")?;
+
+                for (i, inner) in types.iter().enumerate() {
+                    write!(f, "{}", inner)?;
+
+                    if i < types.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+
+                write!(f, ")")
+            }
+            ParseType::Type(inner) => write!(f, "{}", inner),
+            ParseType::Unit => write!(f, "()"),
+        }
+    }
+}
+
+impl Display for ParseTypeInner {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)?;
 

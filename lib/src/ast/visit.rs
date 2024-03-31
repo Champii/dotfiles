@@ -91,6 +91,7 @@ generate_visitor_trait!(
     EnumInstance
     Array
     ParseType
+    ParseTypeInner
     IdentOrType
 );
 
@@ -128,13 +129,13 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
 }
 
 pub fn walk_struct_decl<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructDecl) {
-    visitor.visit_parse_type(&s.name);
+    visitor.visit_parse_type_inner(&s.name);
 
     walk_map!(visitor, &s.fields);
 }
 
 pub fn walk_trait<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
-    visitor.visit_parse_type(&t.name);
+    visitor.visit_parse_type_inner(&t.name);
 
     walk_map!(visitor, &t.methods);
 
@@ -142,7 +143,7 @@ pub fn walk_trait<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
 }
 
 pub fn walk_impl<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a Impl) {
-    visitor.visit_parse_type(&i.name);
+    visitor.visit_parse_type_inner(&i.name);
 
     walk_map!(visitor, &i.methods);
 }
@@ -235,7 +236,7 @@ pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression
 }
 
 pub fn walk_struct_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructInstance) {
-    visitor.visit_parse_type(&s.name);
+    visitor.visit_parse_type_inner(&s.name);
 
     walk_map!(visitor, &s.fields);
 }
@@ -289,8 +290,8 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
 }
 
 pub fn walk_enum_instance<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumInstance) {
-    visitor.visit_parse_type(&e.name);
-    visitor.visit_parse_type(&e.variant);
+    visitor.visit_parse_type_inner(&e.name);
+    visitor.visit_parse_type_inner(&e.variant);
 
     walk_list!(visitor, visit_expression, &e.args);
 }
@@ -315,6 +316,25 @@ pub fn walk_array<'a, V: Visitor<'a>>(visitor: &mut V, arr: &'a Array) {
 }
 
 pub fn walk_parse_type<'a, V: Visitor<'a>>(visitor: &mut V, ty: &'a ParseType) {
+    match ty {
+        ParseType::Array(ty) => {
+            visitor.visit_parse_type(ty);
+        }
+        ParseType::Tuple(tys) => {
+            walk_list!(visitor, visit_parse_type, tys);
+        }
+        ParseType::Function(tys) => {
+            walk_list!(visitor, visit_parse_type, tys);
+        }
+        ParseType::Type(ident) => {
+            visitor.visit_parse_type_inner(ident);
+        }
+        ParseType::Unit => {}
+    }
+    // walk_list!(visitor, visit_parse_type_inner, &ty.inners);
+}
+
+pub fn walk_parse_type_inner<'a, V: Visitor<'a>>(visitor: &mut V, ty: &'a ParseTypeInner) {
     visitor.visit_primitive(&ty.name);
     walk_list!(visitor, visit_parse_type, &ty.generics);
 }
@@ -340,12 +360,12 @@ pub fn walk_lambda_decl<'a, V: Visitor<'a>>(visitor: &mut V, lambda: &'a LambdaD
 }
 
 pub fn walk_enum_decl<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumDecl) {
-    visitor.visit_parse_type(&e.name);
+    visitor.visit_parse_type_inner(&e.name);
     walk_list!(visitor, visit_parse_type, &e.variants);
 }
 
 pub fn walk_trait_decl<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
-    visitor.visit_parse_type(&t.name);
+    visitor.visit_parse_type_inner(&t.name);
 
     walk_map!(visitor, &t.methods);
 

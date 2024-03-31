@@ -229,12 +229,14 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Comments (end of line ('#') or inline ('/*' '*/')
-      - Pattern matching and destructuring
-      - Allow multiline function arguments
       - Function signature
+      - Extern fn
+      - Native Operators
       - ParseType must handle parenthesis and function type
       - Tuples
+      - Pattern matching and destructuring
+      - Allow multiline function arguments
+      - Comments (end of line ('#') or inline ('/*' '*/')
       - Empty fn call with `!`
       - unsafe blocks
 

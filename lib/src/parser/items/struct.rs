@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{Expression, Ident, ParseType, StructDecl, StructInstance},
+    ast::{Expression, Ident, ParseType, ParseTypeInner, StructDecl, StructInstance},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -18,7 +18,7 @@ impl Parsable for StructDecl {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("struct".to_string()))?;
 
-        let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let (name, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
@@ -88,7 +88,7 @@ impl Parsable for StructInstance {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
+        let (parse_type, remaining_tokens) = ParseTypeInner::parse(tokens, parse_ctx)?;
 
         if remaining_tokens.is_empty() {
             return Ok((
@@ -212,10 +212,12 @@ mod parse_struct {
         let (struct_decl, rest) =
             StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(struct_decl.name.name, "Test");
-        assert_eq!(struct_decl.name.generics.len(), 2);
-        assert_eq!(struct_decl.name.generics[0].name, "T");
-        assert_eq!(struct_decl.name.generics[1].name, "U");
+        let ty = struct_decl.name;
+
+        assert_eq!(ty.name, "Test");
+        assert_eq!(ty.generics.len(), 2);
+        assert_eq!(ty.generics[0].to_string(), "T");
+        assert_eq!(ty.generics[1].to_string(), "U");
         assert_eq!(rest.len(), 0);
     }
 
@@ -226,7 +228,9 @@ mod parse_struct {
         let (struct_decl, rest) =
             StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(struct_decl.name.name, "Test");
+        let ty = struct_decl.name;
+
+        assert_eq!(ty.name, "Test");
         assert_eq!(struct_decl.fields.len(), 2);
         assert_eq!(
             struct_decl
@@ -235,7 +239,7 @@ mod parse_struct {
                 .find(|(k, _v)| k.name == "field")
                 .unwrap()
                 .1
-                .name,
+                .to_string(),
             "Type"
         );
         assert_eq!(
@@ -245,7 +249,7 @@ mod parse_struct {
                 .find(|(k, _v)| k.name == "field2")
                 .unwrap()
                 .1
-                .name,
+                .to_string(),
             "Type2"
         );
         assert_eq!(rest.len(), 0);

@@ -1,5 +1,5 @@
 use crate::{
-    ast::{EnumDecl, EnumInstance, ParseType},
+    ast::{EnumDecl, EnumInstance, ParseTypeInner},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -15,7 +15,7 @@ impl Parsable for EnumDecl {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("enum".to_string()))?;
 
-        let (name, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let (name, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
@@ -35,7 +35,7 @@ impl Parsable for EnumDecl {
             };
 
             if let Ok((variant, new_remaining_tokens)) =
-                ParseType::parse(new_remaining_tokens, parse_ctx)
+                ParseTypeInner::parse(new_remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
 
@@ -62,11 +62,11 @@ impl Parsable for EnumInstance {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let (name, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
+        let (name, remaining_tokens) = ParseTypeInner::parse(tokens, parse_ctx)?;
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::DoubleColon)?;
 
-        let (variant, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let (variant, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
         let (args, remaining_tokens) =
             parse_vec_of(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
@@ -94,7 +94,7 @@ mod parse_enum {
         let (enum_decl, rest) =
             EnumDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(enum_decl.name.name, "Type");
+        assert_eq!(enum_decl.name.to_string(), "Type");
         assert_eq!(enum_decl.variants.len(), 2);
         assert_eq!(rest.len(), 0);
     }
@@ -106,8 +106,8 @@ mod parse_enum {
         let (enum_instance, rest) =
             EnumInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(enum_instance.name.name, "Type");
-        assert_eq!(enum_instance.variant.name, "Variant1");
+        assert_eq!(enum_instance.name.to_string(), "Type");
+        assert_eq!(enum_instance.variant.to_string(), "Variant1");
         assert_eq!(rest.len(), 0);
     }
 
@@ -118,8 +118,8 @@ mod parse_enum {
         let (enum_instance, rest) =
             EnumInstance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        assert_eq!(enum_instance.name.name, "Type");
-        assert_eq!(enum_instance.variant.name, "Variant1");
+        assert_eq!(enum_instance.name.to_string(), "Type");
+        assert_eq!(enum_instance.variant.to_string(), "Variant1");
         assert_eq!(enum_instance.args.len(), 2);
         assert_eq!(rest.len(), 0);
     }
