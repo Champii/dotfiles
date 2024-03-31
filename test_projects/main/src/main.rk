@@ -1,0 +1,8 @@
+struct Lol
+  mdr: Tata
+
+main : Lol -> (Lol, [Mdr], [(Toto A -> Mdr B -> (Lol))])
+main = x -> x
+
+extern free: Ptr T -> ()
+
