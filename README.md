@@ -216,7 +216,6 @@ struct MyStruct
 < MyStruct
 ```
 
-
 # TODO
 
   - CLI tool
@@ -230,7 +229,6 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - InfixOperator must declare the operator first then have a separated item for the fn decl
 
     - Low priority list:
       - Match arm binding like `foo @ (a, b) -> a + b`

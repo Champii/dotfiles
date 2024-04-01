@@ -72,7 +72,7 @@ impl Display for TopLevel {
         match &self.kind {
             TopLevelKind::Module(module) => write!(f, "{}", module),
             TopLevelKind::InfixOperator(precedence, decl) => {
-                write!(f, "infix {} {}", precedence, decl)
+                write!(f, "infix {} {}\n", precedence, decl)
             }
             TopLevelKind::Import(path) => write!(f, "> {}\n", path),
             TopLevelKind::Export(path) => write!(f, "< {}\n", path),
@@ -850,7 +850,7 @@ mod format {
     fn full_program() {
         let input = r#"> foo::Bar
 
-infix 7 |> = a -> a
+infix 7 |>
 
 macro my_macro
   $name:ident $($arg:ident)* =>

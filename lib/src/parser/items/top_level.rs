@@ -1,8 +1,8 @@
 use crate::{
     ast::{
         EnumDecl, FunctionDecl, FunctionSig, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc,
-        Module, ModuleDecl, ParseType, ParseTypeInner, StructDecl, TopLevel, TopLevelKind,
-        TraitDecl,
+        Module, ModuleDecl, Operator, ParseType, ParseTypeInner, StructDecl, TopLevel,
+        TopLevelKind, TraitDecl,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -77,13 +77,17 @@ impl Parsable for TopLevel {
                             ParseError::InvalidPrecedence(precedence, tokens[1].clone()).into()
                         );
                     }
-                    let (f, new_tokens) = FunctionDecl::parse(&tokens[2..], parse_ctx)?;
+
+                    let (op, remaining_tokens) = Operator::parse(&tokens[2..], parse_ctx)?;
+
+                    let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
                     return Ok((
                         TopLevel {
-                            ident: f.name.clone(),
-                            kind: TopLevelKind::InfixOperator(precedence, f),
+                            ident: Ident::default(), // FIXME
+                            kind: TopLevelKind::InfixOperator(precedence, op.value.clone()),
                         },
-                        new_tokens,
+                        remaining_tokens,
                     ));
                 } else {
                     return Err(ParseError::UnexpectedToken(
@@ -187,7 +191,12 @@ impl Parsable for TopLevel {
             });
         }
 
-        if let TokenType::Ident(_name) = &tokens[0].token_type {
+        let name = match &tokens[0].token_type {
+            TokenType::Ident(name) | TokenType::Operator(name) => Some(name),
+            _ => None,
+        };
+
+        if let Some(_) = name {
             if let TokenType::Equal = tokens[1].token_type {
                 return FunctionDecl::parse(tokens, parse_ctx).map(
                     |(function_decl, new_tokens)| {
@@ -233,21 +242,18 @@ mod parse_top_level {
 
     #[test]
     fn parse_infix_operator() {
-        let input = "infix 5 |> = x, f -> f x\n";
+        let input = "infix 5 |>\n";
         let tokens = lex_test(input);
         let (top_level, rest) =
             TopLevel::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
-        let (precedence, f_decl) = match top_level.kind {
-            TopLevelKind::InfixOperator(precedence, f_decl) => (precedence, f_decl),
+        let (precedence, name) = match top_level.kind {
+            TopLevelKind::InfixOperator(precedence, name) => (precedence, name),
             _ => panic!(),
         };
 
         assert_eq!(precedence, 5);
-        assert_eq!(top_level.ident.name, "|>".to_string());
-        assert_eq!(f_decl.name.name, "|>".to_string());
-        assert_eq!(f_decl.lambda.parameters.len(), 2);
-        assert_eq!(f_decl.lambda.body.statements.len(), 1);
+        assert_eq!(name, "|>".to_string());
         assert_eq!(rest.len(), 0);
     }
 }

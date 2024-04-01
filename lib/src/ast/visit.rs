@@ -124,7 +124,7 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevelKind::Module(m) => visitor.visit_module_decl(m),
         TopLevelKind::Import(ident_path) => visitor.visit_identifier_path(ident_path),
         TopLevelKind::Export(ident_path) => visitor.visit_identifier_path(ident_path),
-        TopLevelKind::InfixOperator(_precedence, fn_decl) => visitor.visit_function_decl(fn_decl),
+        TopLevelKind::InfixOperator(_precedence, _name) => (),
         TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
         TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
         TopLevelKind::Extern(sig) => visitor.visit_function_sig(sig),

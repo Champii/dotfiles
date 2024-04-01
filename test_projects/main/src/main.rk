@@ -1,11 +1,13 @@
 extern free : Ptr T -> ()
+type Lol T = Toto T -> (T -> U) -> U
 
 struct Lol
   mdr : Tata
 
 main : () -> ()
-
 main = x -> x
+
++ = a, b -> a + b
 
 trait Num
   + : T -> T -> T
@@ -29,4 +31,3 @@ toto = ->
   unsafe
     a = 2
 
-type Lol T = Toto T -> (T -> U) -> U
