@@ -679,8 +679,12 @@ impl Display for NativeOperator {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "%{}", self.name)?;
 
-        for arg in &self.args {
+        for (i, arg) in self.args.iter().enumerate() {
             write!(f, " {}", arg)?;
+
+            if i < self.args.len() - 1 {
+                write!(f, ",")?;
+            }
         }
 
         Ok(())

@@ -229,8 +229,10 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
+      - Struct field visibility with `<`
 
     - Low priority list:
+      - Auto export current item `< struct Foo`
       - Match arm binding like `foo @ (a, b) -> a + b`
       - Match if like `(a, b) if a == b -> a + b`
       - Allow multiline function arguments

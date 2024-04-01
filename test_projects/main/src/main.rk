@@ -13,21 +13,30 @@ trait Num
   + : T -> T -> T
 
 impl Num Int
-  + = a, b -> %IAdd a b
+  + = a, b -> %IAdd a, b
+
+struct Lol
+  mdr : Tata
+  pas_mdr : Toto
 
 main = -> (0, "a")
 
 toto = ->
   main!
+
   a = 2
+
   (a, b) = (1, 2)
+
   Result::Ok a = lol
+
   match a
     a -> 2
     (a, 2) -> a + b
     [lol, ..mdr] -> 0
     _ -> 0
+
   a = 2
+
   unsafe
     a = 2
-
