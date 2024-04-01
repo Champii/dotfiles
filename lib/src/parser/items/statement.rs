@@ -92,6 +92,7 @@ mod tests {
                     span: Span::default(),
                 }),
                 secondaries: None,
+                type_annotation: None,
             })))
         );
 
@@ -116,6 +117,7 @@ mod tests {
                         })],
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
@@ -123,6 +125,7 @@ mod tests {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
             })
         );
@@ -159,6 +162,7 @@ mod tests {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })
                         )),),
                         SecondaryExpr::Dot(Ident {
@@ -166,6 +170,7 @@ mod tests {
                             span: Span::default(),
                         }),
                     ]),
+                    type_annotation: None,
                 })),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
@@ -173,6 +178,7 @@ mod tests {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
             })
         );
@@ -195,6 +201,7 @@ mod tests {
                     span: Span::default(),
                 }),
                 secondaries: None,
+                type_annotation: None,
             })))
         );
 
@@ -216,6 +223,7 @@ mod tests {
                     span: Span::default(),
                 }),
                 secondaries: None,
+                type_annotation: None,
             })))
         );
 
@@ -237,6 +245,7 @@ mod tests {
                     span: Span::default(),
                 }),
                 secondaries: None,
+                type_annotation: None,
             })))
         );
 

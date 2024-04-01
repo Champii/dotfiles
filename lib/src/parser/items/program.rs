@@ -41,7 +41,14 @@ impl Parsable for Module {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let tokens = expect_token(tokens, TokenType::Keyword("mod".to_string()))?;
-        let (name, tokens) = Ident::parse(tokens, parse_ctx)?;
+        let (name, mut tokens) = Ident::parse(tokens, parse_ctx)?;
+
+        let comment = if let TokenType::Comment(comment) = &tokens[0].token_type {
+            tokens = &tokens[1..];
+            Some(comment.clone().trim().to_string())
+        } else {
+            None
+        };
 
         if look_ahead(
             tokens,
@@ -64,6 +71,7 @@ impl Parsable for Module {
                     top_levels: module_inner.top_levels,
                     is_inline: true,
                     filepath: None,
+                    comment,
                 },
                 tokens,
             ))
@@ -78,6 +86,7 @@ impl Parsable for Module {
 
             module.filepath = Some(path);
             module.name = Some(name);
+            module.comment = comment;
 
             parse_ctx.current_file = old_file_name;
 
@@ -93,6 +102,7 @@ impl From<ModuleInner> for Module {
             top_levels: module_inner.top_levels,
             is_inline: false,
             filepath: None,
+            comment: None,
         }
     }
 }

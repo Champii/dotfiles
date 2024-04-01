@@ -1,8 +1,10 @@
+mod mdr #lol
+
 extern free : Ptr T -> ()
 type Lol T = Toto T -> (T -> U) -> U
 
 struct Lol
-  mdr : Tata
+  < mdr : Tata
 
 main : () -> ()
 main = x -> x
@@ -29,6 +31,7 @@ toto = ->
   (a, b) = (1, 2)
 
   Result::Ok a = lol
+  a: Mdr -> Toto A = mdr (toto : Int) : String
 
   match a
     a -> 2

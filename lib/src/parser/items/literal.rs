@@ -191,12 +191,14 @@ mod literals {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     })),
                     Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                         operand: Operand::Literal(Literal {
                             kind: LiteralKind::Number(2),
                             span: Span::default(),
                         }),
+                        type_annotation: None,
                         secondaries: None,
                     })),
                     Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -205,6 +207,7 @@ mod literals {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     })),
                 ],
             })
@@ -232,6 +235,7 @@ mod literals {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
@@ -246,6 +250,7 @@ mod literals {
                                         })],
                                     }),
                                     secondaries: None,
+                                    type_annotation: None,
                                 })),
                                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                                     operand: Operand::Literal(Literal {
@@ -253,11 +258,13 @@ mod literals {
                                         span: Span::default(),
                                     }),
                                     secondaries: None,
+                                    type_annotation: None,
                                 })),
                             ],
                         }),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
@@ -265,6 +272,7 @@ mod literals {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 Expression::BinopExpr(
                     UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -273,6 +281,7 @@ mod literals {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     }),
                     Operator {
                         value: "+".to_string(),
@@ -284,6 +293,7 @@ mod literals {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     }))),
                 ),
             ],

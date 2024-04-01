@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{Expression, Ident, ParseType, ParseTypeInner, StructDecl, StructInstance},
+    ast::{
+        Expression, Ident, ParseType, ParseTypeInner, StructDecl, StructDeclField, StructInstance,
+    },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -22,7 +24,7 @@ impl Parsable for StructDecl {
 
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let mut fields = BTreeMap::new();
+        let mut fields = Vec::new();
 
         parse_ctx.indent();
 
@@ -39,11 +41,11 @@ impl Parsable for StructDecl {
                 break;
             }
 
-            if let Ok(((name, ty), new_remaining_tokens)) =
-                <(Ident, ParseType)>::parse(remaining_tokens, parse_ctx)
+            if let Ok((field, new_remaining_tokens)) =
+                <StructDeclField>::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
-                fields.insert(name, ty);
+                fields.push(field);
                 continue;
             }
 
@@ -56,12 +58,43 @@ impl Parsable for StructDecl {
     }
 }
 
+impl Parsable for StructDeclField {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let mut remaining_tokens = tokens;
+        let mut public = false;
+
+        if TokenType::Operator("<".to_string()) == remaining_tokens[0].token_type {
+            remaining_tokens = &remaining_tokens[1..];
+            public = true;
+        }
+
+        let (ident, remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+        let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+        Ok((
+            StructDeclField {
+                name: ident,
+                ty: parse_type,
+                public,
+            },
+            remaining_tokens,
+        ))
+    }
+}
+
 impl Parsable for (Ident, ParseType) {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+        let remaining_tokens = tokens;
+
+        let (ident, remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
         let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
@@ -236,9 +269,9 @@ mod parse_struct {
             struct_decl
                 .fields
                 .iter()
-                .find(|(k, _v)| k.name == "field")
+                .find(|field| field.name.name == "field")
                 .unwrap()
-                .1
+                .ty
                 .to_string(),
             "Type"
         );
@@ -246,9 +279,9 @@ mod parse_struct {
             struct_decl
                 .fields
                 .iter()
-                .find(|(k, _v)| k.name == "field2")
+                .find(|field| field.name.name == "field2")
                 .unwrap()
-                .1
+                .ty
                 .to_string(),
             "Type2"
         );

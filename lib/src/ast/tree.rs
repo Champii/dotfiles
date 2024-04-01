@@ -16,6 +16,7 @@ pub struct Module {
     pub top_levels: Vec<TopLevel>,
     pub is_inline: bool,
     pub filepath: Option<PathBuf>,
+    pub comment: Option<String>,
 }
 
 impl Module {
@@ -64,7 +65,14 @@ pub enum TopLevelKind {
 #[derive(Debug, PartialEq)]
 pub struct StructDecl {
     pub name: ParseTypeInner,
-    pub fields: BTreeMap<Ident, ParseType>,
+    pub fields: Vec<StructDeclField>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct StructDeclField {
+    pub name: Ident,
+    pub ty: ParseType,
+    pub public: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -186,6 +194,7 @@ pub enum UnaryExpr {
 pub struct PrimaryExpr {
     pub operand: Operand,
     pub secondaries: Option<Vec<SecondaryExpr>>,
+    pub type_annotation: Option<ParseType>,
 }
 
 #[derive(Debug, PartialEq)]

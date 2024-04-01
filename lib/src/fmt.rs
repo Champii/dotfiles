@@ -38,7 +38,13 @@ impl Display for Program {
 impl Display for ModuleDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if let Some(name) = &self.0.name {
-            write!(f, "mod {}\n", name)?;
+            write!(f, "mod {}", name)?;
+
+            if let Some(comment) = &self.0.comment {
+                write!(f, " # {}", comment)?;
+            }
+
+            write!(f, "\n")?;
         }
 
         Ok(())
@@ -97,14 +103,21 @@ impl Display for StructDecl {
 
         increase_indent();
 
-        for (name, field) in &self.fields {
+        for field in &self.fields {
             write!(f, "{}", indent())?;
-            write!(f, "{} : {}\n", name, field)?;
+            write!(f, "{}\n", field)?;
         }
 
         decrease_indent();
 
         Ok(())
+    }
+}
+
+impl Display for StructDeclField {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let public_str = if self.public { "< " } else { "" };
+        write!(f, "{}{} : {}", public_str, self.name, self.ty)
     }
 }
 
@@ -531,6 +544,10 @@ impl Display for PrimaryExpr {
                     }
                 }
             }
+        }
+
+        if let Some(type_annotation) = &self.type_annotation {
+            write!(f, " : {}", type_annotation)?;
         }
 
         Ok(())

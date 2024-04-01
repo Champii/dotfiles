@@ -66,6 +66,7 @@ mod parse_loop {
                         })]
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 Block {
                     statements: vec![Statement::Expression(Expression::UnaryExpr(
@@ -75,6 +76,7 @@ mod parse_loop {
                                 span: tokens[5].span.clone()
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })
                     ))],
                 }
@@ -101,6 +103,7 @@ mod parse_loop {
                         })]
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })),
                 Block {
                     statements: vec![Statement::Expression(Expression::UnaryExpr(
@@ -110,6 +113,7 @@ mod parse_loop {
                                 span: tokens[3].span.clone()
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })
                     ))],
                 }
@@ -135,6 +139,7 @@ mod parse_loop {
                             span: tokens[2].span.clone()
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     })
                 ))],
             })

@@ -73,6 +73,7 @@ generate_visitor_trait!(
     LambdaDecl
     Block
     StructDecl
+    StructDeclField
     Ident
     Assignment
     IdentifierPath
@@ -145,7 +146,12 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
 pub fn walk_struct_decl<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructDecl) {
     visitor.visit_parse_type_inner(&s.name);
 
-    walk_map!(visitor, &s.fields);
+    walk_list!(visitor, visit_struct_decl_field, &s.fields);
+}
+
+pub fn walk_struct_decl_field<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructDeclField) {
+    visitor.visit_ident(&s.name);
+    visitor.visit_parse_type(&s.ty);
 }
 
 pub fn walk_trait<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {

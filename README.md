@@ -245,6 +245,9 @@ struct MyStruct
       - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
       - Struct default value
       - Async?
+      - Allow parenthesis for function calls ?
+      - Allow braces for nested blocks ?
+
 
   - Desugar
     - Operator precedence

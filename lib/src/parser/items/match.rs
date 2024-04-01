@@ -175,7 +175,8 @@ mod r#match {
                             span: Span::default(),
                         })]
                     }),
-                    secondaries: None
+                    secondaries: None,
+                    type_annotation: None,
                 })),
                 arms: vec![
                     MatchArm {
@@ -190,7 +191,8 @@ mod r#match {
                                         kind: LiteralKind::Number(2),
                                         span: Span::default()
                                     }),
-                                    secondaries: None
+                                    secondaries: None,
+                                    type_annotation: None,
                                 })
                             ))]
                         }
@@ -215,7 +217,8 @@ mod r#match {
                                             span: Span::default(),
                                         })]
                                     }),
-                                    secondaries: None
+                                    secondaries: None,
+                                    type_annotation: None,
                                 }),
                                 Operator {
                                     value: "+".to_string(),
@@ -229,7 +232,8 @@ mod r#match {
                                                 span: Span::default(),
                                             })]
                                         }),
-                                        secondaries: None
+                                        secondaries: None,
+                                        type_annotation: None,
                                     }
                                 )))
                             ))]

@@ -1,8 +1,8 @@
 use crate::{
     ast::{
         Argument, Block, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal,
-        Loop, Match, NativeOperator, Operand, Operator, PrimaryExpr, SecondaryExpr, StructInstance,
-        Tuple, UnaryExpr,
+        Loop, Match, NativeOperator, Operand, Operator, ParseType, PrimaryExpr, SecondaryExpr,
+        StructInstance, Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -84,13 +84,14 @@ impl Parsable for PrimaryExpr {
         let mut primary_expr = PrimaryExpr {
             operand,
             secondaries: None,
+            type_annotation: None,
         };
 
         if remaining_tokens.is_empty() {
             return Ok((primary_expr, remaining_tokens));
         }
 
-        let (secondaries, remaining_tokens_after_secondaries) =
+        let (secondaries, mut remaining_tokens_after_secondaries) =
             parse_vec_of::<SecondaryExpr>(remaining_tokens, None, parse_ctx)?;
 
         // if operand is literal, cannot be function call
@@ -104,6 +105,14 @@ impl Parsable for PrimaryExpr {
 
         if !secondaries.is_empty() {
             primary_expr.secondaries = Some(secondaries);
+        }
+
+        if TokenType::Colon == remaining_tokens_after_secondaries[0].token_type {
+            let (type_annotation, remaining_tokens) =
+                ParseType::parse(&remaining_tokens_after_secondaries[1..], parse_ctx)?;
+
+            primary_expr.type_annotation = Some(type_annotation);
+            remaining_tokens_after_secondaries = remaining_tokens;
         }
 
         return Ok((primary_expr, remaining_tokens_after_secondaries));
@@ -407,6 +416,7 @@ mod expression {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 }),
                 Operator {
                     value: "+".to_string(),
@@ -418,6 +428,7 @@ mod expression {
                         span: Span::default(),
                     }),
                     secondaries: None,
+                    type_annotation: None,
                 })))
             )
         );
@@ -446,6 +457,7 @@ mod expression {
                         name: "a".to_string(),
                         span: Span::default(),
                     })]),
+                    type_annotation: None,
                 }),
                 Operator {
                     value: "+".to_string(),
@@ -460,6 +472,7 @@ mod expression {
                             })],
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     }),
                     Operator {
                         value: "+".to_string(),
@@ -471,6 +484,7 @@ mod expression {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     })))
                 ))
             )
@@ -495,6 +509,7 @@ mod expression {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     }),
                     Operator {
                         value: "+".to_string(),
@@ -508,6 +523,7 @@ mod expression {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             }),
                             Operator {
                                 value: "+".to_string(),
@@ -519,12 +535,15 @@ mod expression {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })))
                         ))),
                         secondaries: None,
+                        type_annotation: None,
                     })))
                 ))),
                 secondaries: None,
+                type_annotation: None,
             })),
         );
 
@@ -555,6 +574,7 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                     },
                     Argument {
@@ -564,6 +584,7 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                     },
                     Argument {
@@ -573,9 +594,11 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                     },
                 ])]),
+                type_annotation: None,
             })),
         );
 
@@ -605,8 +628,10 @@ mod expression {
                             span: Span::default(),
                         }),
                         secondaries: None,
+                        type_annotation: None,
                     }))
                 ))]),
+                type_annotation: None,
             })),
         );
 
@@ -633,6 +658,7 @@ mod expression {
                     name: "world".to_string(),
                     span: Span::default(),
                 })]),
+                type_annotation: None,
             })),
         );
 
@@ -657,6 +683,7 @@ mod expression {
                     name: "test".to_string(),
                     span: Span::default(),
                 })]),
+                type_annotation: None,
             })),
         );
 
@@ -687,6 +714,7 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         }
                     )))),
                     SecondaryExpr::Dot(Ident {
@@ -701,6 +729,7 @@ mod expression {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })),
                         },
                         Argument {
@@ -710,6 +739,7 @@ mod expression {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })),
                         },
                         Argument {
@@ -719,10 +749,12 @@ mod expression {
                                     span: Span::default(),
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })),
                         },
                     ]),
                 ]),
+                type_annotation: None,
             })),
         );
 
@@ -757,6 +789,7 @@ mod expression {
                         span: Span::default(),
                     }),
                 ]),
+                type_annotation: None,
             })),
         );
         assert_eq!(rest.len(), 0);
@@ -789,6 +822,7 @@ mod expression {
                                     })],
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })),
                         },
                         Argument {
@@ -800,6 +834,7 @@ mod expression {
                                     })],
                                 }),
                                 secondaries: None,
+                                type_annotation: None,
                             })),
                         },
                     ]),
@@ -808,6 +843,7 @@ mod expression {
                         span: Span::default(),
                     })
                 ]),
+                type_annotation: None,
             })),
         );
         assert_eq!(rest.len(), 0);
@@ -831,6 +867,7 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                         Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                             operand: Operand::Literal(Literal {
@@ -838,6 +875,7 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                         Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                             operand: Operand::Literal(Literal {
@@ -845,10 +883,12 @@ mod expression {
                                 span: Span::default(),
                             }),
                             secondaries: None,
+                            type_annotation: None,
                         })),
                     ],
                 }),
                 secondaries: None,
+                type_annotation: None,
             })),
         );
         assert_eq!(rest.len(), 0);
