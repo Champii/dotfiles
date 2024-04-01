@@ -28,3 +28,5 @@ toto = ->
   a = 2
   unsafe
     a = 2
+
+type Lol T = Toto T -> (T -> U) -> U

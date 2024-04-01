@@ -135,6 +135,10 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevelKind::EnumDecl(e) => visitor.visit_enum_decl(e),
         TopLevelKind::Impl(i) => visitor.visit_impl(i),
         TopLevelKind::Comment(_) => {}
+        TopLevelKind::NewType(inner, ty) => {
+            visitor.visit_parse_type_inner(inner);
+            visitor.visit_parse_type(ty);
+        }
     };
 }
 

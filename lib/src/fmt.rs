@@ -86,6 +86,7 @@ impl Display for TopLevel {
             TopLevelKind::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::Impl(impl_) => write!(f, "{}", impl_),
             TopLevelKind::Comment(comment) => write!(f, "#{}\n", comment),
+            TopLevelKind::NewType(inner, ty) => write!(f, "type {} = {}\n", inner, ty),
         }
     }
 }

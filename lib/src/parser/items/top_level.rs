@@ -1,7 +1,8 @@
 use crate::{
     ast::{
         EnumDecl, FunctionDecl, FunctionSig, Ident, IdentifierPath, Impl, MacroDecl, MacroInvoc,
-        Module, ModuleDecl, StructDecl, TopLevel, TopLevelKind, TraitDecl,
+        Module, ModuleDecl, ParseType, ParseTypeInner, StructDecl, TopLevel, TopLevelKind,
+        TraitDecl,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -113,6 +114,23 @@ impl Parsable for TopLevel {
                         )
                     },
                 );
+            } else if keyword == "type" {
+                let (parse_type_inner, remaining_tokens) =
+                    ParseTypeInner::parse(&tokens[1..], parse_ctx)?;
+
+                let remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
+
+                let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+
+                let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
+                return Ok((
+                    TopLevel {
+                        ident: Ident::default(), // FIXME
+                        kind: TopLevelKind::NewType(parse_type_inner, parse_type),
+                    },
+                    remaining_tokens,
+                ));
             } else {
                 return Err(ParseError::UnexpectedKeyword(
                     tokens[0].clone(),

@@ -58,6 +58,7 @@ pub enum TopLevelKind {
     EnumDecl(EnumDecl),
     Impl(Impl),
     Comment(String),
+    NewType(ParseTypeInner, ParseType),
 }
 
 #[derive(Debug, PartialEq)]
