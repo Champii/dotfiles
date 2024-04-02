@@ -68,8 +68,12 @@ impl Parsable for EnumInstance {
 
         let (variant, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
 
+        parse_ctx.inside_argument_list.push(true);
+
         let (args, remaining_tokens) =
             parse_vec_of(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+
+        parse_ctx.inside_argument_list.pop();
 
         Ok((
             EnumInstance {

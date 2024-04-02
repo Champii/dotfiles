@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Ident, IdentOrType, IdentifierPath, ParseType},
+    ast::{Ident, IdentOrNumber, IdentOrType, IdentifierPath, Literal, LiteralKind, ParseType},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -33,6 +33,38 @@ impl Parsable for IdentOrType {
         let (parse_type, remaining_tokens) = ParseType::parse(tokens, parse_ctx)?;
 
         Ok((IdentOrType::Type(parse_type), remaining_tokens))
+    }
+}
+
+impl Parsable for IdentOrNumber {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        if let Ok((ident, remaining_tokens)) = Ident::parse(tokens, parse_ctx) {
+            Ok((IdentOrNumber::Ident(ident), remaining_tokens))
+        } else if let TokenType::Number(_) = tokens[0].token_type {
+            let (num, remaining_tokens) = Literal::parse(tokens, parse_ctx)?;
+
+            if let LiteralKind::Number(num) = num.kind {
+                return Ok((IdentOrNumber::Number(num), remaining_tokens));
+            }
+
+            Err(ParseError::UnexpectedToken(
+                tokens[0].clone(),
+                vec![TokenType::Number("".to_string())],
+            )
+            .into())
+        } else {
+            Err(ParseError::UnexpectedToken(
+                tokens[0].clone(),
+                vec![
+                    TokenType::Ident("".to_string()),
+                    TokenType::Number("".to_string()),
+                ],
+            )
+            .into())
+        }
     }
 }
 

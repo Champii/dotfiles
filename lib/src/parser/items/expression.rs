@@ -168,28 +168,13 @@ impl Parsable for SecondaryExpr {
                 remaining_tokens,
             ))
         } else if TokenType::Dot == token.token_type {
-            if let Ok((ident, remaining_tokens)) = Ident::parse(&tokens[1..], parse_ctx) {
-                Ok((
-                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
-                    remaining_tokens,
-                ))
-            } else if let TokenType::Number(_) = tokens[1].token_type {
-                let (num, remaining_tokens) = Literal::parse(&tokens[1..], parse_ctx)?;
-                if let LiteralKind::Number(num) = num.kind {
-                    return Ok((
-                        SecondaryExpr::Dot(IdentOrNumber::Number(num)),
-                        remaining_tokens,
-                    ));
-                }
-
-                Err(ParseError::UnexpectedToken(
-                    tokens[1].clone(),
-                    vec![TokenType::Number("".to_string())],
-                )
-                .into())
+            if let Ok((ident_or_num, remaining_tokens)) =
+                IdentOrNumber::parse(&tokens[1..], parse_ctx)
+            {
+                Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
             } else {
                 Err(ParseError::UnexpectedToken(
-                    tokens[1].clone(),
+                    token.clone(),
                     vec![
                         TokenType::Ident("".to_string()),
                         TokenType::Number("".to_string()),
@@ -206,13 +191,11 @@ impl Parsable for SecondaryExpr {
                 parse_ctx.inside_argument_list[list_idx] = false;
                 Err(ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into())
             } else {
-                let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+                let (ident_or_num, remaining_tokens) =
+                    IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
                 parse_ctx.inside_argument_list.pop();
 
-                Ok((
-                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
-                    remaining_tokens,
-                ))
+                Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
             }
         } else {
             parse_ctx.inside_argument_list.push(true);

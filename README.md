@@ -229,14 +229,11 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Indexable tuple `(1, 2).0 == 1`
-      - Indexable Enum variant ? `SomeEnum::Variant 1, 2, 3 .1 == 2`
-      - Spaced dot for enum variant
-      - Slice of array `arr[1..]`
+      - Match arm binding like `foo @ (a, b) -> a + b`
 
     - Low priority list:
+      - Slice of array `arr[1..]`
       - Auto export current item `< struct Foo`
-      - Match arm binding like `foo @ (a, b) -> a + b`
       - Match if like `(a, b) if a == b -> a + b`
       - Allow multiline function arguments
       - Struct default constructor
