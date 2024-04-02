@@ -92,8 +92,8 @@ mod tests {
     use super::*;
     use crate::{
         ast::{
-            Ident, IdentOrNumber, IdentOrType, IdentifierPath, Literal, Operand, PrimaryExpr,
-            SecondaryExpr, UnaryExpr,
+            Ident, IdentOrNumber, IdentOrType, IdentifierPath, Literal, Operand, PatternKind,
+            PrimaryExpr, SecondaryExpr, UnaryExpr,
         },
         lexer::Span,
         parser::util::lex_test,
@@ -132,10 +132,13 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Assignment(Assignment {
-                lhs: AssignmentLHS::Pattern(Pattern::Ident(Ident {
-                    name: "a".to_string(),
-                    span: Span::default(),
-                })),
+                lhs: AssignmentLHS::Pattern(Pattern {
+                    binding: None,
+                    kind: PatternKind::Ident(Ident {
+                        name: "a".to_string(),
+                        span: Span::default(),
+                    })
+                }),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
                         kind: crate::ast::LiteralKind::Number(1),

@@ -234,7 +234,13 @@ pub struct MatchArm {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Pattern {
+pub struct Pattern {
+    pub binding: Option<Ident>,
+    pub kind: PatternKind,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum PatternKind {
     Ident(Ident),
     Literal(Literal),
     Tuple(Vec<Pattern>),

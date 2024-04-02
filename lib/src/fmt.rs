@@ -616,10 +616,20 @@ impl Display for MatchArm {
 
 impl Display for Pattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(binding) = &self.binding {
+            write!(f, "{} @ ", binding)?;
+        }
+
+        write!(f, "{}", self.kind)
+    }
+}
+
+impl Display for PatternKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Pattern::Ident(ident) => write!(f, "{}", ident),
-            Pattern::Literal(lit) => write!(f, "{}", lit),
-            Pattern::Tuple(patterns) => {
+            PatternKind::Ident(ident) => write!(f, "{}", ident),
+            PatternKind::Literal(lit) => write!(f, "{}", lit),
+            PatternKind::Tuple(patterns) => {
                 write!(f, "(")?;
 
                 for (i, pattern) in patterns.iter().enumerate() {
@@ -632,7 +642,7 @@ impl Display for Pattern {
 
                 write!(f, ")")
             }
-            Pattern::Array(patterns) => {
+            PatternKind::Array(patterns) => {
                 write!(f, "[")?;
 
                 for (i, pattern) in patterns.iter().enumerate() {
@@ -645,9 +655,9 @@ impl Display for Pattern {
 
                 write!(f, "]")
             }
-            Pattern::EnumInstance(inst) => write!(f, "{}", inst),
-            Pattern::StructInstance(inst) => write!(f, "{}", inst),
-            Pattern::Wildcard => write!(f, "_"),
+            PatternKind::EnumInstance(inst) => write!(f, "{}", inst),
+            PatternKind::StructInstance(inst) => write!(f, "{}", inst),
+            PatternKind::Wildcard => write!(f, "_"),
         }
     }
 }

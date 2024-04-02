@@ -229,7 +229,6 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Match arm binding like `foo @ (a, b) -> a + b`
 
     - Low priority list:
       - Slice of array `arr[1..]`

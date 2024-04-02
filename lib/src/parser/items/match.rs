@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         ArrayPattern, Block, EnumPattern, Expression, Ident, Literal, Match, MatchArm,
-        Pattern, ParseTypeInner,
+        ParseTypeInner, Pattern, PatternKind,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -57,32 +57,60 @@ impl Parsable for Pattern {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let mut remaining_tokens = tokens;
+        let binding =
+            if let Ok((ident, new_remaining_tokens)) = Ident::parse(remaining_tokens, parse_ctx) {
+                if new_remaining_tokens.len() < 2 {
+                    None
+                } else {
+                    if let TokenType::Arobase = new_remaining_tokens[0].token_type {
+                        remaining_tokens = &new_remaining_tokens[1..];
+                        Some(ident)
+                    } else {
+                        None
+                    }
+                }
+            } else {
+                None
+            };
+
+        let (kind, remaining_tokens) = PatternKind::parse(remaining_tokens, parse_ctx)?;
+
+        Ok((Pattern { binding, kind }, remaining_tokens))
+    }
+}
+
+impl Parsable for PatternKind {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
         if let TokenType::OpenParen = tokens[0].token_type {
             let (patterns, remaining_tokens) =
                 parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
 
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 
-            Ok((Pattern::Tuple(patterns), remaining_tokens))
+            Ok((PatternKind::Tuple(patterns), remaining_tokens))
         } else if let TokenType::OpenBracket = tokens[0].token_type {
             let (patterns, remaining_tokens) =
                 parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
 
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
 
-            Ok((Pattern::Array(patterns), remaining_tokens))
+            Ok((PatternKind::Array(patterns), remaining_tokens))
         } else if let TokenType::Type(_) = tokens[0].token_type {
             let (enum_inst, remaining_tokens) = EnumPattern::parse(tokens, parse_ctx)?;
 
-            Ok((Pattern::EnumInstance(enum_inst), remaining_tokens))
+            Ok((PatternKind::EnumInstance(enum_inst), remaining_tokens))
         } else if let TokenType::Ident(_) = tokens[0].token_type {
             let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
 
-            Ok((Pattern::Ident(ident), remaining_tokens))
+            Ok((PatternKind::Ident(ident), remaining_tokens))
         } else if let TokenType::Underscore = tokens[0].token_type {
-            Ok((Pattern::Wildcard, &tokens[1..]))
+            Ok((PatternKind::Wildcard, &tokens[1..]))
         } else if let Ok((literal, remaining_tokens)) = Literal::parse(tokens, parse_ctx) {
-            Ok((Pattern::Literal(literal), remaining_tokens))
+            Ok((PatternKind::Literal(literal), remaining_tokens))
         } else {
             return Err(ParseError::UnexpectedToken(
                 tokens[0].clone(),
@@ -149,7 +177,8 @@ mod r#match {
     use super::*;
     use crate::{
         ast::{
-            IdentOrType, Literal, LiteralKind, Operand, Operator, PrimaryExpr, Statement, UnaryExpr,
+            IdentOrType, Literal, LiteralKind, Operand, Operator, PatternKind, PrimaryExpr,
+            Statement, UnaryExpr,
         },
         lexer::Span,
         parser::util::lex_test,
@@ -180,10 +209,13 @@ mod r#match {
                 })),
                 arms: vec![
                     MatchArm {
-                        pattern: Pattern::Ident(Ident {
-                            name: "a".to_string(),
-                            span: Span::default(),
-                        }),
+                        pattern: Pattern {
+                            binding: None,
+                            kind: PatternKind::Ident(Ident {
+                                name: "a".to_string(),
+                                span: Span::default(),
+                            })
+                        },
                         body: Block {
                             statements: vec![Statement::Expression(Expression::UnaryExpr(
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -198,16 +230,25 @@ mod r#match {
                         }
                     },
                     MatchArm {
-                        pattern: Pattern::Tuple(vec![
-                            Pattern::Ident(Ident {
-                                name: "a".to_string(),
-                                span: Span::default(),
-                            }),
-                            Pattern::Ident(Ident {
-                                name: "b".to_string(),
-                                span: Span::default(),
-                            }),
-                        ]),
+                        pattern: Pattern {
+                            binding: None,
+                            kind: PatternKind::Tuple(vec![
+                                Pattern {
+                                    binding: None,
+                                    kind: PatternKind::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })
+                                },
+                                Pattern {
+                                    binding: None,
+                                    kind: PatternKind::Ident(Ident {
+                                        name: "b".to_string(),
+                                        span: Span::default(),
+                                    })
+                                }
+                            ])
+                        },
                         body: Block {
                             statements: vec![Statement::Expression(Expression::BinopExpr(
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -240,6 +281,30 @@ mod r#match {
                         }
                     }
                 ]
+            }
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_patter_with_binding() {
+        let input = "a @ 1";
+        let tokens = lex_test(input);
+        let (pattern, rest) =
+            Pattern::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            pattern,
+            Pattern {
+                binding: Some(Ident {
+                    name: "a".to_string(),
+                    span: Span::default()
+                }),
+                kind: PatternKind::Literal(Literal {
+                    kind: LiteralKind::Number(1),
+                    span: Span::default()
+                })
             }
         );
 

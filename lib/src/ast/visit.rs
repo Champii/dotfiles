@@ -87,6 +87,7 @@ generate_visitor_trait!(
     Match
     MatchArm
     Pattern
+    PatternKind
     EnumPattern
     ArrayPattern
     UnaryExpr
@@ -346,15 +347,23 @@ pub fn walk_match_arm<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchArm) {
     visitor.visit_block(&m.body);
 }
 
-pub fn walk_pattern<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a Pattern) {
+pub fn walk_pattern<'a, V: Visitor<'a>>(visitor: &mut V, p: &'a Pattern) {
+    if let Some(ident) = &p.binding {
+        visitor.visit_ident(ident);
+    }
+
+    visitor.visit_pattern_kind(&p.kind);
+}
+
+pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind) {
     match m {
-        Pattern::Ident(ident) => visitor.visit_ident(ident),
-        Pattern::Literal(l) => visitor.visit_literal(l),
-        Pattern::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
-        Pattern::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
-        Pattern::EnumInstance(e) => visitor.visit_enum_pattern(e),
-        Pattern::StructInstance(s) => visitor.visit_struct_instance(s),
-        Pattern::Wildcard => {}
+        PatternKind::Ident(ident) => visitor.visit_ident(ident),
+        PatternKind::Literal(l) => visitor.visit_literal(l),
+        PatternKind::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
+        PatternKind::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
+        PatternKind::EnumInstance(e) => visitor.visit_enum_pattern(e),
+        PatternKind::StructInstance(s) => visitor.visit_struct_instance(s),
+        PatternKind::Wildcard => {}
     }
 }
 
