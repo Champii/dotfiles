@@ -504,6 +504,15 @@ impl Display for Assignment {
     }
 }
 
+impl Display for AssignmentLHS {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            AssignmentLHS::Expression(expr) => write!(f, "{}", expr),
+            AssignmentLHS::Pattern(pattern) => write!(f, "{}", pattern),
+        }
+    }
+}
+
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
@@ -605,12 +614,12 @@ impl Display for MatchArm {
     }
 }
 
-impl Display for MatchPattern {
+impl Display for Pattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            MatchPattern::Ident(ident) => write!(f, "{}", ident),
-            MatchPattern::Literal(lit) => write!(f, "{}", lit),
-            MatchPattern::Tuple(patterns) => {
+            Pattern::Ident(ident) => write!(f, "{}", ident),
+            Pattern::Literal(lit) => write!(f, "{}", lit),
+            Pattern::Tuple(patterns) => {
                 write!(f, "(")?;
 
                 for (i, pattern) in patterns.iter().enumerate() {
@@ -623,7 +632,7 @@ impl Display for MatchPattern {
 
                 write!(f, ")")
             }
-            MatchPattern::Array(patterns) => {
+            Pattern::Array(patterns) => {
                 write!(f, "[")?;
 
                 for (i, pattern) in patterns.iter().enumerate() {
@@ -636,9 +645,9 @@ impl Display for MatchPattern {
 
                 write!(f, "]")
             }
-            MatchPattern::EnumInstance(inst) => write!(f, "{}", inst),
-            MatchPattern::StructInstance(inst) => write!(f, "{}", inst),
-            MatchPattern::Wildcard => write!(f, "_"),
+            Pattern::EnumInstance(inst) => write!(f, "{}", inst),
+            Pattern::StructInstance(inst) => write!(f, "{}", inst),
+            Pattern::Wildcard => write!(f, "_"),
         }
     }
 }

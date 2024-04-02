@@ -173,8 +173,14 @@ pub enum Statement {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum AssignmentLHS {
+    Expression(Expression),
+    Pattern(Pattern),
+}
+
+#[derive(Debug, PartialEq)]
 pub struct Assignment {
-    pub lhs: Expression,
+    pub lhs: AssignmentLHS,
     pub rhs: Expression,
 }
 
@@ -223,15 +229,15 @@ pub struct Match {
 
 #[derive(Debug, PartialEq)]
 pub struct MatchArm {
-    pub pattern: MatchPattern,
+    pub pattern: Pattern,
     pub body: Block,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum MatchPattern {
+pub enum Pattern {
     Ident(Ident),
     Literal(Literal),
-    Tuple(Vec<MatchPattern>),
+    Tuple(Vec<Pattern>),
     Array(Vec<ArrayPattern>),
     EnumInstance(EnumPattern),
     StructInstance(StructInstance),
@@ -240,7 +246,7 @@ pub enum MatchPattern {
 
 #[derive(Debug, PartialEq)]
 pub enum ArrayPattern {
-    Pattern(MatchPattern),
+    Pattern(Pattern),
     Rest(Ident),
 }
 
@@ -248,7 +254,7 @@ pub enum ArrayPattern {
 pub struct EnumPattern {
     pub name: ParseTypeInner,
     pub variant: ParseTypeInner,
-    pub args: Vec<MatchPattern>,
+    pub args: Vec<Pattern>,
 }
 
 #[derive(Debug, PartialEq)]

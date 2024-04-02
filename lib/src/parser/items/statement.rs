@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Assignment, Expression, Statement},
+    ast::{Assignment, AssignmentLHS, Expression, Pattern, Statement},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -41,26 +41,49 @@ impl Parsable for Statement {
             return Ok((Statement::Break(expression), remaining_tokens));
         }
 
+        if let Ok((assignment, remaining_tokens)) = Assignment::parse(remaining_tokens, parse_ctx) {
+            return Ok((Statement::Assignment(assignment), remaining_tokens));
+        }
+
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
-        if remaining_tokens.is_empty() {
-            return Ok((Statement::Expression(expression), remaining_tokens));
-        }
-
-        if let TokenType::Equal = remaining_tokens[0].token_type {
-            let remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
-            let (rhs, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
-
-            return Ok((
-                Statement::Assignment(Assignment {
-                    lhs: expression,
-                    rhs,
-                }),
-                remaining_tokens,
-            ));
-        }
-
         Ok((Statement::Expression(expression), remaining_tokens))
+    }
+}
+
+impl Parsable for Assignment {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let (lhs, remaining_tokens) = AssignmentLHS::parse(tokens, parse_ctx)?;
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
+
+        let (rhs, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+
+        Ok((Assignment { lhs, rhs }, remaining_tokens))
+    }
+}
+
+impl Parsable for AssignmentLHS {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        if let Ok((pattern, remaining_tokens)) = Pattern::parse(tokens, parse_ctx) {
+            if remaining_tokens.len() > 0 && remaining_tokens[0].token_type == TokenType::Equal {
+                return Ok((AssignmentLHS::Pattern(pattern), remaining_tokens));
+            }
+        }
+
+        if let Ok((expression, remaining_tokens)) = Expression::parse(tokens, parse_ctx) {
+            if remaining_tokens.len() > 0 && remaining_tokens[0].token_type == TokenType::Equal {
+                return Ok((AssignmentLHS::Expression(expression), remaining_tokens));
+            }
+        }
+
+        Err(ParseError::UnexpectedToken(tokens[0].clone(), vec![]).into())
     }
 }
 
@@ -109,15 +132,9 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Assignment(Assignment {
-                lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                    operand: Operand::Ident(crate::ast::IdentifierPath {
-                        path: vec![IdentOrType::Ident(crate::ast::Ident {
-                            name: "a".to_string(),
-                            span: Span::default(),
-                        })],
-                    }),
-                    secondaries: None,
-                    type_annotation: None,
+                lhs: AssignmentLHS::Pattern(Pattern::Ident(Ident {
+                    name: "a".to_string(),
+                    span: Span::default(),
                 })),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
@@ -143,35 +160,37 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Assignment(Assignment {
-                lhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                    operand: Operand::Ident(IdentifierPath {
-                        path: vec![IdentOrType::Ident(Ident {
-                            name: "a".to_string(),
-                            span: Span::default(),
-                        })],
-                    }),
-                    secondaries: Some(vec![
-                        SecondaryExpr::Dot(Ident {
-                            name: "b".to_string(),
-                            span: Span::default(),
+                lhs: AssignmentLHS::Expression(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                    PrimaryExpr {
+                        operand: Operand::Ident(IdentifierPath {
+                            path: vec![IdentOrType::Ident(Ident {
+                                name: "a".to_string(),
+                                span: Span::default(),
+                            })],
                         }),
-                        SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(
-                            UnaryExpr::PrimaryExpr(PrimaryExpr {
-                                operand: Operand::Literal(Literal {
-                                    kind: crate::ast::LiteralKind::Number(2),
-                                    span: Span::default(),
-                                }),
-                                secondaries: None,
-                                type_annotation: None,
-                            })
-                        )),),
-                        SecondaryExpr::Dot(Ident {
-                            name: "c".to_string(),
-                            span: Span::default(),
-                        }),
-                    ]),
-                    type_annotation: None,
-                })),
+                        secondaries: Some(vec![
+                            SecondaryExpr::Dot(Ident {
+                                name: "b".to_string(),
+                                span: Span::default(),
+                            }),
+                            SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(
+                                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                    operand: Operand::Literal(Literal {
+                                        kind: crate::ast::LiteralKind::Number(2),
+                                        span: Span::default(),
+                                    }),
+                                    secondaries: None,
+                                    type_annotation: None,
+                                })
+                            )),),
+                            SecondaryExpr::Dot(Ident {
+                                name: "c".to_string(),
+                                span: Span::default(),
+                            }),
+                        ]),
+                        type_annotation: None,
+                    }
+                ))),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
                         kind: crate::ast::LiteralKind::Number(1),

@@ -107,7 +107,9 @@ impl Parsable for PrimaryExpr {
             primary_expr.secondaries = Some(secondaries);
         }
 
-        if TokenType::Colon == remaining_tokens_after_secondaries[0].token_type {
+        if remaining_tokens_after_secondaries.len() > 0
+            && TokenType::Colon == remaining_tokens_after_secondaries[0].token_type
+        {
             let (type_annotation, remaining_tokens) =
                 ParseType::parse(&remaining_tokens_after_secondaries[1..], parse_ctx)?;
 

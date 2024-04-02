@@ -229,7 +229,10 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Struct field visibility with `<`
+      - Indexable tuple `(1, 2).0 == 1`
+      - Indexable Enum variant ? `SomeEnum::Variant 1, 2, 3 .1 == 2`
+      - Spaced dot for enum variant
+      - Slice of array `arr[1..]`
 
     - Low priority list:
       - Auto export current item `< struct Foo`

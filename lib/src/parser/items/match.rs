@@ -1,7 +1,7 @@
 use crate::{
     ast::{
         ArrayPattern, Block, EnumPattern, Expression, Ident, Literal, Match, MatchArm,
-        MatchPattern, ParseTypeInner,
+        Pattern, ParseTypeInner,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -42,7 +42,7 @@ impl Parsable for MatchArm {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = parse_ctx.consume_indent(tokens)?;
 
-        let (pattern, remaining_tokens) = MatchPattern::parse(remaining_tokens, parse_ctx)?;
+        let (pattern, remaining_tokens) = Pattern::parse(remaining_tokens, parse_ctx)?;
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Arrow)?;
 
@@ -52,7 +52,7 @@ impl Parsable for MatchArm {
     }
 }
 
-impl Parsable for MatchPattern {
+impl Parsable for Pattern {
     fn parse<'a>(
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
@@ -63,26 +63,26 @@ impl Parsable for MatchPattern {
 
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
 
-            Ok((MatchPattern::Tuple(patterns), remaining_tokens))
+            Ok((Pattern::Tuple(patterns), remaining_tokens))
         } else if let TokenType::OpenBracket = tokens[0].token_type {
             let (patterns, remaining_tokens) =
                 parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
 
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
 
-            Ok((MatchPattern::Array(patterns), remaining_tokens))
+            Ok((Pattern::Array(patterns), remaining_tokens))
         } else if let TokenType::Type(_) = tokens[0].token_type {
             let (enum_inst, remaining_tokens) = EnumPattern::parse(tokens, parse_ctx)?;
 
-            Ok((MatchPattern::EnumInstance(enum_inst), remaining_tokens))
+            Ok((Pattern::EnumInstance(enum_inst), remaining_tokens))
         } else if let TokenType::Ident(_) = tokens[0].token_type {
             let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
 
-            Ok((MatchPattern::Ident(ident), remaining_tokens))
+            Ok((Pattern::Ident(ident), remaining_tokens))
         } else if let TokenType::Underscore = tokens[0].token_type {
-            Ok((MatchPattern::Wildcard, &tokens[1..]))
+            Ok((Pattern::Wildcard, &tokens[1..]))
         } else if let Ok((literal, remaining_tokens)) = Literal::parse(tokens, parse_ctx) {
-            Ok((MatchPattern::Literal(literal), remaining_tokens))
+            Ok((Pattern::Literal(literal), remaining_tokens))
         } else {
             return Err(ParseError::UnexpectedToken(
                 tokens[0].clone(),
@@ -107,7 +107,7 @@ impl Parsable for ArrayPattern {
         {
             let (ident, remaining_tokens) = Ident::parse(&tokens[2..], parse_ctx)?;
             return Ok((ArrayPattern::Rest(ident), remaining_tokens));
-        } else if let Ok((pattern, remaining_tokens)) = MatchPattern::parse(tokens, parse_ctx) {
+        } else if let Ok((pattern, remaining_tokens)) = Pattern::parse(tokens, parse_ctx) {
             return Ok((ArrayPattern::Pattern(pattern), remaining_tokens));
         } else {
             Err(ParseError::UnexpectedToken(
@@ -180,7 +180,7 @@ mod r#match {
                 })),
                 arms: vec![
                     MatchArm {
-                        pattern: MatchPattern::Ident(Ident {
+                        pattern: Pattern::Ident(Ident {
                             name: "a".to_string(),
                             span: Span::default(),
                         }),
@@ -198,12 +198,12 @@ mod r#match {
                         }
                     },
                     MatchArm {
-                        pattern: MatchPattern::Tuple(vec![
-                            MatchPattern::Ident(Ident {
+                        pattern: Pattern::Tuple(vec![
+                            Pattern::Ident(Ident {
                                 name: "a".to_string(),
                                 span: Span::default(),
                             }),
-                            MatchPattern::Ident(Ident {
+                            Pattern::Ident(Ident {
                                 name: "b".to_string(),
                                 span: Span::default(),
                             }),

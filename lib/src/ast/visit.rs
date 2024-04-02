@@ -76,6 +76,7 @@ generate_visitor_trait!(
     StructDeclField
     Ident
     Assignment
+    AssignmentLHS
     IdentifierPath
     Statement
     Loop
@@ -84,7 +85,7 @@ generate_visitor_trait!(
     Else
     Match
     MatchArm
-    MatchPattern
+    Pattern
     EnumPattern
     ArrayPattern
     UnaryExpr
@@ -214,8 +215,15 @@ pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statem
 }
 
 pub fn walk_assignment<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a Assignment) {
-    visitor.visit_expression(&assign.lhs);
+    visitor.visit_assignment_l_h_s(&assign.lhs);
     visitor.visit_expression(&assign.rhs);
+}
+
+pub fn walk_assignment_l_h_s<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a AssignmentLHS) {
+    match assign {
+        AssignmentLHS::Expression(expr) => visitor.visit_expression(expr),
+        AssignmentLHS::Pattern(pattern) => visitor.visit_pattern(pattern),
+    }
 }
 
 pub fn walk_for<'a, V: Visitor<'a>>(visitor: &mut V, for_loop: &'a Loop) {
@@ -326,19 +334,19 @@ pub fn walk_match<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a Match) {
 }
 
 pub fn walk_match_arm<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchArm) {
-    visitor.visit_match_pattern(&m.pattern);
+    visitor.visit_pattern(&m.pattern);
     visitor.visit_block(&m.body);
 }
 
-pub fn walk_match_pattern<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a MatchPattern) {
+pub fn walk_pattern<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a Pattern) {
     match m {
-        MatchPattern::Ident(ident) => visitor.visit_ident(ident),
-        MatchPattern::Literal(l) => visitor.visit_literal(l),
-        MatchPattern::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
-        MatchPattern::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
-        MatchPattern::EnumInstance(e) => visitor.visit_enum_pattern(e),
-        MatchPattern::StructInstance(s) => visitor.visit_struct_instance(s),
-        MatchPattern::Wildcard => {}
+        Pattern::Ident(ident) => visitor.visit_ident(ident),
+        Pattern::Literal(l) => visitor.visit_literal(l),
+        Pattern::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
+        Pattern::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
+        Pattern::EnumInstance(e) => visitor.visit_enum_pattern(e),
+        Pattern::StructInstance(s) => visitor.visit_struct_instance(s),
+        Pattern::Wildcard => {}
     }
 }
 
@@ -351,7 +359,7 @@ pub fn walk_enum_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumPattern
 
 pub fn walk_array_pattern<'a, V: Visitor<'a>>(visitor: &mut V, a: &'a ArrayPattern) {
     match a {
-        ArrayPattern::Pattern(p) => visitor.visit_match_pattern(p),
+        ArrayPattern::Pattern(p) => visitor.visit_pattern(p),
         ArrayPattern::Rest(ident) => visitor.visit_ident(ident),
     }
 }
