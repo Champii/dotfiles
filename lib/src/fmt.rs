@@ -747,6 +747,15 @@ impl Display for SecondaryExpr {
     }
 }
 
+impl Display for IdentOrNumber {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            IdentOrNumber::Ident(ident) => write!(f, "{}", ident),
+            IdentOrNumber::Number(num) => write!(f, "{}", num),
+        }
+    }
+}
+
 impl Display for Argument {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.arg)

@@ -1,3 +1,3 @@
 toto = ->
-  Lol::Mdr a = 2
+  (a, b).1
 

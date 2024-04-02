@@ -1,8 +1,8 @@
 use crate::{
     ast::{
-        Argument, Block, EnumInstance, Expression, Ident, IdentifierPath, If, LambdaDecl, Literal,
-        Loop, Match, NativeOperator, Operand, Operator, ParseType, PrimaryExpr, SecondaryExpr,
-        StructInstance, Tuple, UnaryExpr,
+        Argument, Block, EnumInstance, Expression, Ident, IdentOrNumber, IdentifierPath, If,
+        LambdaDecl, Literal, LiteralKind, Loop, Match, NativeOperator, Operand, Operator,
+        ParseType, PrimaryExpr, SecondaryExpr, StructInstance, Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -154,7 +154,10 @@ impl Parsable for SecondaryExpr {
             } else {
                 let (ident, remaining_tokens) = Ident::parse(&tokens[3..], parse_ctx)?;
 
-                Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+                Ok((
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
+                    remaining_tokens,
+                ))
             }
         } else if let TokenType::OpenBracket = token.token_type {
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
@@ -165,9 +168,35 @@ impl Parsable for SecondaryExpr {
                 remaining_tokens,
             ))
         } else if TokenType::Dot == token.token_type {
-            let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+            if let Ok((ident, remaining_tokens)) = Ident::parse(&tokens[1..], parse_ctx) {
+                Ok((
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
+                    remaining_tokens,
+                ))
+            } else if let TokenType::Number(_) = tokens[1].token_type {
+                let (num, remaining_tokens) = Literal::parse(&tokens[1..], parse_ctx)?;
+                if let LiteralKind::Number(num) = num.kind {
+                    return Ok((
+                        SecondaryExpr::Dot(IdentOrNumber::Number(num)),
+                        remaining_tokens,
+                    ));
+                }
 
-            Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+                Err(ParseError::UnexpectedToken(
+                    tokens[1].clone(),
+                    vec![TokenType::Number("".to_string())],
+                )
+                .into())
+            } else {
+                Err(ParseError::UnexpectedToken(
+                    tokens[1].clone(),
+                    vec![
+                        TokenType::Ident("".to_string()),
+                        TokenType::Number("".to_string()),
+                    ],
+                )
+                .into())
+            }
         } else if TokenType::SpacedDot == token.token_type {
             let list_idx = parse_ctx.inside_argument_list.len().saturating_sub(1);
 
@@ -180,7 +209,10 @@ impl Parsable for SecondaryExpr {
                 let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
                 parse_ctx.inside_argument_list.pop();
 
-                Ok((SecondaryExpr::Dot(ident), remaining_tokens))
+                Ok((
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
+                    remaining_tokens,
+                ))
             }
         } else {
             parse_ctx.inside_argument_list.push(true);
@@ -455,10 +487,10 @@ mod expression {
                             span: Span::default(),
                         })],
                     }),
-                    secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                    secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "a".to_string(),
                         span: Span::default(),
-                    })]),
+                    }))]),
                     type_annotation: None,
                 }),
                 Operator {
@@ -656,10 +688,10 @@ mod expression {
                         span: Span::default(),
                     })],
                 }),
-                secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                     name: "world".to_string(),
                     span: Span::default(),
-                })]),
+                }))]),
                 type_annotation: None,
             })),
         );
@@ -681,14 +713,37 @@ mod expression {
                     kind: crate::ast::LiteralKind::Number(4),
                     span: Span::default(),
                 }),
-                secondaries: Some(vec![SecondaryExpr::Dot(Ident {
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                     name: "test".to_string(),
                     span: Span::default(),
-                })]),
+                }))]),
                 type_annotation: None,
             })),
         );
 
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression_with_number() {
+        let input = "some_tuple.1";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "some_tuple".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Number(1))]),
+                type_annotation: None,
+            })),
+        );
         assert_eq!(rest.len(), 0);
     }
 
@@ -719,10 +774,10 @@ mod expression {
                             type_annotation: None,
                         }
                     )))),
-                    SecondaryExpr::Dot(Ident {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "world".to_string(),
                         span: Span::default(),
-                    }),
+                    })),
                     SecondaryExpr::Arguments(vec![
                         Argument {
                             arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -782,14 +837,14 @@ mod expression {
                     })],
                 }),
                 secondaries: Some(vec![
-                    SecondaryExpr::Dot(Ident {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "bar".to_string(),
                         span: Span::default(),
-                    }),
-                    SecondaryExpr::Dot(Ident {
+                    })),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "baz".to_string(),
                         span: Span::default(),
-                    }),
+                    })),
                 ]),
                 type_annotation: None,
             })),
@@ -840,10 +895,10 @@ mod expression {
                             })),
                         },
                     ]),
-                    SecondaryExpr::Dot(Ident {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "bar".to_string(),
                         span: Span::default(),
-                    })
+                    }))
                 ]),
                 type_annotation: None,
             })),

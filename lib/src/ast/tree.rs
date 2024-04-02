@@ -334,10 +334,16 @@ pub struct Array {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum IdentOrNumber {
+    Ident(Ident),
+    Number(u64),
+}
+
+#[derive(Debug, PartialEq)]
 pub enum SecondaryExpr {
     Arguments(Vec<Argument>),
     Indice(Box<Expression>), // Boxing here to keep the enum size low
-    Dot(Ident),
+    Dot(IdentOrNumber),
 }
 
 #[derive(Debug, PartialEq)]

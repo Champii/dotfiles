@@ -75,6 +75,7 @@ generate_visitor_trait!(
     StructDecl
     StructDeclField
     Ident
+    IdentOrNumber
     Assignment
     AssignmentLHS
     IdentifierPath
@@ -199,6 +200,13 @@ pub fn walk_ident<'a, V: Visitor<'a>>(visitor: &mut V, identifier: &'a Ident) {
     visitor.visit_name(&identifier.name);
 }
 
+pub fn walk_ident_or_number<'a, V: Visitor<'a>>(visitor: &mut V, ident: &'a IdentOrNumber) {
+    match ident {
+        IdentOrNumber::Ident(ident) => visitor.visit_ident(ident),
+        IdentOrNumber::Number(num) => visitor.visit_primitive(num),
+    }
+}
+
 pub fn walk_block<'a, V: Visitor<'a>>(visitor: &mut V, body: &'a Block) {
     walk_list!(visitor, visit_statement, &body.statements);
 }
@@ -302,7 +310,7 @@ pub fn walk_secondary_expr<'a, V: Visitor<'a>>(visitor: &mut V, secondary: &'a S
             visitor.visit_expression(expr);
         }
         SecondaryExpr::Dot(expr) => {
-            visitor.visit_ident(expr);
+            visitor.visit_ident_or_number(expr);
         }
     }
 }

@@ -92,8 +92,8 @@ mod tests {
     use super::*;
     use crate::{
         ast::{
-            Ident, IdentOrType, IdentifierPath, Literal, Operand, PrimaryExpr, SecondaryExpr,
-            UnaryExpr,
+            Ident, IdentOrNumber, IdentOrType, IdentifierPath, Literal, Operand, PrimaryExpr,
+            SecondaryExpr, UnaryExpr,
         },
         lexer::Span,
         parser::util::lex_test,
@@ -169,10 +169,10 @@ mod tests {
                             })],
                         }),
                         secondaries: Some(vec![
-                            SecondaryExpr::Dot(Ident {
+                            SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                                 name: "b".to_string(),
                                 span: Span::default(),
-                            }),
+                            })),
                             SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
                                     operand: Operand::Literal(Literal {
@@ -183,10 +183,10 @@ mod tests {
                                     type_annotation: None,
                                 })
                             )),),
-                            SecondaryExpr::Dot(Ident {
+                            SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                                 name: "c".to_string(),
                                 span: Span::default(),
-                            }),
+                            })),
                         ]),
                         type_annotation: None,
                     }
