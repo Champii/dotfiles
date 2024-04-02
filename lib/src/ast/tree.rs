@@ -230,6 +230,7 @@ pub struct Match {
 #[derive(Debug, PartialEq)]
 pub struct MatchArm {
     pub pattern: Pattern,
+    pub condition: Option<Expression>,
     pub body: Block,
 }
 

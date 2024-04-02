@@ -231,12 +231,11 @@ struct MyStruct
       - Comments (end of line ('#') or inline ('/*' '*/')
 
     - Low priority list:
-      - Slice of array `arr[1..]`
       - Auto export current item `< struct Foo`
-      - Match if like `(a, b) if a == b -> a + b`
       - Allow multiline function arguments
       - Struct default constructor
       - Chain calls without variables
+      - Slice of array `arr[1..]`
       - Default arguments and named arguments
       - Error bubbling with `?`
       - Postfix `if` and `loop`

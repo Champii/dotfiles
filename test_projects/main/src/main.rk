@@ -1,3 +1,4 @@
 toto = ->
-  foo @ (a, b @ toto) = lol
+  match a
+    (a, b) if a == b => a + b
 

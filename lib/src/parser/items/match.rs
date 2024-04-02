@@ -42,13 +42,33 @@ impl Parsable for MatchArm {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = parse_ctx.consume_indent(tokens)?;
 
-        let (pattern, remaining_tokens) = Pattern::parse(remaining_tokens, parse_ctx)?;
+        let (pattern, mut remaining_tokens) = Pattern::parse(remaining_tokens, parse_ctx)?;
 
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::Arrow)?;
+        let condition = if TokenType::Keyword("if".to_string()) == remaining_tokens[0].token_type {
+            if let Ok((expr, new_remaining_tokens)) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)
+            {
+                remaining_tokens = new_remaining_tokens;
+                Some(expr)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let remaining_tokens = expect_token(remaining_tokens, TokenType::FatArrow)?;
 
         let (body, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
 
-        Ok((MatchArm { pattern, body }, remaining_tokens))
+        Ok((
+            MatchArm {
+                pattern,
+                condition,
+                body,
+            },
+            remaining_tokens,
+        ))
     }
 }
 
@@ -188,8 +208,8 @@ mod r#match {
     #[test]
     fn test_parse_match() {
         let input = r#"match a
-  a -> 2
-  (a, b) -> a + b"#;
+  a => 2
+  (a, b) => a + b"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Match::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -216,6 +236,7 @@ mod r#match {
                                 span: Span::default(),
                             })
                         },
+                        condition: None,
                         body: Block {
                             statements: vec![Statement::Expression(Expression::UnaryExpr(
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -249,6 +270,7 @@ mod r#match {
                                 }
                             ])
                         },
+                        condition: None,
                         body: Block {
                             statements: vec![Statement::Expression(Expression::BinopExpr(
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -305,6 +327,78 @@ mod r#match {
                     kind: LiteralKind::Number(1),
                     span: Span::default()
                 })
+            }
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_match_with_condition() {
+        let input = r#"match a
+  (a, b) if a => a"#;
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Match::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Match {
+                expr: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(crate::ast::IdentifierPath {
+                        path: vec![IdentOrType::Ident(Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        })]
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                })),
+                arms: vec![MatchArm {
+                    pattern: Pattern {
+                        binding: None,
+                        kind: PatternKind::Tuple(vec![
+                            Pattern {
+                                binding: None,
+                                kind: PatternKind::Ident(Ident {
+                                    name: "a".to_string(),
+                                    span: Span::default(),
+                                })
+                            },
+                            Pattern {
+                                binding: None,
+                                kind: PatternKind::Ident(Ident {
+                                    name: "b".to_string(),
+                                    span: Span::default(),
+                                })
+                            }
+                        ])
+                    },
+                    condition: Some(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Ident(crate::ast::IdentifierPath {
+                            path: vec![IdentOrType::Ident(Ident {
+                                name: "a".to_string(),
+                                span: Span::default(),
+                            })]
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    }))),
+                    body: Block {
+                        statements: vec![Statement::Expression(Expression::UnaryExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(crate::ast::IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })]
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })
+                        ))]
+                    }
+                }]
             }
         );
 
