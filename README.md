@@ -73,7 +73,8 @@ add_mul = mul . add
 ## Custom operators
 
 ```haskell
-infix 1 |> = x, f -> f x
+infix 1 |>
+|> = x, f -> f x
 
 main = -> [1, 2, 3] |> map (+2)
 ```
@@ -151,9 +152,9 @@ main = ->
 main = ->
   a = (10, "hello")
   match a
-    (0, "world")      => "something"
-    (a, str) if a > 5 => str
-    _                 => "otherwise"
+    (0, "world")            => "something"
+    foo @ (a, str) if a > 5 => str
+    _                       => "otherwise"
 ```
 
 ## Destructuring
@@ -229,23 +230,27 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
+      - Allow Enum instance without the parent part `Ok 42`
+      - Allow multiline function arguments
+      - Chain calls without variables
+      - `+=` like operators
+      - `if let` like `if Err e = run!`
+      - Allow any characters into strings and chars
 
     - Low priority list:
       - Auto export current item `< struct Foo`
-      - Allow multiline function arguments
       - Struct default constructor
-      - Chain calls without variables
       - Slice of array `arr[1..]`
       - Default arguments and named arguments
       - Error bubbling with `?`
       - Postfix `if` and `loop`
-      - Oneliner for loops (other than postfix)
+      - Oneliner for loops (other than postfix) like array comprehension `[a for a in arr]`
       - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
       - Struct default value
       - Async?
       - Allow parenthesis for function calls ?
       - Allow braces for nested blocks ?
-
+      - String interpolation ? 
 
   - Desugar
     - Operator precedence

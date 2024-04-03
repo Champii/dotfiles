@@ -1,4 +1,9 @@
 toto = ->
-  match a
-    (a, b) if a == b => a + b
+  lol a, b d .toto .mdr
+
+macro lol
+  $name:ident, $expr:expr =>
+    $name = a -> $expr
+
+%lol lol, 2 + 2
 

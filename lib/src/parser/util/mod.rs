@@ -1,5 +1,8 @@
 use super::{parse_ctx::ParseCtx, Parsable};
-use crate::lexer::{Token, TokenType};
+use crate::{
+    diagnostic::Diagnostics,
+    lexer::{Token, TokenType},
+};
 
 mod parse_error;
 pub use parse_error::ParseError;
@@ -26,7 +29,7 @@ pub fn parse_vec_of<'a, T: Parsable>(
     tokens: &'a [Token],
     delim: Option<TokenType>,
     parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<T>, &'a [Token]), ParseError> {
+) -> Result<(Vec<T>, &'a [Token]), Diagnostics> {
     let mut remaining_tokens = tokens;
     let mut items = Vec::new();
 

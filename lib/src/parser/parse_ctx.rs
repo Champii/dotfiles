@@ -1,6 +1,7 @@
 use std::{collections::HashSet, path::PathBuf};
 
 use crate::{
+    diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     Config,
 };
@@ -36,6 +37,16 @@ impl ParseCtx {
 
     pub fn indent(&mut self) {
         self.indent_level += self.indent_step;
+    }
+
+    pub fn indent_block<'a, T, F>(&mut self, f: F) -> Result<(T, &'a [Token]), Diagnostics>
+    where
+        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+    {
+        self.indent();
+        let res = f(self);
+        self.dedent();
+        res
     }
 
     pub fn dedent(&mut self) {
@@ -106,6 +117,42 @@ impl ParseCtx {
         } else {
             self.files_map.insert(PathBuf::from(name.clone()));
             self.current_file = Some(PathBuf::from(name));
+        }
+    }
+
+    /// This is to handle the spaced dot that closes argument list
+    pub fn argument_list<'a, T, F>(&mut self, f: F) -> Result<(T, &'a [Token]), Diagnostics>
+    where
+        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+    {
+        self.inside_argument_list.push(true);
+        let res = f(self);
+        self.inside_argument_list.pop();
+        res
+    }
+
+    pub fn argument_list_short_circuit<'a, T, F>(
+        &mut self,
+        f: F,
+    ) -> Result<(T, &'a [Token]), Diagnostics>
+    where
+        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+    {
+        let list_idx = self.inside_argument_list.len().saturating_sub(1);
+
+        if !self.inside_argument_list.is_empty() && self.inside_argument_list[list_idx] {
+            self.inside_argument_list[list_idx] = false;
+            Err(ParseError::UnexpectedToken(
+                Token {
+                    token_type: TokenType::Operator(",".to_string()),
+                    span: Default::default(),
+                },
+                vec![TokenType::Operator(")".to_string())],
+            )
+            .into())
+        } else {
+            // self.inside_argument_list.pop();
+            f(self)
         }
     }
 }

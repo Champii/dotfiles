@@ -1,7 +1,7 @@
 use crate::{
     ast::{Expression, Ident, MacroFragment},
     diagnostic::Diagnostics,
-    lexer::{Token, TokenType},
+    lexer::{Span, Token, TokenType},
     parser::{Parsable, ParseError},
 };
 
@@ -19,10 +19,17 @@ pub struct MacroArgMatcher<'a> {
     threads: Vec<MacroThread<'a>>,
     must_be_completed: bool,
     args: &'a [Token],
+    macro_span: Span,
+    invoc_span: Span,
 }
 
 impl<'a> MacroArgMatcher<'a> {
-    pub fn new(args: &'a [Token], thread: Vec<MacroFragment>) -> Self {
+    pub fn new(
+        args: &'a [Token],
+        thread: Vec<MacroFragment>,
+        macro_span: Span,
+        invoc_span: Span,
+    ) -> Self {
         Self {
             threads: vec![MacroThread {
                 args,
@@ -31,6 +38,8 @@ impl<'a> MacroArgMatcher<'a> {
             }],
             args,
             must_be_completed: false,
+            macro_span,
+            invoc_span,
         }
     }
 
@@ -70,8 +79,9 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
-                            } else {
-                                let last_found_arg = self.args.len() - thread.args.len();
+
+                                let last_found_arg =
+                                    (self.args.len() - thread.args.len()).saturating_sub(1);
                                 if last_found_arg > most_advanced_arg_idx {
                                     most_advanced_arg_idx = last_found_arg;
                                 }
@@ -93,7 +103,7 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
-                            } else {
+
                                 let last_found_arg = self.args.len() - thread.args.len();
                                 if last_found_arg > most_advanced_arg_idx {
                                     most_advanced_arg_idx = last_found_arg;
@@ -110,8 +120,9 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
-                            } else {
-                                let last_found_arg = self.args.len() - thread.args.len();
+
+                                let last_found_arg =
+                                    (self.args.len() - thread.args.len()).saturating_sub(1);
                                 if last_found_arg > most_advanced_arg_idx {
                                     most_advanced_arg_idx = last_found_arg;
                                 }
@@ -124,8 +135,9 @@ impl<'a> MacroArgMatcher<'a> {
                                     tokens: tokens[1..].to_vec(),
                                     correspondances: thread.correspondances.clone(),
                                 });
-                            } else {
-                                let last_found_arg = self.args.len() - thread.args.len();
+
+                                let last_found_arg =
+                                    (self.args.len() - thread.args.len()).saturating_sub(1);
                                 if last_found_arg > most_advanced_arg_idx {
                                     most_advanced_arg_idx = last_found_arg;
                                 }
@@ -139,7 +151,12 @@ impl<'a> MacroArgMatcher<'a> {
                                 correspondances: thread.correspondances.clone(),
                             });
 
-                            let mut matcher = MacroArgMatcher::new(thread.args, repetition.clone());
+                            let mut matcher = MacroArgMatcher::new(
+                                thread.args,
+                                repetition.clone(),
+                                self.macro_span.clone(),
+                                self.invoc_span.clone(),
+                            );
                             if let Ok((correspondances, new_args)) = matcher.match_threads() {
                                 thread
                                     .correspondances
@@ -180,15 +197,26 @@ impl<'a> MacroArgMatcher<'a> {
             new_threads = new_new_threads.clone();
         }
 
-        let last_found_arg = self.args[most_advanced_arg_idx].clone();
+        if most_advanced_arg_idx >= self.args.len() {
+            most_advanced_arg_idx = self.args.len() - 1;
+        }
+        let Some(last_found_arg) = self.args.get(most_advanced_arg_idx) else {
+            return Err(ParseError::MacroNoCorrespondance {
+                macro_name: self.macro_span.clone(),
+                invoc_name: self.invoc_span.clone(),
+                invoc_arg: None,
+            }
+            .into());
+        };
 
         if let Some(thread) = get_correspondances_thread(new_threads.clone()) {
             Ok((thread.correspondances.clone(), thread.args))
         } else {
-            Err(ParseError::MacroNoCorrespondance(Ident {
-                name: "macro".to_string(),
-                span: last_found_arg.span.clone(),
-            })
+            Err(ParseError::MacroNoCorrespondance {
+                macro_name: self.macro_span.clone(),
+                invoc_name: self.invoc_span.clone(),
+                invoc_arg: Some(last_found_arg.span.clone()),
+            }
             .into())
         }
     }

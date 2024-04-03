@@ -9,6 +9,61 @@ use crate::{
     },
 };
 
+fn parse_statements_loop<'a>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+) -> Result<(Vec<Statement>, &'a [Token]), Diagnostics> {
+    let mut remaining_tokens = &tokens[1..];
+    let mut remaining_tokens_with_leading_newlines = remaining_tokens;
+    let mut statements = vec![];
+    let mut nb_statements_without_leading_newlines = 0;
+
+    loop {
+        if let Ok((statement, new_tokens)) = Statement::parse(remaining_tokens, parse_ctx) {
+            remaining_tokens = new_tokens;
+            statements.push(statement);
+        } else {
+            remaining_tokens = remaining_tokens_with_leading_newlines;
+            statements = statements
+                .into_iter()
+                .take(nb_statements_without_leading_newlines)
+                .collect();
+            break;
+        }
+
+        remaining_tokens_with_leading_newlines = remaining_tokens;
+
+        if let Ok(new_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
+            remaining_tokens = new_tokens;
+        } else {
+            break;
+        }
+
+        nb_statements_without_leading_newlines = statements.len();
+
+        while remaining_tokens
+            .get(0)
+            .map(|t| {
+                if let TokenType::Indent(_) = t.token_type {
+                    true
+                } else {
+                    false
+                }
+            })
+            .unwrap_or(false)
+            && remaining_tokens
+                .get(1)
+                .map(|t| t.token_type == TokenType::Eol)
+                .unwrap_or(false)
+        {
+            remaining_tokens = &remaining_tokens[2..];
+            statements.push(Statement::EmptyLine);
+        }
+    }
+
+    Ok((statements, remaining_tokens))
+}
+
 impl Parsable for Block {
     fn parse<'a>(
         tokens: &'a [Token],
@@ -18,59 +73,7 @@ impl Parsable for Block {
             return Err(ParseError::UnexpectedEof(TokenType::Eol).into());
         }
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
-            parse_ctx.indent();
-
-            let mut remaining_tokens = &tokens[1..];
-            let mut remaining_tokens_with_leading_newlines = remaining_tokens;
-            let mut statements = vec![];
-            let mut nb_statements_without_leading_newlines = 0;
-
-            loop {
-                if let Ok((statement, new_tokens)) = Statement::parse(remaining_tokens, parse_ctx) {
-                    remaining_tokens = new_tokens;
-                    statements.push(statement);
-                } else {
-                    remaining_tokens = remaining_tokens_with_leading_newlines;
-                    statements = statements
-                        .into_iter()
-                        .take(nb_statements_without_leading_newlines)
-                        .collect();
-                    break;
-                }
-
-                remaining_tokens_with_leading_newlines = remaining_tokens;
-
-                if let Ok(new_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
-                    remaining_tokens = new_tokens;
-                } else {
-                    break;
-                }
-
-                nb_statements_without_leading_newlines = statements.len();
-
-                while remaining_tokens
-                    .get(0)
-                    .map(|t| {
-                        if let TokenType::Indent(_) = t.token_type {
-                            true
-                        } else {
-                            false
-                        }
-                    })
-                    .unwrap_or(false)
-                    && remaining_tokens
-                        .get(1)
-                        .map(|t| t.token_type == TokenType::Eol)
-                        .unwrap_or(false)
-                {
-                    remaining_tokens = &remaining_tokens[2..];
-                    statements.push(Statement::EmptyLine);
-                }
-            }
-
-            parse_ctx.dedent();
-
-            (statements, remaining_tokens)
+            parse_ctx.indent_block(|parse_ctx| parse_statements_loop(tokens, parse_ctx))?
         } else {
             let (statement, remaining_tokens) = Statement::parse(&tokens, parse_ctx)?;
 

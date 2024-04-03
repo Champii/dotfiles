@@ -144,21 +144,12 @@ impl Parsable for SecondaryExpr {
                 TokenType::Dot,
             ],
         ) {
-            let list_idx = parse_ctx.inside_argument_list.len().saturating_sub(1);
+            let (ident_or_number, remaining_tokens) =
+                parse_ctx.argument_list_short_circuit(|parse_ctx| {
+                    IdentOrNumber::parse(&tokens[3..], parse_ctx)
+                })?;
 
-            if !parse_ctx.inside_argument_list.is_empty()
-                && parse_ctx.inside_argument_list[list_idx]
-            {
-                parse_ctx.inside_argument_list[list_idx] = false;
-                Err(ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into())
-            } else {
-                let (ident, remaining_tokens) = Ident::parse(&tokens[3..], parse_ctx)?;
-
-                Ok((
-                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)),
-                    remaining_tokens,
-                ))
-            }
+            Ok((SecondaryExpr::Dot(ident_or_number), remaining_tokens))
         } else if let TokenType::OpenBracket = token.token_type {
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
@@ -168,42 +159,25 @@ impl Parsable for SecondaryExpr {
                 remaining_tokens,
             ))
         } else if TokenType::Dot == token.token_type {
-            if let Ok((ident_or_num, remaining_tokens)) =
-                IdentOrNumber::parse(&tokens[1..], parse_ctx)
-            {
-                Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
-            } else {
-                Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![
-                        TokenType::Ident("".to_string()),
-                        TokenType::Number("".to_string()),
-                    ],
-                )
-                .into())
-            }
+            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
+
+            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
         } else if TokenType::SpacedDot == token.token_type {
-            let list_idx = parse_ctx.inside_argument_list.len().saturating_sub(1);
+            let (ident_or_num, remaining_tokens) =
+                parse_ctx.argument_list_short_circuit(|parse_ctx| {
+                    let (ident_or_number, remaining_tokens) =
+                        IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
 
-            if !parse_ctx.inside_argument_list.is_empty()
-                && parse_ctx.inside_argument_list[list_idx]
-            {
-                parse_ctx.inside_argument_list[list_idx] = false;
-                Err(ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into())
-            } else {
-                let (ident_or_num, remaining_tokens) =
-                    IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
-                parse_ctx.inside_argument_list.pop();
+                    parse_ctx.inside_argument_list.pop();
 
-                Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
-            }
+                    Ok((ident_or_number, remaining_tokens))
+                })?;
+
+            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
         } else {
-            parse_ctx.inside_argument_list.push(true);
-
-            let (arguments, remaining_tokens) =
-                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)?;
-
-            parse_ctx.inside_argument_list.pop();
+            let (arguments, remaining_tokens) = parse_ctx.argument_list(|parse_ctx| {
+                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)
+            })?;
 
             if arguments.is_empty() {
                 return Err(
@@ -882,6 +856,79 @@ mod expression {
                         name: "bar".to_string(),
                         span: Span::default(),
                     }))
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn spaced_dot_closes_fn_call_nested() {
+        let input = "foo a, b a .bar .baz";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "b".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: Some(vec![
+                                    SecondaryExpr::Arguments(vec![Argument {
+                                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                                            PrimaryExpr {
+                                                operand: Operand::Ident(IdentifierPath {
+                                                    path: vec![IdentOrType::Ident(Ident {
+                                                        name: "a".to_string(),
+                                                        span: Span::default(),
+                                                    })],
+                                                }),
+                                                secondaries: None,
+                                                type_annotation: None,
+                                            },
+                                        )),
+                                    },]),
+                                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                                        name: "bar".to_string(),
+                                        span: Span::default(),
+                                    })),
+                                ]),
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    })),
                 ]),
                 type_annotation: None,
             })),

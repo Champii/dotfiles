@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
     diagnostic::Diagnostics,
-    lexer::{Token, TokenType},
+    lexer::{Span, Token, TokenType},
     parser::{Parsable, ParseCtx},
     Config,
 };
@@ -32,7 +32,14 @@ pub fn expand_macros(mut program: Program) -> Result<Program, Diagnostics> {
                         continue;
                     };
 
-                    decls.insert(i, (decl.clone(), invocation.args.clone()));
+                    decls.insert(
+                        i,
+                        (
+                            decl.clone(),
+                            invocation.args.clone(),
+                            invocation.name.span.clone(),
+                        ),
+                    );
                 }
                 _ => (),
             }
@@ -53,7 +60,7 @@ pub fn expand_macros(mut program: Program) -> Result<Program, Diagnostics> {
 
 fn expand_macros_once(
     mut module: Module,
-    decls: &HashMap<usize, (MacroDecl, Vec<Token>)>,
+    decls: &HashMap<usize, (MacroDecl, Vec<Token>, Span)>,
 ) -> Result<Module, Diagnostics> {
     let results = module
         .top_levels
@@ -61,11 +68,11 @@ fn expand_macros_once(
         .enumerate()
         .map(|(i, top_level)| match top_level.kind {
             TopLevelKind::MacroInvoc(_) => {
-                let Some((decl, args)) = decls.get(&i) else {
+                let Some((decl, args, invoc_span)) = decls.get(&i) else {
                     return Ok(vec![top_level]);
                 };
 
-                expand_top_level(decl, args.clone())
+                expand_top_level(decl, args.clone(), invoc_span.clone())
             }
             _ => Ok(vec![top_level]),
         })
@@ -83,6 +90,7 @@ fn expand_macros_once(
 fn expand_top_level(
     macro_decl: &MacroDecl,
     args: Vec<Token>,
+    invoc_span: Span,
 ) -> Result<Vec<TopLevel>, Diagnostics> {
     let entries = &macro_decl.entries;
     let mut top_levels = vec![];
@@ -90,7 +98,12 @@ fn expand_top_level(
 
     for entry in entries {
         let defs = &entry.defs;
-        let mut macro_matcher = MacroArgMatcher::new(&args, defs.clone());
+        let mut macro_matcher = MacroArgMatcher::new(
+            &args,
+            defs.clone(),
+            macro_decl.name.span.clone(),
+            invoc_span.clone(),
+        );
         let correspondances = match macro_matcher.run() {
             Ok(correspondances) => correspondances,
             Err(diags) => {

@@ -45,15 +45,27 @@ impl From<ParseError> for Diagnostic {
                 span,
                 kind: DiagnosticType::Error,
             },
-            ParseError::MacroNoCorrespondance(ident) => Diagnostic {
-                message: format!("Macro: No correspondance for macro: {:?}", ident.name),
-                labels: vec![(
-                    format!("Cannot find any entries matching the macro arguments"),
-                    ident.span.clone(),
-                )],
-                span: ident.span,
-                kind: DiagnosticType::Error,
-            },
+            ParseError::MacroNoCorrespondance {
+                macro_name,
+                invoc_name,
+                invoc_arg,
+            } => {
+                let mut labels = vec![
+                    (format!("For this macro"), macro_name.clone()),
+                    (format!("In this macro invocation"), invoc_name.clone()),
+                ];
+
+                if let Some(invoc_arg) = invoc_arg {
+                    labels.push((format!("With this token"), invoc_arg.clone()));
+                }
+
+                Diagnostic {
+                    message: format!("Macro: Nothing expected this token"),
+                    labels,
+                    span: macro_name.clone(),
+                    kind: DiagnosticType::Error,
+                }
+            }
             ParseError::InvalidPrecedence(precedence, token) => Diagnostic {
                 message: format!("Invalid precedence: {:?}", precedence),
                 labels: vec![(
