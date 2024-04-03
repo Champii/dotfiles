@@ -1,9 +1,5 @@
 toto = ->
-  lol a, b d .toto .mdr
-
-macro lol
-  $name:ident, $expr:expr =>
-    $name = a -> $expr
-
-%lol lol, 2 + 2
+  lol a, b d
+    .toto a, b.c d .lol
+    .mdr
 

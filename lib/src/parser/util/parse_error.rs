@@ -18,4 +18,5 @@ pub enum ParseError {
     }, // macro name span,  macro entry argument span, macro invoc name span
     IndentMismatch(u8, u8),
     InvalidPrecedence(u8, Token),
+    InternalError(String),
 }

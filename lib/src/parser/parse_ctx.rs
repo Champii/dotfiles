@@ -13,7 +13,7 @@ pub struct ParseCtx {
     indent_level: u8,
     indent_step: u8,
     _diagnostics: Vec<String>,
-    pub inside_argument_list: Vec<bool>,
+    inside_argument_list: bool,
     pub files_map: HashSet<PathBuf>,
     pub current_file: Option<PathBuf>,
     pub config: Config,
@@ -26,7 +26,7 @@ impl ParseCtx {
         ParseCtx {
             indent_step: 2,
             indent_level: 0,
-            inside_argument_list: Vec::new(),
+            inside_argument_list: false,
             _diagnostics: Vec::new(),
             files_map: HashSet::new(),
             current_file: None,
@@ -125,34 +125,33 @@ impl ParseCtx {
     where
         F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
     {
-        self.inside_argument_list.push(true);
+        let mut has_toggled = false;
+
+        if !self.inside_argument_list {
+            self.inside_argument_list = true;
+            has_toggled = true;
+        }
+
         let res = f(self);
-        self.inside_argument_list.pop();
+
+        if has_toggled {
+            self.inside_argument_list = false;
+        }
         res
     }
 
-    pub fn argument_list_short_circuit<'a, T, F>(
-        &mut self,
-        f: F,
-    ) -> Result<(T, &'a [Token]), Diagnostics>
-    where
-        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
-    {
-        let list_idx = self.inside_argument_list.len().saturating_sub(1);
-
-        if !self.inside_argument_list.is_empty() && self.inside_argument_list[list_idx] {
-            self.inside_argument_list[list_idx] = false;
-            Err(ParseError::UnexpectedToken(
-                Token {
-                    token_type: TokenType::Operator(",".to_string()),
-                    span: Default::default(),
-                },
-                vec![TokenType::Operator(")".to_string())],
-            )
-            .into())
-        } else {
-            // self.inside_argument_list.pop();
-            f(self)
+    pub fn argument_list_short_circuit(&mut self) -> Result<(), Diagnostics> {
+        if !self.inside_argument_list {
+            return Ok(());
         }
+
+        Err(ParseError::UnexpectedToken(
+            Token {
+                token_type: TokenType::Operator(",".to_string()),
+                span: Default::default(),
+            },
+            vec![TokenType::Operator(")".to_string())],
+        )
+        .into())
     }
 }

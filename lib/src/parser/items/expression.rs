@@ -144,10 +144,10 @@ impl Parsable for SecondaryExpr {
                 TokenType::Dot,
             ],
         ) {
+            parse_ctx.argument_list_short_circuit()?;
+
             let (ident_or_number, remaining_tokens) =
-                parse_ctx.argument_list_short_circuit(|parse_ctx| {
-                    IdentOrNumber::parse(&tokens[3..], parse_ctx)
-                })?;
+                IdentOrNumber::parse(&tokens[3..], parse_ctx)?;
 
             Ok((SecondaryExpr::Dot(ident_or_number), remaining_tokens))
         } else if let TokenType::OpenBracket = token.token_type {
@@ -163,15 +163,9 @@ impl Parsable for SecondaryExpr {
 
             Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
         } else if TokenType::SpacedDot == token.token_type {
-            let (ident_or_num, remaining_tokens) =
-                parse_ctx.argument_list_short_circuit(|parse_ctx| {
-                    let (ident_or_number, remaining_tokens) =
-                        IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
+            parse_ctx.argument_list_short_circuit()?;
 
-                    parse_ctx.inside_argument_list.pop();
-
-                    Ok((ident_or_number, remaining_tokens))
-                })?;
+            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
 
             Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
         } else {
@@ -901,30 +895,28 @@ mod expression {
                                         span: Span::default(),
                                     })],
                                 }),
-                                secondaries: Some(vec![
-                                    SecondaryExpr::Arguments(vec![Argument {
-                                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
-                                            PrimaryExpr {
-                                                operand: Operand::Ident(IdentifierPath {
-                                                    path: vec![IdentOrType::Ident(Ident {
-                                                        name: "a".to_string(),
-                                                        span: Span::default(),
-                                                    })],
-                                                }),
-                                                secondaries: None,
-                                                type_annotation: None,
-                                            },
-                                        )),
-                                    },]),
-                                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
-                                        name: "bar".to_string(),
-                                        span: Span::default(),
-                                    })),
-                                ]),
+                                secondaries: Some(vec![SecondaryExpr::Arguments(vec![Argument {
+                                    arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                                        PrimaryExpr {
+                                            operand: Operand::Ident(IdentifierPath {
+                                                path: vec![IdentOrType::Ident(Ident {
+                                                    name: "a".to_string(),
+                                                    span: Span::default(),
+                                                })],
+                                            }),
+                                            secondaries: None,
+                                            type_annotation: None,
+                                        },
+                                    )),
+                                },]),]),
                                 type_annotation: None,
                             })),
                         },
                     ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "bar".to_string(),
+                        span: Span::default(),
+                    })),
                     SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "baz".to_string(),
                         span: Span::default(),
