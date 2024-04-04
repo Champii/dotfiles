@@ -1,5 +1,6 @@
 toto = ->
-  lol a, b d
-    .toto a, b.c d .lol
+  lol a
+    .toto a, a lol, mdr toto, tata titi
     .mdr
+    .lol
 

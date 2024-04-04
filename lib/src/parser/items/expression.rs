@@ -1,8 +1,8 @@
 use crate::{
     ast::{
         Argument, Block, EnumInstance, Expression, Ident, IdentOrNumber, IdentifierPath, If,
-        LambdaDecl, Literal, LiteralKind, Loop, Match, NativeOperator, Operand, Operator,
-        ParseType, PrimaryExpr, SecondaryExpr, StructInstance, Tuple, UnaryExpr,
+        LambdaDecl, Literal, Loop, Match, NativeOperator, Operand, Operator, ParseType,
+        PrimaryExpr, SecondaryExpr, StructInstance, Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -19,6 +19,8 @@ impl Parsable for Expression {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens, parse_ctx)?;
+        /* let (unary_expr, remaining_tokens) =
+        parse_ctx.new_argument_list_scope(|parse_ctx| UnaryExpr::parse(tokens, parse_ctx))?; */
 
         if remaining_tokens.is_empty() {
             return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
@@ -91,6 +93,8 @@ impl Parsable for PrimaryExpr {
             return Ok((primary_expr, remaining_tokens));
         }
 
+        /* let (unary_expr, remaining_tokens) =
+        parse_ctx.new_argument_list_scope(|parse_ctx| UnaryExpr::parse(tokens, parse_ctx))?; */
         let (secondaries, mut remaining_tokens_after_secondaries) =
             parse_vec_of::<SecondaryExpr>(remaining_tokens, None, parse_ctx)?;
 
@@ -251,7 +255,10 @@ impl Parsable for Operand {
             } else if let Ok((lambda, remaining_tokens)) = LambdaDecl::parse(tokens, parse_ctx) {
                 return Ok((Operand::LambdaDecl(lambda), remaining_tokens));
             }
+
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
+            parse_ctx.inside_argument_list = true;
+
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
             return Ok((Operand::Expression(Box::new(expression)), remaining_tokens));
         }

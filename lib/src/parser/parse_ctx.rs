@@ -13,7 +13,7 @@ pub struct ParseCtx {
     indent_level: u8,
     indent_step: u8,
     _diagnostics: Vec<String>,
-    inside_argument_list: bool,
+    pub inside_argument_list: bool,
     pub files_map: HashSet<PathBuf>,
     pub current_file: Option<PathBuf>,
     pub config: Config,
@@ -120,30 +120,51 @@ impl ParseCtx {
         }
     }
 
+    pub fn new_argument_list_scope<
+        'a,
+        T,
+        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+    >(
+        &mut self,
+        f: F,
+    ) -> Result<(T, &'a [Token]), Diagnostics> {
+        let old_state = self.inside_argument_list;
+        self.inside_argument_list = false;
+        let res = f(self);
+        self.inside_argument_list = old_state;
+        res
+    }
+
     /// This is to handle the spaced dot that closes argument list
     pub fn argument_list<'a, T, F>(&mut self, f: F) -> Result<(T, &'a [Token]), Diagnostics>
     where
         F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
     {
-        let mut has_toggled = false;
+        let old_state = self.inside_argument_list;
+        self.inside_argument_list = true;
+        /* let mut has_toggled = false;
 
         if !self.inside_argument_list {
             self.inside_argument_list = true;
             has_toggled = true;
-        }
+        } */
 
         let res = f(self);
 
-        if has_toggled {
+        self.inside_argument_list = old_state;
+        res
+        /* if has_toggled {
             self.inside_argument_list = false;
         }
-        res
+        res */
     }
 
     pub fn argument_list_short_circuit(&mut self) -> Result<(), Diagnostics> {
         if !self.inside_argument_list {
             return Ok(());
         }
+
+        self.inside_argument_list = false;
 
         Err(ParseError::UnexpectedToken(
             Token {

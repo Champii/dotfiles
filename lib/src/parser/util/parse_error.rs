@@ -1,7 +1,4 @@
-use crate::{
-    ast::Ident,
-    lexer::{LexerError, Span, Token, TokenType},
-};
+use crate::lexer::{LexerError, Span, Token, TokenType};
 
 #[derive(Debug)]
 pub enum ParseError {

@@ -237,6 +237,7 @@ struct MyStruct
       - `if let` like `if Err e = run!`
       - Allow any characters into strings and chars
       - Fix nested multiline dot (indent problem)
+      - Escaped string, char and Nested string
 
     - Low priority list:
       - Auto export current item `< struct Foo`
