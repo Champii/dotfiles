@@ -68,6 +68,8 @@ generate_visitor_trait!(
     TraitDecl
     Impl
     EnumDecl
+    EnumVariant
+    NamedFieldsOrTypesList
     FunctionDecl
     FunctionSig
     LambdaDecl
@@ -97,8 +99,7 @@ generate_visitor_trait!(
     Operand
     Argument
     Literal
-    StructInstance
-    EnumInstance
+    Instance
     NativeOperator
     Tuple
     Array
@@ -278,8 +279,8 @@ pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression
     }
 }
 
-pub fn walk_struct_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a StructInstance) {
-    visitor.visit_parse_type_inner(&s.name);
+pub fn walk_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a Instance) {
+    visitor.visit_identifier_path(&s.name);
 
     walk_map!(visitor, &s.fields);
 }
@@ -323,8 +324,7 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::Literal(l) => visitor.visit_literal(l),
         Operand::Ident(i) => visitor.visit_identifier_path(i),
         Operand::SelfIdent(i) => visitor.visit_ident(i),
-        Operand::StructInstance(s) => visitor.visit_struct_instance(s),
-        Operand::EnumInstance(e) => visitor.visit_enum_instance(e),
+        Operand::Instance(s) => visitor.visit_instance(s),
         Operand::NativeOperator(n) => visitor.visit_native_operator(n),
         Operand::LambdaDecl(l) => visitor.visit_lambda_decl(l),
         Operand::Tuple(t) => visitor.visit_tuple(t),
@@ -362,7 +362,6 @@ pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind
         PatternKind::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
         PatternKind::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
         PatternKind::EnumInstance(e) => visitor.visit_enum_pattern(e),
-        PatternKind::StructInstance(s) => visitor.visit_struct_instance(s),
         PatternKind::Wildcard => {}
     }
 }
@@ -383,13 +382,6 @@ pub fn walk_array_pattern<'a, V: Visitor<'a>>(visitor: &mut V, a: &'a ArrayPatte
 
 pub fn walk_tuple<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a Tuple) {
     walk_list!(visitor, visit_expression, &t.elements);
-}
-
-pub fn walk_enum_instance<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumInstance) {
-    visitor.visit_parse_type_inner(&e.name);
-    visitor.visit_parse_type_inner(&e.variant);
-
-    walk_list!(visitor, visit_expression, &e.args);
 }
 
 pub fn walk_native_operator<'a, V: Visitor<'a>>(visitor: &mut V, n: &'a NativeOperator) {
@@ -463,7 +455,26 @@ pub fn walk_lambda_decl<'a, V: Visitor<'a>>(visitor: &mut V, lambda: &'a LambdaD
 
 pub fn walk_enum_decl<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumDecl) {
     visitor.visit_parse_type_inner(&e.name);
-    walk_list!(visitor, visit_parse_type, &e.variants);
+    walk_list!(visitor, visit_enum_variant, &e.variants);
+}
+
+pub fn walk_enum_variant<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumVariant) {
+    visitor.visit_parse_type_inner(&e.name);
+    visitor.visit_named_fields_or_types_list(&e.fields);
+}
+
+pub fn walk_named_fields_or_types_list<'a, V: Visitor<'a>>(
+    visitor: &mut V,
+    n: &'a NamedFieldsOrTypesList,
+) {
+    match n {
+        NamedFieldsOrTypesList::NamedFields(fields) => {
+            walk_list!(visitor, visit_struct_decl_field, fields);
+        }
+        NamedFieldsOrTypesList::TypesList(types) => {
+            walk_list!(visitor, visit_parse_type, types);
+        }
+    }
 }
 
 pub fn walk_trait_decl<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {

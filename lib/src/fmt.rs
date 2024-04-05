@@ -138,6 +138,49 @@ impl Display for EnumDecl {
     }
 }
 
+impl Display for EnumVariant {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)?;
+        write!(f, "{}", self.fields)
+    }
+}
+
+impl Display for NamedFieldsOrTypesList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            NamedFieldsOrTypesList::NamedFields(fields) => {
+                if fields.is_empty() {
+                    return Ok(());
+                }
+
+                write!(f, "\n")?;
+
+                increase_indent();
+
+                for field in fields {
+                    write!(f, "{}", indent())?;
+                    write!(f, "{}\n", field)?;
+                }
+
+                decrease_indent();
+
+                Ok(())
+            }
+            NamedFieldsOrTypesList::TypesList(types) => {
+                for (i, ty) in types.iter().enumerate() {
+                    write!(f, " {}", ty)?;
+
+                    if i < types.len() - 1 {
+                        write!(f, ",")?;
+                    }
+                }
+
+                Ok(())
+            }
+        }
+    }
+}
+
 impl Display for MacroDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "macro {}\n", self.name)?;
@@ -568,9 +611,8 @@ impl Display for Operand {
             Operand::Literal(lit) => write!(f, "{}", lit),
             Operand::Ident(ident) => write!(f, "{}", ident),
             Operand::SelfIdent(ident) => write!(f, "{}", ident),
-            Operand::StructInstance(inst) => write!(f, "{}", inst),
+            Operand::Instance(inst) => write!(f, "{}", inst),
             Operand::NativeOperator(op) => write!(f, "{}", op),
-            Operand::EnumInstance(inst) => write!(f, "{}", inst),
             Operand::LambdaDecl(decl) => write!(f, "{}", decl),
             Operand::Tuple(tuple) => write!(f, "{}", tuple),
             Operand::If(if_) => write!(f, "{}", if_),
@@ -655,7 +697,6 @@ impl Display for PatternKind {
                 write!(f, "]")
             }
             PatternKind::EnumInstance(inst) => write!(f, "{}", inst),
-            PatternKind::StructInstance(inst) => write!(f, "{}", inst),
             PatternKind::Wildcard => write!(f, "_"),
         }
     }
@@ -784,11 +825,15 @@ impl Display for Literal {
     }
 }
 
-impl Display for StructInstance {
+impl Display for Instance {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n", self.name)?;
+        write!(f, "{}", self.name)?;
 
         increase_indent();
+
+        if !self.fields.is_empty() {
+            write!(f, "\n")?;
+        }
 
         for (i, (field, value)) in self.fields.iter().enumerate() {
             write!(f, "{}", indent())?;
@@ -800,22 +845,6 @@ impl Display for StructInstance {
         }
 
         decrease_indent();
-
-        Ok(())
-    }
-}
-
-impl Display for EnumInstance {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}::{}", self.name, self.variant)?;
-
-        for (i, arg) in self.args.iter().enumerate() {
-            write!(f, " {}", arg)?;
-
-            if i < self.args.len() - 1 {
-                write!(f, ",")?;
-            }
-        }
 
         Ok(())
     }
@@ -935,7 +964,7 @@ main = ->
 
     a + a + c
 
-    Foo::Bar Baz
+    Foo::Bar baz
 
     for i in a
         a

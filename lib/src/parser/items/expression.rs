@@ -1,8 +1,8 @@
 use crate::{
     ast::{
-        Argument, Block, EnumInstance, Expression, Ident, IdentOrNumber, IdentifierPath, If,
-        LambdaDecl, Literal, Loop, Match, NativeOperator, Operand, Operator, ParseType,
-        PrimaryExpr, SecondaryExpr, StructInstance, Tuple, UnaryExpr,
+        Argument, Block, Expression, Ident, IdentOrNumber, IdentOrType, IdentifierPath, If,
+        Instance, LambdaDecl, Literal, Loop, Match, NativeOperator, Operand, Operator, ParseType,
+        PrimaryExpr, SecondaryExpr, Tuple, UnaryExpr,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -159,24 +159,20 @@ impl Parsable for Operand {
         }
 
         if let TokenType::Type(_) = tokens[0].token_type {
-            if tokens.len() > 1 {
-                if let TokenType::DoubleColon = tokens[1].token_type {
-                    if let Ok((enum_instance, remaining_tokens)) =
-                        EnumInstance::parse(tokens, parse_ctx)
-                    {
-                        return Ok((Operand::EnumInstance(enum_instance), remaining_tokens));
-                    } else if let Ok((ident_path, remaining_tokens)) =
-                        IdentifierPath::parse(tokens, parse_ctx)
-                    {
-                        return Ok((Operand::Ident(ident_path), remaining_tokens));
+            if let Ok((identifier_path, remaining_tokens)) =
+                IdentifierPath::parse(tokens, parse_ctx)
+            {
+                if let IdentOrType::Type(_) = identifier_path.path.last().unwrap() {
+                    if let Ok((instance, remaining_tokens)) = Instance::parse(tokens, parse_ctx) {
+                        return Ok((Operand::Instance(instance), remaining_tokens));
+                    } else {
+                        return Err(ParseError::ExpectedType(tokens[0].span.clone()).into());
                     }
                 } else {
-                    let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
-                    return Ok((Operand::StructInstance(instance), remaining_tokens));
+                    return Ok((Operand::Ident(identifier_path), remaining_tokens));
                 }
             } else {
-                let (instance, remaining_tokens) = StructInstance::parse(tokens, parse_ctx)?;
-                return Ok((Operand::StructInstance(instance), remaining_tokens));
+                return Err(ParseError::ExpectedType(tokens[0].span.clone()).into());
             }
         }
 

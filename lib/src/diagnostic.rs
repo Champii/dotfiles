@@ -117,6 +117,12 @@ impl From<ParseError> for Diagnostic {
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
+            ParseError::ExpectedType(span) => Diagnostic {
+                message: format!("Expected a type"),
+                labels: vec![(format!("But got"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
         }
     }
 }

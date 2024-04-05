@@ -85,7 +85,19 @@ pub struct TraitDecl {
 #[derive(Debug, PartialEq)]
 pub struct EnumDecl {
     pub name: ParseTypeInner,
-    pub variants: Vec<ParseTypeInner>,
+    pub variants: Vec<EnumVariant>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct EnumVariant {
+    pub name: ParseTypeInner,
+    pub fields: NamedFieldsOrTypesList,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum NamedFieldsOrTypesList {
+    NamedFields(Vec<StructDeclField>),
+    TypesList(Vec<ParseType>),
 }
 
 #[derive(Debug, PartialEq)]
@@ -210,8 +222,7 @@ pub enum Operand {
     Ident(IdentifierPath),
     /// Ident prefixed with a @ are desugared to self.ident
     SelfIdent(Ident),
-    StructInstance(StructInstance),
-    EnumInstance(EnumInstance), // EnumName::Variant expr1, expr2
+    Instance(Instance),
     LambdaDecl(LambdaDecl),
     Tuple(Tuple),
     NativeOperator(NativeOperator),
@@ -248,7 +259,6 @@ pub enum PatternKind {
     Tuple(Vec<Pattern>),
     Array(Vec<ArrayPattern>),
     EnumInstance(EnumPattern),
-    StructInstance(StructInstance),
     Wildcard,
 }
 
@@ -297,15 +307,8 @@ pub enum Loop {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct EnumInstance {
-    pub name: ParseTypeInner,
-    pub variant: ParseTypeInner,
-    pub args: Vec<Expression>,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct StructInstance {
-    pub name: ParseTypeInner,
+pub struct Instance {
+    pub name: IdentifierPath,
     pub fields: BTreeMap<Ident, Expression>,
 }
 

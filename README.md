@@ -240,6 +240,8 @@ struct MyStruct
       - Escaped string, char and Nested string, and allow spaces. Basically dont do anything to it (maybe let the lexer take care of that ?)
       - Deconstruct function arguments declaration
       - Fix fmt indent and multiline struct instance 
+      - Create a TypePath like IdentifierPath
+      - Add struct pattern matching  and Add enum struct-like pattern matching
 
     - Low priority list:
       - Auto export current item `< struct Foo`
@@ -255,6 +257,7 @@ struct MyStruct
       - Allow parenthesis for function calls ?
       - Allow braces for nested blocks ?
       - String interpolation ? 
+      - Replace the Type1OrType2 with an implem of Either<Type1, Type2>
 
   - Desugar
     - Operator precedence

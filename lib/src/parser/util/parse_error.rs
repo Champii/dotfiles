@@ -17,4 +17,5 @@ pub enum ParseError {
     InvalidPrecedence(u8, Token),
     InternalError(String),
     ShortCircuit, // should not be bubbled up to the user
+    ExpectedType(Span),
 }

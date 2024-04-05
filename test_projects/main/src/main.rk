@@ -1,33 +1,9 @@
-toto = ->
-    Ok lol
-
-    if lol == 1
-    then Ok 1
-    else Err 2
-
-    for i in lol
-        print i
-
-macro lol
-    $toto:ident =>
-        $toto = -> lol
-
-%lol mdr
-
-enum Result T, E
-    Ok T
-    Err E
-
-struct Foo
-    bar : Int
-    baz : String
+enum Foo
+    Toto Tutu, Titi
+    Bar
+        foo: Bar
+    Lol A -> B -> C
+    Titi
 
 
-impl Foo
-    new : Int -> String -> Foo
-    new = bar, baz -> Foo bar, baz
-
-    display : () -> String
-    display = ->
-        "Foo bar: bar, baz: baz"
 

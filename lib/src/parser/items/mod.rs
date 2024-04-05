@@ -5,6 +5,7 @@ mod fn_decl;
 mod ident;
 mod r#if;
 mod r#impl;
+mod instance;
 mod literal;
 mod r#loop;
 mod r#macro;
