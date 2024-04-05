@@ -1,2 +1,29 @@
-toto = -> 2 + 2
+macro lol
+    $toto:ident =>
+        $name = -> lol
+
+%lol mdr
+enum Result T, E
+    Ok T
+    Err E
+
+struct Foo
+    bar : Int
+    baz : String
+
+impl Foo
+    new = bar, baz -> Foo bar, baz
+
+    display = ->
+        "Foo bar: bar, baz: baz"
+
+toto = ->
+    Ok lol
+
+    if lol == 1
+    then Ok 1
+    else Err 2
+
+    for i in lol
+        print i
 

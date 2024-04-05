@@ -125,74 +125,6 @@ impl Parsable for PrimaryExpr {
     }
 }
 
-impl Parsable for SecondaryExpr {
-    fn parse<'a>(
-        tokens: &'a [Token],
-        parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let token = tokens
-            .get(0)
-            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
-                "".to_string(),
-            )))?;
-
-        if TokenType::Operator("!".to_string()) == token.token_type
-            || TokenType::StuckOperator("!".to_string()) == token.token_type
-        {
-            Ok((SecondaryExpr::Arguments(vec![]), &tokens[1..]))
-        } else if look_ahead(
-            tokens,
-            &vec![
-                TokenType::Eol,
-                TokenType::Indent(parse_ctx.indent_level() + parse_ctx.indent_step()),
-                TokenType::Dot,
-            ],
-        ) {
-            parse_ctx.argument_list_short_circuit()?;
-
-            let (ident_or_number, remaining_tokens) =
-                IdentOrNumber::parse(&tokens[3..], parse_ctx)?;
-
-            Ok((SecondaryExpr::Dot(ident_or_number), remaining_tokens))
-        } else if let TokenType::OpenBracket = token.token_type {
-            let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
-            let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
-
-            Ok((
-                SecondaryExpr::Indice(Box::new(expression)),
-                remaining_tokens,
-            ))
-        } else if TokenType::Dot == token.token_type {
-            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
-
-            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
-        } else if TokenType::SpacedDot == token.token_type {
-            parse_ctx.argument_list_short_circuit()?;
-
-            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
-
-            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
-        } else {
-            let (arguments, remaining_tokens) = parse_ctx.argument_list(|parse_ctx| {
-                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)
-            })?;
-
-            if arguments.is_empty() {
-                return Err(
-                    ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into(),
-                );
-            }
-
-            let arguments = arguments
-                .into_iter()
-                .map(|expr| Argument { arg: expr })
-                .collect::<Vec<_>>();
-
-            Ok((SecondaryExpr::Arguments(arguments), remaining_tokens))
-        }
-    }
-}
-
 impl Parsable for Operand {
     fn parse<'a>(
         tokens: &'a [Token],
@@ -293,6 +225,74 @@ impl Parsable for Operand {
                 ],
             )
             .into()),
+        }
+    }
+}
+
+impl Parsable for SecondaryExpr {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let token = tokens
+            .get(0)
+            .ok_or(ParseError::UnexpectedEof(TokenType::Operator(
+                "".to_string(),
+            )))?;
+
+        if TokenType::Operator("!".to_string()) == token.token_type
+            || TokenType::StuckOperator("!".to_string()) == token.token_type
+        {
+            Ok((SecondaryExpr::Arguments(vec![]), &tokens[1..]))
+        } else if look_ahead(
+            tokens,
+            &vec![
+                TokenType::Eol,
+                TokenType::Indent(parse_ctx.indent_level() + parse_ctx.indent_step()),
+                TokenType::Dot,
+            ],
+        ) {
+            parse_ctx.argument_list_short_circuit()?;
+
+            let (ident_or_number, remaining_tokens) =
+                IdentOrNumber::parse(&tokens[3..], parse_ctx)?;
+
+            Ok((SecondaryExpr::Dot(ident_or_number), remaining_tokens))
+        } else if let TokenType::OpenBracket = token.token_type {
+            let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
+            let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
+
+            Ok((
+                SecondaryExpr::Indice(Box::new(expression)),
+                remaining_tokens,
+            ))
+        } else if TokenType::Dot == token.token_type {
+            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
+
+            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
+        } else if TokenType::SpacedDot == token.token_type {
+            parse_ctx.argument_list_short_circuit()?;
+
+            let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
+
+            Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
+        } else {
+            let (arguments, remaining_tokens) = parse_ctx.argument_list(|parse_ctx| {
+                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)
+            })?;
+
+            if arguments.is_empty() {
+                return Err(
+                    ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into(),
+                );
+            }
+
+            let arguments = arguments
+                .into_iter()
+                .map(|expr| Argument { arg: expr })
+                .collect::<Vec<_>>();
+
+            Ok((SecondaryExpr::Arguments(arguments), remaining_tokens))
         }
     }
 }

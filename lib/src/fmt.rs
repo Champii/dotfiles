@@ -21,12 +21,12 @@ fn indent() -> String {
 
 fn increase_indent() {
     let mut indent = INDENT.lock().unwrap();
-    *indent += 2;
+    *indent += 4;
 }
 
 fn decrease_indent() {
     let mut indent = INDENT.lock().unwrap();
-    *indent -= 2;
+    *indent -= 4;
 }
 
 impl Display for Program {
@@ -162,8 +162,6 @@ impl Display for MacroEntry {
 
         write!(f, "=>\n")?;
 
-        increase_indent();
-
         for (i, fragment) in self.body.iter().enumerate() {
             let next_is_eol = self.body.get(i + 1).map_or(true, |f| {
                 if let MacroFragment::Token(token) = f {
@@ -196,7 +194,6 @@ impl Display for MacroEntry {
             }
         }
 
-        decrease_indent();
         decrease_indent();
 
         Ok(())
@@ -902,54 +899,64 @@ mod format {
 infix 7 |>
 
 macro my_macro
-  $name:ident $($arg:ident)* =>
-    $name
-    $($arg)*
+    $name:ident $($arg:ident)* =>
+        $name
+        $($arg)*
 
 %my_macro lol
 
 struct MyStruct
-  field : Int
+    field : Int
 
 enum MyEnum
-  Foo Bar
-  Baz
+    Foo Bar
+    Baz
 
 trait MyTrait
-  foo : Bar
-  baz = a -> a
+    foo : Bar
+    baz = a -> a
 
 impl MyTrait
-  baz = a -> a
-  foo = a -> a
+    baz = a -> a
+    foo = a -> a
 
 lambda = (*5)
 
 main = ->
-  foo a, b
-  foo[a + b + -c]
-  foo.bar.baz
-  a = MyStruct
-    field: 42
-  a + a + c
-  Foo::Bar Baz
-  for i in a
-    a
-  while a == b
-    a = a + b
-  loop
-    foo bar
-  if a
-  then foo
-  else bar
-  if b
-  then
-    a b
-    b c
-  else
-    c + d
-    b c
-  a = (.foo)
+    foo a, b
+    foo[a + b + -c]
+
+    foo.bar.baz
+
+    a = MyStruct
+        field: 42
+
+    a + a + c
+
+    Foo::Bar Baz
+
+    for i in a
+        a
+
+    while a == b
+        a = a + b
+
+    loop
+        foo bar
+
+    if a
+    then foo
+    else bar
+
+    if b
+    then
+        a b
+        b c
+    else
+        c + d
+        b c
+
+    a = (.foo)
 
 < MyTrait
 "#;

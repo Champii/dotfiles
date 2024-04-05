@@ -4,9 +4,9 @@
 
 ```haskell
 write_file = ->
-  File::open "test.txt"?
-   ..write "Hello, World!"?
-   ..close!
+    File::open "test.txt"?
+       ..write "Hello, World!"?
+       ..close!
 ```
 
 ## Named arguments and default value
@@ -14,22 +14,22 @@ write_file = ->
 ```haskell
 listen = addr, port = 8000 -> #some code here
 main = ->
-  if something
-  then listen "localhost"
-  else listen port: 8080, addr: "localhost"
+    if something
+    then listen "localhost"
+    else listen port: 8080, addr: "localhost"
 ```
 
 ## If and loops as expressions
 
 ```haskell
 do_something = x ->
-  value = if x > 42 then 42 else x
-  list =
-    while value > 0
-      value++
-  new_list =
-    for item in list
-      item + 2
+    value = if x > 42 then 42 else x
+    list =
+        while value > 0
+            value++
+    new_list =
+        for item in list
+            item + 2
 ```
 
 ## Functions as first class citizen
@@ -83,10 +83,10 @@ main = -> [1, 2, 3] |> map (+2)
 
 ```haskell
 trait ToString
-  @to_string : String
+    @to_string : String
 
 impl ToString Int
-  @to_string = -> @show!
+    @to_string = -> @show!
 ```
 
 ## Dynamic trait
@@ -100,16 +100,16 @@ some_fumc = x -> x.to_string!
 
 ```haskell
 struct Hello
-  world : String
-  some_default_field = true
+    world : String
+    some_default_field = true
 
 impl Hello
-  new = s -> Hello world: s
-  @display = -> @world.print!
+    new = s -> Hello world: s
+    @display = -> @world.print!
 
 main = ->
-  hello = Hello::new "World"
-  hello.display!
+    hello = Hello::new "World"
+    hello.display!
 ```
 
 ## Generics
@@ -119,18 +119,18 @@ struct Wrapper T
   inner: T
 
 enum Choice T, U
-  Left T
-  Right U
+    Left T
+    Right U
 ```
 
 ## Automatic Reference/Dereference
 
 ```haskell
 main = ->
-  a = 5
-  #Here b is &Int
-  b = a 
-  add a, b
+    a = 5
+    #Here b is &Int
+    b = a 
+    add a, b
 
 #Will detect if one is a reference and autoderef if needed
 add = a, b -> a + b
@@ -139,22 +139,22 @@ add = a, b -> a + b
 
 ```haskell
 main = ->
-  unsafe
-    a = 42
-    p: *Int8 = 0
-    # very unsafe
-    *p
+    unsafe
+        a = 42
+        p: *Int8 = 0
+        # very unsafe
+        *p
 ```
 
 ## Pattern matching
 
 ```haskell
 main = ->
-  a = (10, "hello")
-  match a
-    (0, "world")            => "something"
-    foo @ (a, str) if a > 5 => str
-    _                       => "otherwise"
+    a = (10, "hello")
+    match a
+        (0, "world")            => "something"
+        foo @ (a, str) if a > 5 => str
+        _                       => "otherwise"
 ```
 
 ## Destructuring
@@ -162,23 +162,23 @@ main = ->
 ```haskell
 fn_return_tuple = -> (10, "a string")
 main = ->
-  (num, str) = fn_return_tuple!
+    (num, str) = fn_return_tuple!
 ```
 
 ## Enums
 
 ```haskell
 enum Error
-  SomeError
-  SomeErrorWithContext String
-  SomeErrorWithMoreContext String, Int
+    SomeError
+     SomeErrorWithContext String
+     SomeErrorWithMoreContext String, Int
 
 impl Show Error
-  @show = ->
-    match @
-      Self::SomeError => "SomeError"
-      Self::SomeErrorWithContext s => "SomeError" + s
-      Self::SomeErrorWithMoreContext s, i => "SomeError" + s + i.show!
+    @show = ->
+        match @
+            Self::SomeError => "SomeError"
+            Self::SomeErrorWithContext s => "SomeError" + s
+            Self::SomeErrorWithMoreContext s, i => "SomeError" + s + i.show!
 
 main = -> Error::SomeErrorWithContext "Hello" .print!
 ```
@@ -187,9 +187,9 @@ main = -> Error::SomeErrorWithContext "Hello" .print!
 
 ```haskell
 macro generate
-  $name:ident, $type:ty =>
-    struct Generated
-      $name: $type
+    $name:ident, $type:ty =>
+        struct Generated
+            $name: $type
 
 %generate hello, String
 ```
@@ -212,7 +212,7 @@ mod my_mod
 > my_mod::SomeOtherType
 
 struct MyStruct
-  my_field: SomeType
+    my_field: SomeType
 
 < MyStruct
 ```
@@ -237,7 +237,10 @@ struct MyStruct
       - `if let` like `if Err e = run!`
       - Allow any characters into strings and chars
       - Fix nested multiline dot (indent problem)
-      - Escaped string, char and Nested string
+      - Escaped string, char and Nested string, and allow spaces. Basically dont do anything to it (maybe let the lexer take care of that ?)
+      - Deconstruct function arguments declaration
+      - Allow function signature in impl
+      - Fix fmt indent and multiline struct instance 
 
     - Low priority list:
       - Auto export current item `< struct Foo`
