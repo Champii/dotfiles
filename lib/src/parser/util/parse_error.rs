@@ -12,7 +12,7 @@ pub enum ParseError {
         macro_name: Span,
         invoc_name: Span,
         invoc_arg: Option<Span>,
-    }, // macro name span,  macro entry argument span, macro invoc name span
+    },
     IndentMismatch(u8, u8),
     InvalidPrecedence(u8, Token),
     InternalError(String),

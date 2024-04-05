@@ -116,10 +116,15 @@ impl Diagnostic {
     pub fn report(&self) {
         let mut colors = ColorGenerator::new();
 
-        let file_name = self.span.file_path.file_name().unwrap().to_str().unwrap();
+        let file_name = self
+            .span
+            .file_path
+            .file_name()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap();
 
         let mut builder = Report::build(ReportKind::Error, file_name, self.span.start)
-            .with_code(3)
             .with_message(self.message.clone());
 
         for (message, span) in &self.labels {
@@ -135,7 +140,7 @@ impl Diagnostic {
             .finish()
             .print((
                 file_name,
-                Source::from(std::fs::read_to_string(&self.span.file_path).unwrap()),
+                Source::from(std::fs::read_to_string(&self.span.file_path).unwrap_or_default()),
             ))
             .unwrap();
     }
