@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Block, FunctionDecl, FunctionSig, Ident, LambdaDecl, ParseType},
+    ast::{Block, FunctionDecl, FunctionSig, Ident, LambdaDecl, ParseType, Pattern},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -52,7 +52,7 @@ impl Parsable for LambdaDecl {
         }
 
         let (parameters, mut remaining_tokens) =
-            parse_vec_of::<Ident>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+            parse_vec_of::<Pattern>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
         // consume token if it's a coma
         if !remaining_tokens.is_empty() && remaining_tokens[0].token_type == TokenType::Coma {

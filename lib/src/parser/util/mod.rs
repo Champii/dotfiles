@@ -25,11 +25,14 @@ pub fn expect_token(tokens: &[Token], token_type: TokenType) -> Result<&[Token],
 
 /// Parse a vector of items of type T: Parsable from the input tokens.
 /// It does not consume the last delimiter token.
-pub fn parse_vec_of<'a, T: Parsable>(
+pub fn parse_vec_of<'a, T>(
     tokens: &'a [Token],
     delim: Option<TokenType>,
     parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<T>, &'a [Token]), Diagnostics> {
+) -> Result<(Vec<T>, &'a [Token]), Diagnostics>
+where
+    T: Parsable + std::fmt::Debug,
+{
     let mut remaining_tokens = tokens;
     let mut items = Vec::new();
 

@@ -11,7 +11,7 @@ use super::ParseError;
 #[derive(Debug, Clone)]
 pub struct ParseCtx {
     indent_level: u8,
-    indent_step: u8,
+    pub indent_step: u8,
     _diagnostics: Vec<String>,
     pub inside_argument_list: bool,
     pub files_map: HashSet<PathBuf>,
@@ -53,25 +53,29 @@ impl ParseCtx {
         self.indent_level -= self.indent_step;
     }
 
-    pub fn consume_indent<'a>(&self, tokens: &'a [Token]) -> Result<&'a [Token], ParseError> {
+    pub fn consume_indent<'a>(&self, tokens: &'a [Token]) -> Result<&'a [Token], Diagnostics> {
         if tokens.is_empty() {
-            return Err(ParseError::UnexpectedEof(TokenType::Indent(
-                self.indent_level,
-            )));
+            return Err(ParseError::UnexpectedEof(TokenType::Indent(self.indent_level)).into());
         }
 
         if let TokenType::Indent(level) = tokens[0].token_type {
             if self.indent_level == level {
                 return Ok(&tokens[1..]);
             } else {
-                return Err(ParseError::IndentMismatch(level, self.indent_level));
+                return Err(ParseError::IndentMismatch(
+                    level,
+                    self.indent_level,
+                    tokens[0].span.clone(),
+                )
+                .into());
             }
         }
 
         return Err(ParseError::UnexpectedToken(
             tokens[0].clone(),
             vec![TokenType::Indent(self.indent_level)],
-        ));
+        )
+        .into());
     }
 
     pub fn consume_indent_if_any<'a>(&self, tokens: &'a [Token]) -> (bool, &'a [Token]) {
@@ -120,21 +124,6 @@ impl ParseCtx {
         }
     }
 
-    pub fn new_argument_list_scope<
-        'a,
-        T,
-        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
-    >(
-        &mut self,
-        f: F,
-    ) -> Result<(T, &'a [Token]), Diagnostics> {
-        let old_state = self.inside_argument_list;
-        self.inside_argument_list = false;
-        let res = f(self);
-        self.inside_argument_list = old_state;
-        res
-    }
-
     /// This is to handle the spaced dot that closes argument list
     pub fn argument_list<'a, T, F>(&mut self, f: F) -> Result<(T, &'a [Token]), Diagnostics>
     where
@@ -142,21 +131,11 @@ impl ParseCtx {
     {
         let old_state = self.inside_argument_list;
         self.inside_argument_list = true;
-        /* let mut has_toggled = false;
-
-        if !self.inside_argument_list {
-            self.inside_argument_list = true;
-            has_toggled = true;
-        } */
 
         let res = f(self);
 
         self.inside_argument_list = old_state;
         res
-        /* if has_toggled {
-            self.inside_argument_list = false;
-        }
-        res */
     }
 
     pub fn argument_list_short_circuit(&mut self) -> Result<(), Diagnostics> {
@@ -166,13 +145,6 @@ impl ParseCtx {
 
         self.inside_argument_list = false;
 
-        Err(ParseError::UnexpectedToken(
-            Token {
-                token_type: TokenType::Operator(",".to_string()),
-                span: Default::default(),
-            },
-            vec![TokenType::Operator(")".to_string())],
-        )
-        .into())
+        Err(ParseError::ShortCircuit.into())
     }
 }

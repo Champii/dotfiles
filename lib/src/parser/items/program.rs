@@ -107,6 +107,27 @@ impl From<ModuleInner> for Module {
     }
 }
 
+//find the next Indent(0) that is not followed by an EOL and start from there.
+fn try_recover<'a>(tokens: &'a [Token]) -> &'a [Token] {
+    let mut tokens = tokens;
+
+    while !tokens.is_empty() {
+        if let TokenType::Indent(0) = tokens[0].token_type {
+            if tokens
+                .get(1)
+                .map(|t| t.token_type != TokenType::Eol)
+                .unwrap_or(false)
+            {
+                break;
+            }
+        }
+
+        tokens = &tokens[1..];
+    }
+
+    tokens
+}
+
 impl Parsable for ModuleInner {
     fn parse<'a>(
         tokens: &'a [Token],
@@ -114,6 +135,7 @@ impl Parsable for ModuleInner {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut top_levels = Vec::new();
         let mut tokens = tokens;
+        let mut diagnostics = Diagnostics::default();
 
         loop {
             tokens = ignore_empty_lines(&tokens);
@@ -122,22 +144,33 @@ impl Parsable for ModuleInner {
                 break;
             }
 
-            if let Ok(new_tokens) = parse_ctx.consume_indent(&tokens) {
-                tokens = new_tokens;
-            } else {
-                break;
+            match parse_ctx.consume_indent(&tokens) {
+                Ok(new_tokens) => tokens = new_tokens,
+                Err(e) => {
+                    diagnostics.merge(e);
+                    tokens = try_recover(tokens);
+                    continue;
+                }
             }
 
-            let (top_level, new_tokens) = TopLevel::parse(tokens, parse_ctx)?;
+            match TopLevel::parse(tokens, parse_ctx) {
+                Ok((top_level, new_tokens)) => {
+                    tokens = new_tokens;
+
+                    top_levels.push(top_level);
+                }
+                Err(e) => {
+                    diagnostics.merge(e);
+                    tokens = try_recover(tokens);
+                }
+            }
 
             if tokens.is_empty() || tokens[0].token_type == TokenType::Eof {
                 break;
             }
-
-            tokens = new_tokens;
-
-            top_levels.push(top_level);
         }
+
+        diagnostics.return_if_err()?;
 
         Ok((ModuleInner { top_levels }, tokens))
     }

@@ -13,7 +13,8 @@ pub enum ParseError {
         invoc_name: Span,
         invoc_arg: Option<Span>,
     },
-    IndentMismatch(u8, u8),
+    IndentMismatch(u8, u8, Span),
     InvalidPrecedence(u8, Token),
     InternalError(String),
+    ShortCircuit, // should not be bubbled up to the user
 }

@@ -173,11 +173,11 @@ fn parse_macro_block_recursive<'a>(
 
                 // fix the indentation for the parser
                 if let TokenType::Indent(level) = token.token_type {
-                    if level == 0 || level == 2 {
+                    if level == 0 || level == parse_ctx.indent_step {
                         // the definition is over
                         return Ok((block, remaining_tokens));
                     }
-                    token.token_type = TokenType::Indent(level - 4);
+                    token.token_type = TokenType::Indent(level - (parse_ctx.indent_step * 2));
                 }
 
                 block.push(MacroFragment::Token(token));

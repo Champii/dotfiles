@@ -153,7 +153,7 @@ pub struct FunctionDecl {
 
 #[derive(Debug, PartialEq)]
 pub struct LambdaDecl {
-    pub parameters: Vec<Ident>,
+    pub parameters: Vec<Pattern>,
     pub body: Block,
     pub shorthand_tokens: Option<Vec<Token>>, // for formating
 }

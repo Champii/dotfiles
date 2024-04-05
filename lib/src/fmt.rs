@@ -162,6 +162,7 @@ impl Display for MacroEntry {
 
         write!(f, "=>\n")?;
 
+        increase_indent();
         for (i, fragment) in self.body.iter().enumerate() {
             let next_is_eol = self.body.get(i + 1).map_or(true, |f| {
                 if let MacroFragment::Token(token) = f {
@@ -194,6 +195,7 @@ impl Display for MacroEntry {
             }
         }
 
+        decrease_indent();
         decrease_indent();
 
         Ok(())

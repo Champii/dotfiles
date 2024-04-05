@@ -1,24 +1,3 @@
-macro lol
-    $toto:ident =>
-        $name = -> lol
-
-%lol mdr
-enum Result T, E
-    Ok T
-    Err E
-
-struct Foo
-    bar : Int
-    baz : String
-
-impl Foo
-    new : Int -> String -> Foo
-    new = bar, baz -> Foo bar, baz
-
-    display : () -> String
-    display = ->
-        "Foo bar: bar, baz: baz"
-
 toto = ->
     Ok lol
 
@@ -28,4 +7,27 @@ toto = ->
 
     for i in lol
         print i
+
+macro lol
+    $toto:ident =>
+        $toto = -> lol
+
+%lol mdr
+
+enum Result T, E
+    Ok T
+    Err E
+
+struct Foo
+    bar : Int
+    baz : String
+
+
+impl Foo
+    new : Int -> String -> Foo
+    new = bar, baz -> Foo bar, baz
+
+    display : () -> String
+    display = ->
+        "Foo bar: bar, baz: baz"
 

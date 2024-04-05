@@ -189,6 +189,8 @@ impl Parsable for Operand {
             }
 
             let (expression, remaining_tokens) = Expression::parse(&tokens[1..], parse_ctx)?;
+
+            // FIXME: this shouldnt exist, this is magic
             parse_ctx.inside_argument_list = true;
 
             let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
@@ -974,6 +976,71 @@ mod expression {
                     ],
                 }),
                 secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn nested_spaced_dot_should_close_fn_call() {
+        let input = "foo a, (b .lol) .toto";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Expression(Box::new(Expression::UnaryExpr(
+                                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                        operand: Operand::Ident(IdentifierPath {
+                                            path: vec![IdentOrType::Ident(Ident {
+                                                name: "b".to_string(),
+                                                span: Span::default(),
+                                            })],
+                                        }),
+                                        secondaries: Some(vec![SecondaryExpr::Dot(
+                                            IdentOrNumber::Ident(Ident {
+                                                name: "lol".to_string(),
+                                                span: Span::default(),
+                                            })
+                                        )]),
+                                        type_annotation: None,
+                                    })
+                                ))),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "toto".to_string(),
+                        span: Span::default(),
+                    })),
+                ]),
                 type_annotation: None,
             })),
         );
