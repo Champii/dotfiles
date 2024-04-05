@@ -92,6 +92,7 @@ pub struct EnumDecl {
 pub struct Impl {
     pub name: ParseTypeInner,
     pub methods: BTreeMap<Ident, FunctionDecl>,
+    pub signatures: BTreeMap<Ident, FunctionSig>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

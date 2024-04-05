@@ -239,7 +239,6 @@ struct MyStruct
       - Fix nested multiline dot (indent problem)
       - Escaped string, char and Nested string, and allow spaces. Basically dont do anything to it (maybe let the lexer take care of that ?)
       - Deconstruct function arguments declaration
-      - Allow function signature in impl
       - Fix fmt indent and multiline struct instance 
 
     - Low priority list:

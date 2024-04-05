@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    ast::{FunctionDecl, Impl, ParseTypeInner},
+    ast::{FunctionDecl, FunctionSig, Impl, ParseTypeInner},
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
@@ -23,6 +23,7 @@ impl Parsable for Impl {
         let mut remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
         let mut methods = BTreeMap::new();
+        let mut signatures = BTreeMap::new();
 
         parse_ctx.indent();
 
@@ -47,12 +48,27 @@ impl Parsable for Impl {
                 continue;
             }
 
+            if let Ok((signature, new_remaining_tokens)) =
+                FunctionSig::parse(remaining_tokens, parse_ctx)
+            {
+                remaining_tokens = new_remaining_tokens;
+                signatures.insert(signature.name.clone(), signature);
+                continue;
+            }
+
             break;
         }
 
         parse_ctx.dedent();
 
-        Ok((Impl { name, methods }, remaining_tokens))
+        Ok((
+            Impl {
+                name,
+                methods,
+                signatures,
+            },
+            remaining_tokens,
+        ))
     }
 }
 

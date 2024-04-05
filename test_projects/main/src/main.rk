@@ -12,8 +12,10 @@ struct Foo
     baz : String
 
 impl Foo
+    new : Int -> String -> Foo
     new = bar, baz -> Foo bar, baz
 
+    display : () -> String
     display = ->
         "Foo bar: bar, baz: baz"
 
