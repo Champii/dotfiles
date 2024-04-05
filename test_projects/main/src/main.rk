@@ -6,4 +6,6 @@ enum Foo
     Titi
 
 
+main = (a, Ok b) -> a + b
+main = (a, Err e) -> e
 

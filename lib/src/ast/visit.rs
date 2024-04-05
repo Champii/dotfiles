@@ -367,8 +367,7 @@ pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind
 }
 
 pub fn walk_enum_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumPattern) {
-    visitor.visit_parse_type_inner(&e.name);
-    visitor.visit_parse_type_inner(&e.variant);
+    visitor.visit_identifier_path(&e.variant);
 
     walk_list!(visitor, visit_match_pattern, &e.args);
 }

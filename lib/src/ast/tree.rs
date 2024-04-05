@@ -270,8 +270,7 @@ pub enum ArrayPattern {
 
 #[derive(Debug, PartialEq)]
 pub struct EnumPattern {
-    pub name: ParseTypeInner,
-    pub variant: ParseTypeInner,
+    pub variant: IdentifierPath,
     pub args: Vec<Pattern>,
 }
 

@@ -48,7 +48,11 @@ impl Parsable for LambdaDecl {
         let remaining_tokens = tokens;
 
         if remaining_tokens[0].token_type == TokenType::OpenParen {
-            return parse_function_shorthand(remaining_tokens, parse_ctx);
+            if let Ok((lambda, remaining_tokens)) =
+                parse_function_shorthand(remaining_tokens, parse_ctx)
+            {
+                return Ok((lambda, remaining_tokens));
+            }
         }
 
         let (parameters, mut remaining_tokens) =

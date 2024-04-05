@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        ArrayPattern, Block, EnumPattern, Expression, Ident, Literal, Match, MatchArm,
-        ParseTypeInner, Pattern, PatternKind,
+        ArrayPattern, Block, EnumPattern, Expression, Ident, IdentifierPath, Literal, Match,
+        MatchArm, Pattern, PatternKind,
     },
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
@@ -172,23 +172,12 @@ impl Parsable for EnumPattern {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let (name, remaining_tokens) = ParseTypeInner::parse(tokens, parse_ctx)?;
-
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::DoubleColon)?;
-
-        let (variant, remaining_tokens) = ParseTypeInner::parse(remaining_tokens, parse_ctx)?;
+        let (variant, remaining_tokens) = IdentifierPath::parse(tokens, parse_ctx)?;
 
         let (args, remaining_tokens) =
             parse_vec_of(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
-        Ok((
-            EnumPattern {
-                name,
-                variant,
-                args,
-            },
-            remaining_tokens,
-        ))
+        Ok((EnumPattern { variant, args }, remaining_tokens))
     }
 }
 

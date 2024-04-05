@@ -713,7 +713,7 @@ impl Display for ArrayPattern {
 
 impl Display for EnumPattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}::{}", self.name, self.variant)?;
+        write!(f, "{}", self.variant)?;
 
         if !self.args.is_empty() {
             write!(f, "(")?;

@@ -230,7 +230,6 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Allow Enum instance without the parent part `Ok 42`
       - Allow multiline function arguments
       - Chain calls without variables
       - `+=` like operators
@@ -238,9 +237,7 @@ struct MyStruct
       - Allow any characters into strings and chars
       - Fix nested multiline dot (indent problem)
       - Escaped string, char and Nested string, and allow spaces. Basically dont do anything to it (maybe let the lexer take care of that ?)
-      - Deconstruct function arguments declaration
       - Fix fmt indent and multiline struct instance 
-      - Create a TypePath like IdentifierPath
       - Add struct pattern matching  and Add enum struct-like pattern matching
 
     - Low priority list:
