@@ -4,7 +4,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ignore_empty_lines},
+        util::{expect_token, parse_indented_vec_of},
         Parsable,
     },
 };
@@ -20,56 +20,15 @@ impl Parsable for StructDecl {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (fields, remaining_tokens) = parse_struct_fields(remaining_tokens, parse_ctx)?;
+        let (fields, mut remaining_tokens) =
+            parse_indented_vec_of(remaining_tokens, parse_ctx, true)?;
+
+        if !fields.is_empty() {
+            remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+        }
 
         Ok((StructDecl { name, fields }, remaining_tokens))
     }
-}
-
-pub fn parse_struct_fields<'a>(
-    tokens: &'a [Token],
-    parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<StructDeclField>, &'a [Token]), Diagnostics> {
-    let mut remaining_tokens = tokens;
-    let mut fields = Vec::new();
-
-    parse_ctx.indent();
-
-    loop {
-        if remaining_tokens.is_empty() {
-            break;
-        }
-
-        remaining_tokens = ignore_empty_lines(remaining_tokens);
-
-        let tokens_backup = remaining_tokens;
-
-        if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
-            remaining_tokens = new_remaining_tokens;
-        } else {
-            break;
-        }
-
-        if let Ok((field, new_remaining_tokens)) =
-            <StructDeclField>::parse(remaining_tokens, parse_ctx)
-        {
-            remaining_tokens = new_remaining_tokens;
-            fields.push(field);
-        } else {
-            remaining_tokens = tokens_backup;
-            break;
-        }
-
-        if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
-            remaining_tokens = new_remaining_tokens;
-        } else {
-            break;
-        }
-    }
-
-    parse_ctx.dedent();
-
-    Ok((fields, remaining_tokens))
 }
 
 impl Parsable for StructDeclField {

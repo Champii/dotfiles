@@ -19,6 +19,7 @@ pub struct ParseCtx {
     pub config: Config,
     /// This is to handle nested fn type declarations
     pub is_inside_fn_type_decl: bool,
+    pub disallowed_multiline_fn_call: bool,
 }
 
 impl ParseCtx {
@@ -32,6 +33,7 @@ impl ParseCtx {
             current_file: None,
             config: config.clone(),
             is_inside_fn_type_decl: false,
+            disallowed_multiline_fn_call: false,
         }
     }
 
@@ -146,5 +148,22 @@ impl ParseCtx {
         self.inside_argument_list = false;
 
         Err(ParseError::ShortCircuit.into())
+    }
+
+    pub fn disallow_multiline_fn_call<
+        'a,
+        T,
+        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+    >(
+        &mut self,
+        f: F,
+    ) -> Result<(T, &'a [Token]), Diagnostics> {
+        let old_state = self.disallowed_multiline_fn_call;
+        self.disallowed_multiline_fn_call = true;
+
+        let res = f(self);
+
+        self.disallowed_multiline_fn_call = old_state;
+        res
     }
 }

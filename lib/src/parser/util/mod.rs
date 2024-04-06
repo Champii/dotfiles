@@ -68,6 +68,60 @@ where
     Ok((items, remaining_tokens))
 }
 
+pub fn parse_indented_vec_of<'a, T>(
+    tokens: &'a [Token],
+    parse_ctx: &mut ParseCtx,
+    consume_eol: bool,
+) -> Result<(Vec<T>, &'a [Token]), Diagnostics>
+where
+    T: Parsable + std::fmt::Debug,
+{
+    let mut remaining_tokens = tokens;
+    let mut remaining_tokens_after_match = tokens;
+    let mut list = Vec::new();
+
+    parse_ctx.indent();
+
+    loop {
+        if remaining_tokens.is_empty() {
+            remaining_tokens = remaining_tokens_after_match;
+            break;
+        }
+
+        remaining_tokens = ignore_empty_lines(remaining_tokens);
+
+        let tokens_backup = remaining_tokens;
+
+        if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
+            remaining_tokens = new_remaining_tokens;
+        } else {
+            remaining_tokens = remaining_tokens_after_match;
+            break;
+        }
+
+        if let Ok((t, new_remaining_tokens)) = <T>::parse(remaining_tokens, parse_ctx) {
+            remaining_tokens = new_remaining_tokens;
+            remaining_tokens_after_match = new_remaining_tokens;
+            list.push(t);
+        } else {
+            remaining_tokens = tokens_backup;
+            break;
+        }
+
+        if consume_eol {
+            if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
+                remaining_tokens = new_remaining_tokens;
+            } else {
+                break;
+            }
+        }
+    }
+
+    parse_ctx.dedent();
+
+    Ok((list, remaining_tokens))
+}
+
 /// Consumes tokens until a token of the given type is found.
 /// The last token is NOT INCLUDED
 pub fn consume_tokens_until(tokens: &[Token], token_type: TokenType) -> (Vec<Token>, &[Token]) {

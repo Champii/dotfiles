@@ -3,12 +3,10 @@ use crate::{
     diagnostic::Diagnostics,
     lexer::{Token, TokenType},
     parser::{
-        util::{expect_token, ignore_empty_lines},
+        util::{expect_token, parse_indented_vec_of},
         Parsable, ParseCtx,
     },
 };
-
-use super::r#struct::parse_struct_fields;
 
 impl Parsable for EnumDecl {
     fn parse<'a>(
@@ -21,42 +19,11 @@ impl Parsable for EnumDecl {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (variants, remaining_tokens) = parse_ctx
-            .indent_block(|parse_ctx| parse_enum_decl_variant_loop(remaining_tokens, parse_ctx))?;
+        let (variants, remaining_tokens) =
+            parse_indented_vec_of(remaining_tokens, parse_ctx, false)?;
 
         Ok((EnumDecl { name, variants }, remaining_tokens))
     }
-}
-
-fn parse_enum_decl_variant_loop<'a>(
-    tokens: &'a [Token],
-    parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<EnumVariant>, &'a [Token]), Diagnostics> {
-    let mut remaining_tokens = tokens;
-    let mut variants = Vec::new();
-
-    loop {
-        if remaining_tokens.is_empty() {
-            break;
-        }
-
-        remaining_tokens = ignore_empty_lines(remaining_tokens);
-
-        let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) else {
-            break;
-        };
-
-        if let Ok((variant, new_remaining_tokens)) =
-            EnumVariant::parse(new_remaining_tokens, parse_ctx)
-        {
-            remaining_tokens = new_remaining_tokens;
-
-            variants.push(variant);
-        } else {
-            break;
-        }
-    }
-    Ok((variants, remaining_tokens))
 }
 
 impl Parsable for EnumVariant {
@@ -105,7 +72,7 @@ impl Parsable for NamedFieldsOrTypesList {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        if let Ok((fields, remaining_tokens)) = parse_struct_fields(tokens, parse_ctx) {
+        if let Ok((fields, remaining_tokens)) = parse_indented_vec_of(tokens, parse_ctx, true) {
             Ok((
                 NamedFieldsOrTypesList::NamedFields(fields),
                 remaining_tokens,
@@ -123,7 +90,7 @@ mod parse_enum {
 
     #[test]
     fn test_parse_enum() {
-        let input = "enum Type\n  Variant1\n  Variant2 T, U\n  StructLike\n    field: Type\n";
+        let input = "enum Type\n  Variant1\n  Variant2 T, U\n  StructLike\n    field: Type";
         let tokens = lex_test(input);
         let (enum_decl, rest) =
             EnumDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();

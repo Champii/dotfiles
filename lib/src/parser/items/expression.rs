@@ -9,7 +9,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{expect_token, look_ahead, parse_vec_of, ParseError},
+        util::{expect_token, look_ahead, parse_indented_vec_of, parse_vec_of, ParseError},
     },
 };
 
@@ -19,8 +19,6 @@ impl Parsable for Expression {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (unary_expr, remaining_tokens) = UnaryExpr::parse(tokens, parse_ctx)?;
-        /* let (unary_expr, remaining_tokens) =
-        parse_ctx.new_argument_list_scope(|parse_ctx| UnaryExpr::parse(tokens, parse_ctx))?; */
 
         if remaining_tokens.is_empty() {
             return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
@@ -93,8 +91,6 @@ impl Parsable for PrimaryExpr {
             return Ok((primary_expr, remaining_tokens));
         }
 
-        /* let (unary_expr, remaining_tokens) =
-        parse_ctx.new_argument_list_scope(|parse_ctx| UnaryExpr::parse(tokens, parse_ctx))?; */
         let (secondaries, mut remaining_tokens_after_secondaries) =
             parse_vec_of::<SecondaryExpr>(remaining_tokens, None, parse_ctx)?;
 
@@ -275,22 +271,59 @@ impl Parsable for SecondaryExpr {
 
             Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
         } else {
-            let (arguments, remaining_tokens) = parse_ctx.argument_list(|parse_ctx| {
-                parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)
-            })?;
+            let (arguments, remaining_tokens) =
+                parse_ctx.argument_list(|parse_ctx| ArgumentList::parse(tokens, parse_ctx))?;
 
-            if arguments.is_empty() {
+            if arguments.args.is_empty() {
                 return Err(
                     ParseError::UnexpectedToken(token.clone(), vec![TokenType::OpenParen]).into(),
                 );
             }
 
             let arguments = arguments
+                .args
                 .into_iter()
                 .map(|expr| Argument { arg: expr })
                 .collect::<Vec<_>>();
 
             Ok((SecondaryExpr::Arguments(arguments), remaining_tokens))
+        }
+    }
+}
+
+struct ArgumentList {
+    args: Vec<Expression>,
+}
+
+impl Parsable for ArgumentList {
+    fn parse<'a>(
+        tokens: &'a [Token],
+        parse_ctx: &mut ParseCtx,
+    ) -> Result<(Self, &'a [Token]), Diagnostics> {
+        let remaining_tokens = tokens;
+
+        if !parse_ctx.disallowed_multiline_fn_call
+            && look_ahead(
+                remaining_tokens,
+                &vec![
+                    TokenType::Eol,
+                    TokenType::Indent(parse_ctx.indent_level() + parse_ctx.indent_step()),
+                ],
+            )
+        {
+            let (args, new_remaining_tokens) =
+                parse_indented_vec_of::<Expression>(&remaining_tokens[1..], parse_ctx, true)?;
+
+            if args.is_empty() {
+                return Ok((ArgumentList { args: Vec::new() }, remaining_tokens));
+            }
+
+            Ok((ArgumentList { args }, new_remaining_tokens))
+        } else {
+            let (args, remaining_tokens) =
+                parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+
+            Ok((ArgumentList { args }, remaining_tokens))
         }
     }
 }
@@ -1037,6 +1070,81 @@ mod expression {
                         span: Span::default(),
                     })),
                 ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_fn_call() {
+        let input = r#"foo
+  bar
+  baz
+  2 + 2"#;
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Arguments(vec![
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "baz".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::BinopExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            }),
+                            Operator {
+                                value: "+".to_string(),
+                                span: Span::default(),
+                            },
+                            Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })))
+                        ),
+                    },
+                ])]),
                 type_annotation: None,
             })),
         );

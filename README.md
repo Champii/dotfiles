@@ -116,7 +116,7 @@ main = ->
 
 ```haskell
 struct Wrapper T
-  inner: T
+    inner: T
 
 enum Choice T, U
     Left T
@@ -230,7 +230,6 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Allow multiline function arguments
       - Chain calls without variables
       - `+=` like operators
       - `if let` like `if Err e = run!`

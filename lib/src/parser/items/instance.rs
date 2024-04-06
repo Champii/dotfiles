@@ -6,7 +6,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
-        util::{expect_token, ignore_empty_lines, parse_vec_of},
+        util::{parse_indented_vec_of, parse_vec_of},
         Parsable,
     },
 };
@@ -29,11 +29,13 @@ impl Parsable for Instance {
         }
 
         if let TokenType::Eol = remaining_tokens[0].token_type {
-            let (fields, new_remaining_tokens) = parse_ctx.indent_block(|parse_ctx| {
-                InstanceBlock::parse(&remaining_tokens[1..], parse_ctx)
-            })?;
+            let (fields, new_remaining_tokens) = parse_indented_vec_of::<(Ident, Expression)>(
+                &remaining_tokens[1..],
+                parse_ctx,
+                true,
+            )?;
 
-            if fields.fields.is_empty() {
+            if fields.is_empty() {
                 return Ok((
                     Instance {
                         name: identifier_path,
@@ -46,7 +48,7 @@ impl Parsable for Instance {
             Ok((
                 Instance {
                     name: identifier_path,
-                    fields: fields.fields.into_iter().collect(),
+                    fields: fields.into_iter().collect(),
                 },
                 new_remaining_tokens,
             ))
@@ -65,63 +67,6 @@ impl Parsable for Instance {
                 remaining_tokens,
             ))
         }
-    }
-}
-
-#[derive(Debug)]
-struct InstanceBlock {
-    fields: Vec<(Ident, Expression)>,
-}
-
-impl Parsable for InstanceBlock {
-    fn parse<'a>(
-        tokens: &'a [Token],
-        parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let mut remaining_tokens = tokens;
-        let mut remaining_tokens_after_match = tokens;
-        let mut fields = Vec::new();
-
-        loop {
-            if remaining_tokens.is_empty() {
-                break;
-            }
-
-            remaining_tokens = ignore_empty_lines(remaining_tokens);
-
-            let tokens_backup = remaining_tokens;
-
-            if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
-                remaining_tokens = new_remaining_tokens;
-            } else {
-                remaining_tokens = remaining_tokens_after_match;
-                break;
-            }
-
-            if let Ok((field, new_remaining_tokens)) =
-                <(Ident, Expression)>::parse(remaining_tokens, parse_ctx)
-            {
-                remaining_tokens = new_remaining_tokens;
-                remaining_tokens_after_match = remaining_tokens;
-                fields.push(field);
-            } else {
-                remaining_tokens = tokens_backup;
-                break;
-            }
-
-            if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
-                remaining_tokens = new_remaining_tokens;
-            } else {
-                break;
-            }
-        }
-
-        Ok((
-            InstanceBlock {
-                fields: fields.into_iter().collect(),
-            },
-            remaining_tokens,
-        ))
     }
 }
 

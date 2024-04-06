@@ -1,11 +1,17 @@
-enum Foo
-    Toto Tutu, Titi
-    Bar
-        foo: Bar
-    Lol A -> B -> C
-    Titi
+struct MyStruct
+    field : Int
+    toto: Lol
 
+enum MyEnum
+    Foo Bar
+    Ba
 
-main = (a, Ok b) -> a + b
-main = (a, Err e) -> e
+impl Lol
+    @toto = -> @lol
+
+main = ->
+    tamere
+        Bar::Baz
+        d b .d
+    2
 

@@ -944,7 +944,7 @@ enum MyEnum
     Baz
 
 trait MyTrait
-    foo : Bar
+    foo : Bar -> Baz
     baz = a -> a
 
 impl MyTrait

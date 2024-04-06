@@ -20,7 +20,9 @@ impl Parsable for Match {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("match".to_string()))?;
 
-        let (expr, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+        let (expr, remaining_tokens) = parse_ctx.disallow_multiline_fn_call(|parse_ctx| {
+            Expression::parse(remaining_tokens, parse_ctx)
+        })?;
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
