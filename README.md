@@ -233,7 +233,6 @@ struct MyStruct
       - `if let` like `if Err e = run!`
       - Fix nested multiline dot (indent problem)
       - Escaped char in strings
-      - Add struct pattern matching  and Add enum struct-like pattern matching
       - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on
       - Proc macros ? Derive ? 
 

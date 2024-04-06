@@ -1,3 +1,8 @@
-main = ->
-    foo bar ..baz
+struct Player
+    name : String
+    age : Int
 
+main = ->
+    Player lol: (Ok lol), mdr: toto = Player
+        age: 42
+        name: "Toto"

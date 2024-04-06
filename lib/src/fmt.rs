@@ -696,7 +696,8 @@ impl Display for PatternKind {
 
                 write!(f, "]")
             }
-            PatternKind::EnumInstance(inst) => write!(f, "{}", inst),
+            PatternKind::Instance(inst) => write!(f, "{}", inst),
+            PatternKind::Nested(pattern) => write!(f, "({})", pattern),
             PatternKind::Wildcard => write!(f, "_"),
         }
     }
@@ -711,27 +712,53 @@ impl Display for ArrayPattern {
     }
 }
 
-impl Display for EnumPattern {
+impl Display for InstancePattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.variant)?;
+        write!(f, "{}", self.name)?;
+        write!(f, "{}", self.args)
+    }
+}
 
-        if !self.args.is_empty() {
-            write!(f, "(")?;
-        }
+impl Display for FieldsPatternOrArgumentsPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            FieldsPatternOrArgumentsPattern::Fields(fields) => {
+                if fields.is_empty() {
+                    return Ok(());
+                }
 
-        for (i, arg) in self.args.iter().enumerate() {
-            write!(f, "{}", arg)?;
+                for (i, field) in fields.iter().enumerate() {
+                    write!(f, " {}", field)?;
 
-            if i < self.args.len() - 1 {
-                write!(f, ", ")?;
+                    if i < fields.len() - 1 {
+                        write!(f, ",")?;
+                    }
+                }
+
+                Ok(())
+            }
+            FieldsPatternOrArgumentsPattern::Arguments(args) => {
+                if args.is_empty() {
+                    return Ok(());
+                }
+
+                for (i, arg) in args.iter().enumerate() {
+                    write!(f, " {}", arg)?;
+
+                    if i < args.len() - 1 {
+                        write!(f, ",")?;
+                    }
+                }
+
+                Ok(())
             }
         }
+    }
+}
 
-        if !self.args.is_empty() {
-            write!(f, ")")?;
-        }
-
-        Ok(())
+impl Display for FieldPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.name, self.pattern)
     }
 }
 

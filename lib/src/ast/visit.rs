@@ -90,8 +90,10 @@ generate_visitor_trait!(
     MatchArm
     Pattern
     PatternKind
-    EnumPattern
+    InstancePattern
+    FieldPattern
     ArrayPattern
+    FieldsPatternOrArgumentsPattern
     UnaryExpr
     Operator
     PrimaryExpr
@@ -364,15 +366,34 @@ pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind
         PatternKind::Literal(l) => visitor.visit_literal(l),
         PatternKind::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
         PatternKind::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
-        PatternKind::EnumInstance(e) => visitor.visit_enum_pattern(e),
+        PatternKind::Instance(e) => visitor.visit_instance_pattern(e),
+        PatternKind::Nested(p) => visitor.visit_pattern(p),
         PatternKind::Wildcard => {}
     }
 }
 
-pub fn walk_enum_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a EnumPattern) {
-    visitor.visit_identifier_path(&e.variant);
+pub fn walk_instance_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a InstancePattern) {
+    visitor.visit_identifier_path(&e.name);
+    visitor.visit_fields_pattern_or_arguments_pattern(&e.args);
+}
 
-    walk_list!(visitor, visit_match_pattern, &e.args);
+pub fn walk_fields_pattern_or_arguments_pattern<'a, V: Visitor<'a>>(
+    visitor: &mut V,
+    f: &'a FieldsPatternOrArgumentsPattern,
+) {
+    match f {
+        FieldsPatternOrArgumentsPattern::Fields(fields) => {
+            walk_list!(visitor, visit_field_pattern, fields);
+        }
+        FieldsPatternOrArgumentsPattern::Arguments(args) => {
+            walk_list!(visitor, visit_argument, args);
+        }
+    }
+}
+
+pub fn walk_field_pattern<'a, V: Visitor<'a>>(visitor: &mut V, f: &'a FieldPattern) {
+    visitor.visit_ident(&f.name);
+    visitor.visit_pattern(&f.pattern);
 }
 
 pub fn walk_array_pattern<'a, V: Visitor<'a>>(visitor: &mut V, a: &'a ArrayPattern) {

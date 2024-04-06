@@ -258,7 +258,8 @@ pub enum PatternKind {
     Literal(Literal),
     Tuple(Vec<Pattern>),
     Array(Vec<ArrayPattern>),
-    EnumInstance(EnumPattern),
+    Instance(InstancePattern),
+    Nested(Box<Pattern>), // parenthesis
     Wildcard,
 }
 
@@ -269,9 +270,21 @@ pub enum ArrayPattern {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct EnumPattern {
-    pub variant: IdentifierPath,
-    pub args: Vec<Pattern>,
+pub struct InstancePattern {
+    pub name: IdentifierPath,
+    pub args: FieldsPatternOrArgumentsPattern,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum FieldsPatternOrArgumentsPattern {
+    Fields(Vec<FieldPattern>),
+    Arguments(Vec<Pattern>),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FieldPattern {
+    pub name: Ident,
+    pub pattern: Pattern,
 }
 
 #[derive(Debug, PartialEq)]
