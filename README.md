@@ -238,14 +238,13 @@ struct MyStruct
 
     - Low priority list:
       - Auto export current item `< struct Foo`
-      - Struct default constructor
       - Slice of array `arr[1..]`
       - Default arguments and named arguments
+      - Allow typeless struct field when default value and let the inference take over
       - Error bubbling with `?`
       - Postfix `if` and `loop`
       - Oneliner for loops (other than postfix) like array comprehension `[a for a in arr]`
       - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
-      - Struct default value
       - Async?
       - Allow parenthesis for function calls ?
       - Allow braces for nested blocks ?

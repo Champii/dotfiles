@@ -1,8 +1,15 @@
 struct Player
-    name : String
-    age : Int
+    name String = "John"
+    age : Int = 2
 
 main = ->
-    Player lol: (Ok lol), mdr: toto = Player
+    player = Player
         age: 42
         name: "Toto"
+
+    Player lol: (Ok lol), mdr: toto = player
+
+    if toto
+        toto.name.print!
+
+main = Ok foo: Ok bar -> bar

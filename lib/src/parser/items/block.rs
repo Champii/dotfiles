@@ -73,7 +73,7 @@ impl Parsable for Block {
             return Err(ParseError::UnexpectedEof(TokenType::Eol).into());
         }
         let (statements, new_tokens) = if tokens[0].token_type == TokenType::Eol {
-            parse_ctx.indent_block(|parse_ctx| parse_statements_loop(tokens, parse_ctx))?
+            parse_ctx.indent_block(|parse_ctx| parse_statements_loop(&tokens[1..], parse_ctx))?
         } else {
             let (statement, remaining_tokens) = Statement::parse(&tokens, parse_ctx)?;
 

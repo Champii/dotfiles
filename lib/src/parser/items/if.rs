@@ -150,4 +150,13 @@ mod test_if {
 
         assert_eq!(rest.len(), 0);
     }
+
+    #[test]
+    fn multiline_if() {
+        let input = "if true\n  1";
+        let tokens = lex_test(input);
+        let (_if_, rest) = If::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(rest.len(), 0);
+    }
 }

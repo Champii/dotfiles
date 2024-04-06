@@ -73,6 +73,7 @@ pub struct StructDeclField {
     pub name: Ident,
     pub ty: ParseType,
     pub public: bool,
+    pub default: Option<Expression>,
 }
 
 #[derive(Debug, PartialEq)]
