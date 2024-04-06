@@ -232,9 +232,8 @@ struct MyStruct
       - Comments (end of line ('#') or inline ('/*' '*/')
       - Chain calls without variables
       - `if let` like `if Err e = run!`
-      - Allow any characters into strings and chars
       - Fix nested multiline dot (indent problem)
-      - Escaped string, char and Nested string, and allow spaces. Basically dont do anything to it (maybe let the lexer take care of that ?)
+      - Escaped char in strings
       - Add struct pattern matching  and Add enum struct-like pattern matching
       - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on
       - Proc macros ? Derive ? 

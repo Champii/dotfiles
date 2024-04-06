@@ -5,7 +5,7 @@ use crate::{
     parser::{
         parsable::Parsable,
         parse_ctx::ParseCtx,
-        util::{consume_tokens_until, expect_token, parse_vec_of, ParseError},
+        util::{expect_token, parse_vec_of, ParseError},
     },
 };
 
@@ -33,15 +33,13 @@ impl Parsable for Literal {
                 tokens = &tokens[1..];
                 LiteralKind::Float(value.parse().unwrap())
             }
-            TokenType::DoubleQuote => {
-                let (string, remaining_tokens) = String::parse(tokens, parse_ctx)?;
-                tokens = remaining_tokens;
-                LiteralKind::String(string)
+            TokenType::String(s) => {
+                tokens = &tokens[1..];
+                LiteralKind::String(s.clone())
             }
-            TokenType::SimpleQuote => {
-                let (char, remaining_tokens) = char::parse(tokens, parse_ctx)?;
-                tokens = remaining_tokens;
-                LiteralKind::Char(char)
+            TokenType::Char(c) => {
+                tokens = &tokens[1..];
+                LiteralKind::Char(*c)
             }
             TokenType::OpenBracket => {
                 let (array, remaining_tokens) =
@@ -65,52 +63,6 @@ impl Parsable for Literal {
                 span: token.span.clone(),
             },
             &tokens,
-        ))
-    }
-}
-
-impl Parsable for String {
-    fn parse<'a>(
-        tokens: &'a [Token],
-        _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let remaining_tokens = expect_token(tokens, TokenType::DoubleQuote)?;
-
-        let (inner_tokens, remaining_tokens) =
-            consume_tokens_until(remaining_tokens, TokenType::DoubleQuote);
-
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::DoubleQuote)?;
-
-        let string = inner_tokens
-            .iter()
-            .map(|token| token.token_type.to_string())
-            .collect();
-
-        Ok((string, remaining_tokens))
-    }
-}
-
-impl Parsable for char {
-    fn parse<'a>(
-        tokens: &'a [Token],
-        _parse_ctx: &mut ParseCtx,
-    ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let mut remaining_tokens = expect_token(tokens, TokenType::SimpleQuote)?;
-
-        let inner_token = remaining_tokens[0].clone();
-
-        if format!("{}", inner_token.token_type.to_string()).len() > 1 {
-            return Err(
-                ParseError::UnexpectedToken(inner_token, vec![TokenType::SimpleQuote]).into(),
-            );
-        }
-        remaining_tokens = &remaining_tokens[1..];
-
-        let remaining_tokens = expect_token(remaining_tokens, TokenType::SimpleQuote)?;
-
-        Ok((
-            inner_token.token_type.to_string().chars().next().unwrap(),
-            remaining_tokens,
         ))
     }
 }

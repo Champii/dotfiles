@@ -28,8 +28,16 @@ impl Either T, U
         Right x => panic "Not left"
 
     @right = -> match @
-        Left x => panic "Not right"
+        Left x => panic "lol"
         Right x => x
 
-
+main = ->
+    match lol
+        Foo => 2
+        Bar => 3
+        Ba => 4
+    match lol
+        Left x => panic "Not left"
+        Right x => x
+    lol
 

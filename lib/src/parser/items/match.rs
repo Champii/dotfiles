@@ -26,12 +26,9 @@ impl Parsable for Match {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        parse_ctx.indent();
-
-        let (arms, remaining_tokens) =
-            parse_vec_of(remaining_tokens, Some(TokenType::Eol), parse_ctx)?;
-
-        parse_ctx.dedent();
+        let (arms, remaining_tokens) = parse_ctx.indent_block(|parse_ctx| {
+            parse_vec_of(remaining_tokens, Some(TokenType::Eol), parse_ctx)
+        })?;
 
         Ok((Match { expr, arms }, remaining_tokens))
     }

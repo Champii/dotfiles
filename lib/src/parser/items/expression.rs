@@ -329,10 +329,20 @@ impl Parsable for ArgumentList {
 
             Ok((ArgumentList { args }, new_remaining_tokens))
         } else {
-            let (args, remaining_tokens) =
-                parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
+            let (args, new_remaining_tokens) =
+                parse_ctx.disallow_multiline_fn_call(|parse_ctx| {
+                    parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)
+                })?;
 
-            Ok((ArgumentList { args }, remaining_tokens))
+            if args.is_empty() {
+                return Err(ParseError::UnexpectedToken(
+                    remaining_tokens[0].clone(),
+                    vec![TokenType::Coma, TokenType::CloseParen],
+                )
+                .into());
+            }
+
+            Ok((ArgumentList { args }, new_remaining_tokens))
         }
     }
 }

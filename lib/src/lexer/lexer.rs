@@ -112,8 +112,8 @@ impl Lexer {
             ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
             '.' => self.token(TokenType::Dot, 1),
-            '\'' => self.token(TokenType::SimpleQuote, 1),
-            '"' => self.token(TokenType::DoubleQuote, 1),
+            '\'' => self.char(),
+            '"' => self.string(),
             '@' => self.token(TokenType::Arobase, 1),
             '#' => self.comment(),
             '_' => self.token(TokenType::Underscore, 1),
@@ -123,7 +123,10 @@ impl Lexer {
             c => return Err(LexerError::UnknownToken(c, self.span(1))),
         };
 
-        self.position = token.span.end;
+        match token.token_type {
+            TokenType::Char(_) | TokenType::String(_) => (),
+            _ => self.position = token.span.end,
+        }
 
         self.last_token = Some(token.clone());
 
@@ -292,6 +295,42 @@ impl Lexer {
 
         self.token(
             TokenType::Number(self.input[start..end].to_string()),
+            end - start,
+        )
+    }
+
+    fn char(&mut self) -> Token {
+        self.position += 1;
+        let start = self.position;
+        let mut end = self.position;
+
+        // We deliberately allow multi-character literals here, it should be catched in the parser
+        // and thus allow for recovery
+        while self.peek(end - start) != '\'' {
+            end += 1;
+        }
+
+        self.position = end + 1;
+
+        self.token(
+            TokenType::Char(self.input[start..end].chars().next().unwrap()),
+            end - start,
+        )
+    }
+
+    fn string(&mut self) -> Token {
+        self.position += 1;
+        let start = self.position;
+        let mut end = self.position;
+
+        while self.peek(end - start) != '"' {
+            end += 1;
+        }
+
+        self.position = end + 1;
+
+        self.token(
+            TokenType::String(self.input[start..end].to_string()),
             end - start,
         )
     }
