@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use ast::debug::debug_ast;
+
 use crate::ast::Program;
 pub mod ast;
 mod diagnostic;
@@ -31,8 +33,12 @@ pub fn compile(config: &Config) {
         }
     };
 
-    if config.has_debug_print("ast") {
+    if config.has_debug_print("ast-full") {
         println!("{:#?}", ast);
+    }
+
+    if config.has_debug_print("ast") {
+        debug_ast(&ast);
     }
 
     let ast = match macro_expansion::expand_macros(ast) {

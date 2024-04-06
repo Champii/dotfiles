@@ -12,7 +12,10 @@ impl Parsable for If {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("if".to_string()))?;
 
-        let (condition, mut remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+        let (condition, mut remaining_tokens) =
+            parse_ctx.disallow_multiline_fn_call(|parse_ctx| {
+                Expression::parse(remaining_tokens, parse_ctx)
+            })?;
 
         if TokenType::Eol == remaining_tokens[0].token_type {
             let (has_consumed, new_remaining_tokens) =

@@ -48,6 +48,18 @@ impl Parsable for StructDeclField {
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
         let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
 
+        if remaining_tokens.is_empty() {
+            return Ok((
+                StructDeclField {
+                    name: ident,
+                    ty: parse_type,
+                    public,
+                    default: None,
+                },
+                remaining_tokens,
+            ));
+        }
+
         let (default, remaining_tokens) = if TokenType::Equal == remaining_tokens[0].token_type {
             let (expression, remaining_tokens) =
                 Expression::parse(&remaining_tokens[1..], parse_ctx)?;

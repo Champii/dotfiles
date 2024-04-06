@@ -1,6 +1,11 @@
 struct Player
-    name String = "John"
+    name : String = "John"
     age : Int = 2
+
+enum Lol
+    Bar
+    Baz Foo
+    Lol
 
 main = ->
     player = Player
@@ -10,6 +15,8 @@ main = ->
     Player lol: (Ok lol), mdr: toto = player
 
     if toto
-        toto.name.print!
+        toto.name.print lol, a + (d - 2)
+
+    a = [1, 2, 3]
 
 main = Ok foo: Ok bar -> bar

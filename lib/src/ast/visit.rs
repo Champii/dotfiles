@@ -2,6 +2,7 @@ use paste::paste;
 
 use crate::ast::tree::*;
 
+#[macro_export]
 macro_rules! walk_list {
     ($visitor:expr, $method:ident, $list:expr) => {
         for elem in $list {
@@ -52,6 +53,10 @@ macro_rules! generate_visitor_trait {
                     paste! {
                         visitor.[<visit_ $name:snake>](self);
                     }
+                }
+
+                pub fn name(&self) -> &'static str {
+                    stringify!($name)
                 }
             }
         )+

@@ -233,17 +233,16 @@ struct MyStruct
       - `if let` like `if Err e = run!`
       - Fix nested multiline dot (indent problem)
       - Escaped char in strings
-      - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on
-      - Proc macros ? Derive ? 
-
-    - Low priority list:
       - Auto export current item `< struct Foo`
       - Slice of array `arr[1..]`
       - Default arguments and named arguments
-      - Allow typeless struct field when default value and let the inference take over
       - Error bubbling with `?`
       - Postfix `if` and `loop`
       - Oneliner for loops (other than postfix) like array comprehension `[a for a in arr]`
+
+    - Low priority list:
+      - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on
+      - Allow typeless struct field when default value and let the inference take over
       - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
       - Async?
       - Allow parenthesis for function calls ?
@@ -251,6 +250,7 @@ struct MyStruct
       - String interpolation ? 
       - Replace the Type1OrType2 with an implem of Either<Type1, Type2>
       - Remove the `,` separator for arguments and follow haskell fn call format ?
+      - Proc macros ? Derive ? 
 
   - Desugar
     - Operator precedence

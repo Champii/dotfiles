@@ -72,7 +72,10 @@ impl Parsable for NamedFieldsOrTypesList {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        if let Ok((fields, remaining_tokens)) = parse_indented_vec_of(tokens, parse_ctx, true) {
+        if let Ok((fields, mut remaining_tokens)) = parse_indented_vec_of(tokens, parse_ctx, true) {
+            if !fields.is_empty() {
+                remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+            }
             Ok((
                 NamedFieldsOrTypesList::NamedFields(fields),
                 remaining_tokens,
@@ -90,7 +93,7 @@ mod parse_enum {
 
     #[test]
     fn test_parse_enum() {
-        let input = "enum Type\n  Variant1\n  Variant2 T, U\n  StructLike\n    field: Type";
+        let input = "enum Type\n  Variant1\n  Variant2 T, U\n  StructLike\n    field: Type\n";
         let tokens = lex_test(input);
         let (enum_decl, rest) =
             EnumDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
