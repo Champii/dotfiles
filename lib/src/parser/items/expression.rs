@@ -279,6 +279,27 @@ impl Parsable for SecondaryExpr {
             let (ident_or_num, remaining_tokens) = IdentOrNumber::parse(&tokens[1..], parse_ctx)?;
 
             Ok((SecondaryExpr::Dot(ident_or_num), remaining_tokens))
+        } else if TokenType::DoubleDot == token.token_type {
+            parse_ctx.argument_list_short_circuit()?;
+
+            let (ident, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
+
+            Ok((SecondaryExpr::DoubleDot(ident), remaining_tokens))
+        } else if {
+            look_ahead(
+                tokens,
+                &vec![
+                    TokenType::Eol,
+                    TokenType::Indent(parse_ctx.indent_level() + parse_ctx.indent_step()),
+                    TokenType::DoubleDot,
+                ],
+            )
+        } {
+            parse_ctx.argument_list_short_circuit()?;
+
+            let (ident, remaining_tokens) = Ident::parse(&tokens[3..], parse_ctx)?;
+
+            Ok((SecondaryExpr::DoubleDot(ident), remaining_tokens))
         } else {
             let (arguments, remaining_tokens) =
                 parse_ctx.argument_list(|parse_ctx| ArgumentList::parse(tokens, parse_ctx))?;
@@ -1206,6 +1227,92 @@ mod expression {
                     span: Span::default(),
                 }),
                 secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn double_dot() {
+        let input = "foo bar ..baz";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        }))
+                    }]),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    }),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn double_dot_multiline() {
+        let input = r#"foo bar
+  ..baz
+  ..foofoo"#;
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        }))
+                    }]),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    }),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "foofoo".to_string(),
+                        span: Span::default(),
+                    }),
+                ]),
                 type_annotation: None,
             })),
         );

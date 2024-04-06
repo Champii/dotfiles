@@ -56,7 +56,7 @@ impl Lexer {
     }
 
     pub fn next(&mut self) -> Result<Token, LexerError> {
-        if self.current_char() == ' ' && self.peek(1) == '.' {
+        if self.current_char() == ' ' && self.peek(1) == '.' && self.peek(2) != '.' {
             let token = self.token(TokenType::SpacedDot, 2);
             self.position = token.span.end;
             self.last_token = Some(token.clone());
@@ -111,6 +111,7 @@ impl Lexer {
             ',' => self.token(TokenType::Coma, 1),
             ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
+            '.' if self.peek(1) == '.' => self.token(TokenType::DoubleDot, 2),
             '.' => self.token(TokenType::Dot, 1),
             '\'' => self.char(),
             '"' => self.string(),

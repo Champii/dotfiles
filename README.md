@@ -230,7 +230,6 @@ struct MyStruct
   - Parser
     - High priority
       - Comments (end of line ('#') or inline ('/*' '*/')
-      - Chain calls without variables
       - `if let` like `if Err e = run!`
       - Fix nested multiline dot (indent problem)
       - Escaped char in strings
@@ -253,6 +252,7 @@ struct MyStruct
       - Allow braces for nested blocks ?
       - String interpolation ? 
       - Replace the Type1OrType2 with an implem of Either<Type1, Type2>
+      - Remove the `,` separator for arguments and follow haskell fn call format ?
 
   - Desugar
     - Operator precedence

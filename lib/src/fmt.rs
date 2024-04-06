@@ -793,6 +793,9 @@ impl Display for SecondaryExpr {
             SecondaryExpr::Dot(field) => {
                 write!(f, ".{}", field)
             }
+            SecondaryExpr::DoubleDot(field) => {
+                write!(f, "..{}", field)
+            }
         }
     }
 }

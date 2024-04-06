@@ -314,6 +314,9 @@ pub fn walk_secondary_expr<'a, V: Visitor<'a>>(visitor: &mut V, secondary: &'a S
         SecondaryExpr::Dot(expr) => {
             visitor.visit_ident_or_number(expr);
         }
+        SecondaryExpr::DoubleDot(ident) => {
+            visitor.visit_ident(ident);
+        }
     }
 }
 

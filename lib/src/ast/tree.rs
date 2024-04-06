@@ -354,6 +354,7 @@ pub enum SecondaryExpr {
     Arguments(Vec<Argument>),
     Indice(Box<Expression>), // Boxing here to keep the enum size low
     Dot(IdentOrNumber),
+    DoubleDot(Ident),
 }
 
 #[derive(Debug, PartialEq)]
