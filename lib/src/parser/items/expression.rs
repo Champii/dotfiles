@@ -150,8 +150,17 @@ impl Parsable for Operand {
         }
 
         if TokenType::Arobase == tokens[0].token_type {
-            let (expression, remaining_tokens) = Ident::parse(&tokens[1..], parse_ctx)?;
-            return Ok((Operand::SelfIdent(expression), remaining_tokens));
+            if let Ok((expression, remaining_tokens)) = Ident::parse(&tokens[1..], parse_ctx) {
+                return Ok((Operand::SelfIdent(expression), remaining_tokens));
+            }
+
+            return Ok((
+                Operand::SelfIdent(Ident {
+                    name: "".to_string(),
+                    span: tokens[0].span.clone(),
+                }),
+                &tokens[1..],
+            ));
         }
 
         if let TokenType::Type(_) = tokens[0].token_type {
@@ -1145,6 +1154,48 @@ mod expression {
                         ),
                     },
                 ])]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn self_ident() {
+        let input = "@foo";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::SelfIdent(Ident {
+                    name: "foo".to_string(),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn empty_self_ident() {
+        let input = "@";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::SelfIdent(Ident {
+                    name: "".to_string(),
+                    span: Span::default(),
+                }),
+                secondaries: None,
                 type_annotation: None,
             })),
         );

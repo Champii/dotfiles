@@ -10,8 +10,26 @@ impl Lol
     @toto = -> @lol
 
 main = ->
-    tamere
-        Bar::Baz
-        d b .d
+    a += 2
+
     2
+
+enum Either T, U
+    Left T
+    Right U
+
+impl Either T, U
+    @map = f -> match @
+        Left x => Left f x
+        Right x => Right f x
+
+    @left = -> match @
+        Left x => x
+        Right x => panic "Not left"
+
+    @right = -> match @
+        Left x => panic "Not right"
+        Right x => x
+
+
 
