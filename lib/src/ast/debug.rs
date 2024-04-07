@@ -41,6 +41,10 @@ macro_rules! ast_printer {
                 println!("{}{} = {}", self.indent(), parse_type.name(), parse_type.to_string());
             }
 
+            fn visit_operator(&mut self, operator: &'a Operator) {
+                println!("{}{} = {}", self.indent(), operator.name(), operator.to_string());
+            }
+
             fn visit_literal(&mut self, literal: &'a Literal) {
                 match &literal.kind {
                     LiteralKind::Number(n) => {
@@ -86,10 +90,54 @@ macro_rules! ast_printer {
                         self.indent_level += 1;
                         expr.visit(self);
                         self.indent_level -= 1;
-
+                    }
+                    SecondaryExpr::Interogation => {
+                        println!("{}{}", self.indent(), "Interogation");
                     }
                 }
             }
+
+            fn visit_pattern(&mut self, pattern: &'a Pattern) {
+                match &pattern.kind {
+                    PatternKind::Instance(instance) => {
+                        println!("{}{}", self.indent(), "InstancePattern");
+                        self.indent_level += 1;
+                        instance.visit(self);
+                        self.indent_level -= 1;
+                    }
+                    PatternKind::Ident(field) => {
+                        println!("{}{} = {}", self.indent(), "IdentPattern", field);
+                    }
+                    PatternKind::Array(array) => {
+                        println!("{}{}", self.indent(), "ArrayPattern");
+                        self.indent_level += 1;
+                        walk_list!(self, visit_pattern, array);
+                        self.indent_level -= 1;
+                    }
+                    PatternKind::Tuple(tuple) => {
+                        println!("{}{}", self.indent(), "TuplePattern");
+                        self.indent_level += 1;
+                        walk_list!(self, visit_pattern, tuple);
+                        self.indent_level -= 1;
+                    }
+                    PatternKind::Literal(literal) => {
+                        println!("{}{}", self.indent(), "LiteralPattern");
+                        self.indent_level += 1;
+                        literal.visit(self);
+                        self.indent_level -= 1;
+                    }
+                    PatternKind::Wildcard => {
+                        println!("{}{}", self.indent(), "WildcardPattern");
+                    }
+                    PatternKind::Nested(nested) => {
+                        println!("{}{}", self.indent(), "NestedPattern");
+                        self.indent_level += 1;
+                        nested.visit(self);
+                        self.indent_level -= 1;
+                    }
+                }
+            }
+
 
             paste! {
                 $(
@@ -138,13 +186,13 @@ ast_printer!(
     MatchArm
     // Pattern
     // PatternKind
-    InstancePattern
-    FieldPattern
-    ArrayPattern
+    // InstancePattern
+    // FieldPattern
+    // ArrayPattern
     // FieldsPatternOrArgumentsPattern
     // UnaryExpr
-    /* Operator
-    PrimaryExpr
+    // Operator
+    /* PrimaryExpr
     SecondaryExpr */
     // Operand
     Argument

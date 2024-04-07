@@ -369,6 +369,7 @@ pub enum SecondaryExpr {
     Indice(Box<Expression>), // Boxing here to keep the enum size low
     Dot(IdentOrNumber),
     DoubleDot(Ident),
+    Interogation,
 }
 
 #[derive(Debug, PartialEq)]

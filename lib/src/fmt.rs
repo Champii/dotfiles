@@ -823,6 +823,9 @@ impl Display for SecondaryExpr {
             SecondaryExpr::DoubleDot(field) => {
                 write!(f, "..{}", field)
             }
+            SecondaryExpr::Interogation => {
+                write!(f, "?")
+            }
         }
     }
 }

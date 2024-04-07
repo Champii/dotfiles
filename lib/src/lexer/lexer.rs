@@ -113,6 +113,7 @@ impl Lexer {
             ':' => self.token(TokenType::Colon, 1),
             '.' if self.peek(1) == '.' => self.token(TokenType::DoubleDot, 2),
             '.' => self.token(TokenType::Dot, 1),
+            '?' => self.token(TokenType::Interogation, 1),
             '\'' => self.char(),
             '"' => self.string(),
             '@' => self.token(TokenType::Arobase, 1),

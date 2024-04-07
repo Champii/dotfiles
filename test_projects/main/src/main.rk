@@ -8,6 +8,7 @@ enum Lol
     Lol
 
 main = ->
+    player = Player "lol", 42
     player = Player
         age: 42
         name: "Toto"
@@ -17,6 +18,9 @@ main = ->
     if toto
         toto.name.print lol, a + (d - 2)
 
-    a = [1, 2, 3]
+    toto = do
+        player.name.print
+        player.age.print
+        (player.age, player.name)
 
-main = Ok foo: Ok bar -> bar
+    lol = toto lol, 2

@@ -66,6 +66,7 @@ fn expand(_config: &Config) {
             std::process::exit(1);
         }
     };
+
     let expanded = match rock_lib::macro_expansion::expand_macros(program) {
         Ok(expanded) => expanded,
         Err(e) => {

@@ -324,6 +324,7 @@ pub fn walk_secondary_expr<'a, V: Visitor<'a>>(visitor: &mut V, secondary: &'a S
         SecondaryExpr::DoubleDot(ident) => {
             visitor.visit_ident(ident);
         }
+        SecondaryExpr::Interogation => {}
     }
 }
 

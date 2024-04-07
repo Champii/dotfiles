@@ -220,7 +220,7 @@ struct MyStruct
 # TODO
 
   - CLI tool
-  - Error recovery for parser (find the next Indent(0))
+  - Error recovery for parser statements (find the next Indent(x))
 
   - Macros
     - Macro nested var repetition $($($arg:ident)*)*
@@ -229,16 +229,19 @@ struct MyStruct
 
   - Parser
     - High priority
-      - Comments (end of line ('#') or inline ('/*' '*/')
       - `if let` like `if Err e = run!`
+      - `Ok a = f! else return Err "error"`
       - Fix nested multiline dot (indent problem)
-      - Escaped char in strings
+      - Escaped char in strings and char
       - Auto export current item `< struct Foo`
       - Slice of array `arr[1..]`
       - Default arguments and named arguments
-      - Error bubbling with `?`
       - Postfix `if` and `loop`
       - Oneliner for loops (other than postfix) like array comprehension `[a for a in arr]`
+      - `do` keyword for nested blocks
+      - Comments (end of line ('#') or inline ('/*' '*/')
+      - Multiline operators and equal
+      - Multiline Patterns
 
     - Low priority list:
       - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on
@@ -246,11 +249,12 @@ struct MyStruct
       - Fix that annoying problem with unaryexp that can be confused with function shorthand (space problem between operator and expr)
       - Async?
       - Allow parenthesis for function calls ?
-      - Allow braces for nested blocks ?
       - String interpolation ? 
       - Replace the Type1OrType2 with an implem of Either<Type1, Type2>
       - Remove the `,` separator for arguments and follow haskell fn call format ?
       - Proc macros ? Derive ? 
+      - Allow asm code ?
+      - Allow right shifted indentation when assign ? (maybe a bad idea)
 
   - Desugar
     - Operator precedence

@@ -247,6 +247,8 @@ impl Parsable for SecondaryExpr {
             || TokenType::StuckOperator("!".to_string()) == token.token_type
         {
             Ok((SecondaryExpr::Arguments(vec![]), &tokens[1..]))
+        } else if TokenType::Interogation == token.token_type {
+            Ok((SecondaryExpr::Interogation, &tokens[1..]))
         } else if look_ahead(
             tokens,
             &vec![
@@ -1313,6 +1315,58 @@ mod expression {
                         span: Span::default(),
                     }),
                 ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn interogation() {
+        let input = "foo? bar, baz?";
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Interogation,
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "bar".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            }))
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "baz".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: Some(vec![SecondaryExpr::Interogation]),
+                                type_annotation: None,
+                            }))
+                        }
+                    ]),
+                ]),
+
                 type_annotation: None,
             })),
         );

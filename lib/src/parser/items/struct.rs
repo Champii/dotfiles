@@ -63,6 +63,7 @@ impl Parsable for StructDeclField {
         let (default, remaining_tokens) = if TokenType::Equal == remaining_tokens[0].token_type {
             let (expression, remaining_tokens) =
                 Expression::parse(&remaining_tokens[1..], parse_ctx)?;
+
             (Some(expression), remaining_tokens)
         } else {
             (None, remaining_tokens)
