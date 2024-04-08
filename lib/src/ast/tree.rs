@@ -188,7 +188,7 @@ pub enum Statement {
 
 #[derive(Debug, PartialEq)]
 pub enum AssignmentLHS {
-    Expression(Expression),
+    Expression(UnaryExpr),
     Pattern(Pattern),
 }
 

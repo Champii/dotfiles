@@ -18,9 +18,7 @@ main = ->
     if toto
         toto.name.print lol, a + (d - 2)
 
-    toto = do
-        player.name.print
-        player.age.print
-        (player.age, player.name)
+    a = toto if toto == 2
 
-    lol = toto lol, 2
+toto = -> *a 2 = toto
+

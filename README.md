@@ -234,14 +234,14 @@ struct MyStruct
       - Fix nested multiline dot (indent problem)
       - Escaped char in strings and char
       - Auto export current item `< struct Foo`
-      - Slice of array `arr[1..]`
+      - Slice of array `arr[1..]` and range
       - Default arguments and named arguments
-      - Postfix `if` and `loop`
       - Oneliner for loops (other than postfix) like array comprehension `[a for a in arr]`
       - `do` keyword for nested blocks
       - Comments (end of line ('#') or inline ('/*' '*/')
       - Multiline operators and equal
       - Multiline Patterns
+      - Allow right indent `if` and `loop` and `match` when at-the-next-line definition
 
     - Low priority list:
       - Multiline arguments and spaced dot are in conflict. A spaced dot should close the arguments on the line its defined on

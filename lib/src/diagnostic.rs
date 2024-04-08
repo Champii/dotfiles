@@ -172,8 +172,12 @@ impl Diagnostic {
 pub struct Diagnostics(pub Vec<Diagnostic>);
 
 impl Diagnostics {
-    pub fn push(&mut self, diagnostic: Diagnostic) {
+    pub fn push<T: Into<Diagnostic>>(&mut self, diagnostic: T) -> Self {
+        let diagnostic = diagnostic.into();
+
         self.0.push(diagnostic);
+
+        self.clone()
     }
 
     pub fn merge(&mut self, mut diagnostics: Diagnostics) {

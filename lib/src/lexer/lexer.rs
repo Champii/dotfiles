@@ -176,7 +176,9 @@ impl Lexer {
         let token = if self.input[start..end] == *"=" {
             self.token(TokenType::Equal, 1)
         } else {
-            if self.input.len() > end + 1 && self.input[end..end + 1] == *" " {
+            if self.input.len() > end + 1
+                && (self.input[end..end + 1] == *" " || self.input[end..end + 1] == *"\n")
+            {
                 self.token(
                     TokenType::Operator(self.input[start..end].to_string()),
                     end - start,
