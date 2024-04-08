@@ -18,7 +18,6 @@ main = ->
     if toto
         toto.name.print lol, a + (d - 2)
 
-    a = toto if toto == 2
+toto = ->
 
-toto = -> *a 2 = toto
 

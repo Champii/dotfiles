@@ -180,7 +180,7 @@ pub struct Block {
 pub enum Statement {
     Assignment(Assignment),
     Expression(Expression),
-    Return(Expression),
+    Return(Option<Expression>),
     Continue(Expression),
     Break(Expression),
     EmptyLine, // Empty line, kept for formating

@@ -138,6 +138,19 @@ macro_rules! ast_printer {
                 }
             }
 
+            fn visit_assignment(&mut self, assignment: &'a Assignment) {
+                println!("{}{}", self.indent(), "Assignment");
+                self.indent_level += 1;
+                println!("{}{}", self.indent(), "LHS");
+                self.indent_level += 1;
+                assignment.lhs.visit(self);
+                self.indent_level -= 1;
+                println!("{}{}", self.indent(), "RHS");
+                self.indent_level += 1;
+                assignment.rhs.visit(self);
+                self.indent_level -= 1;
+            }
+
 
             paste! {
                 $(
@@ -174,7 +187,7 @@ ast_printer!(
     StructDeclField
     // Ident
     // IdentOrNumber
-    Assignment
+    // Assignment
     // AssignmentLHS
     // IdentifierPath
     // Statement

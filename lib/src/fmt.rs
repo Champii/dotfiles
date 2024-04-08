@@ -532,7 +532,14 @@ impl Display for Statement {
         match self {
             Statement::Assignment(assign) => write!(f, "{}", assign),
             Statement::Expression(expr) => write!(f, "{}", expr),
-            Statement::Return(expr) => write!(f, "return {}", expr),
+            Statement::Return(expr) => {
+                if let Some(expr) = expr {
+                    write!(f, "return {}", expr)
+                } else {
+                    write!(f, "return")
+                }
+            }
+
             Statement::Continue(expr) => write!(f, "continue {}", expr),
             Statement::Break(expr) => write!(f, "break {}", expr),
             Statement::EmptyLine => write!(f, ""),

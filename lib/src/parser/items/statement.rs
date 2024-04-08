@@ -21,10 +21,13 @@ impl Parsable for Statement {
         let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(tokens);
 
         if TokenType::Keyword("return".to_string()) == remaining_tokens[0].token_type {
-            let (expression, remaining_tokens) =
-                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
+            let Ok((expression, remaining_tokens)) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)
+            else {
+                return Ok((Statement::Return(None), remaining_tokens));
+            };
 
-            return Ok((Statement::Return(expression), remaining_tokens));
+            return Ok((Statement::Return(Some(expression)), remaining_tokens));
         }
 
         if TokenType::Keyword("continue".to_string()) == remaining_tokens[0].token_type {
@@ -215,14 +218,16 @@ mod tests {
 
         assert_eq!(
             statement,
-            Statement::Return(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                operand: Operand::Literal(Literal {
-                    kind: crate::ast::LiteralKind::Number(1),
-                    span: Span::default(),
-                }),
-                secondaries: None,
-                type_annotation: None,
-            })))
+            Statement::Return(Some(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }
+            ))))
         );
 
         assert_eq!(rest.len(), 0);

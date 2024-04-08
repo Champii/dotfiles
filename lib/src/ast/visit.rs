@@ -224,7 +224,11 @@ pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statem
     match &statement {
         Statement::Assignment(assign) => visitor.visit_assignment(assign),
         Statement::Expression(expr) => visitor.visit_expression(expr),
-        Statement::Return(expr) => visitor.visit_expression(expr),
+        Statement::Return(expr) => {
+            if let Some(expr) = expr {
+                visitor.visit_expression(expr);
+            }
+        }
         Statement::Continue(expr) => visitor.visit_expression(expr),
         Statement::Break(expr) => visitor.visit_expression(expr),
         Statement::EmptyLine => {}
