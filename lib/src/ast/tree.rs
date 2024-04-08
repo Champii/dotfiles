@@ -181,8 +181,8 @@ pub enum Statement {
     Assignment(Assignment),
     Expression(Expression),
     Return(Option<Expression>),
-    Continue(Expression),
-    Break(Expression),
+    Continue(Option<Expression>),
+    Break(Option<Expression>),
     EmptyLine, // Empty line, kept for formating
 }
 

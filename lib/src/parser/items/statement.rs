@@ -17,31 +17,36 @@ impl Parsable for Statement {
         if tokens.len() == 0 {
             return Err(ParseError::UnexpectedEof(TokenType::Eol).into());
         }
-        // let remaining_tokens = ignore_empty_lines(tokens);
         let (_, remaining_tokens) = parse_ctx.consume_indent_if_any(tokens);
 
         if TokenType::Keyword("return".to_string()) == remaining_tokens[0].token_type {
-            let Ok((expression, remaining_tokens)) =
+            if let Ok((expression, remaining_tokens)) =
                 Expression::parse(&remaining_tokens[1..], parse_ctx)
-            else {
-                return Ok((Statement::Return(None), remaining_tokens));
-            };
-
-            return Ok((Statement::Return(Some(expression)), remaining_tokens));
+            {
+                return Ok((Statement::Return(Some(expression)), remaining_tokens));
+            } else {
+                return Ok((Statement::Return(None), &remaining_tokens[1..]));
+            }
         }
 
         if TokenType::Keyword("continue".to_string()) == remaining_tokens[0].token_type {
-            let (expression, remaining_tokens) =
-                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
-
-            return Ok((Statement::Continue(expression), remaining_tokens));
+            if let Ok((expression, remaining_tokens)) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)
+            {
+                return Ok((Statement::Continue(Some(expression)), remaining_tokens));
+            } else {
+                return Ok((Statement::Continue(None), &remaining_tokens[1..]));
+            }
         }
 
         if TokenType::Keyword("break".to_string()) == remaining_tokens[0].token_type {
-            let (expression, remaining_tokens) =
-                Expression::parse(&remaining_tokens[1..], parse_ctx)?;
-
-            return Ok((Statement::Break(expression), remaining_tokens));
+            if let Ok((expression, remaining_tokens)) =
+                Expression::parse(&remaining_tokens[1..], parse_ctx)
+            {
+                return Ok((Statement::Break(Some(expression)), remaining_tokens));
+            } else {
+                return Ok((Statement::Break(None), &remaining_tokens[1..]));
+            }
         }
 
         if let Ok((assignment, remaining_tokens)) = Assignment::parse(remaining_tokens, parse_ctx) {
@@ -242,14 +247,16 @@ mod tests {
 
         assert_eq!(
             statement,
-            Statement::Continue(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                operand: Operand::Literal(Literal {
-                    kind: crate::ast::LiteralKind::Number(1),
-                    span: Span::default(),
-                }),
-                secondaries: None,
-                type_annotation: None,
-            })))
+            Statement::Continue(Some(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }
+            ))))
         );
 
         assert_eq!(rest.len(), 0);
@@ -264,14 +271,16 @@ mod tests {
 
         assert_eq!(
             statement,
-            Statement::Break(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                operand: Operand::Literal(Literal {
-                    kind: crate::ast::LiteralKind::Number(1),
-                    span: Span::default(),
-                }),
-                secondaries: None,
-                type_annotation: None,
-            })))
+            Statement::Break(Some(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }
+            ))))
         );
 
         assert_eq!(rest.len(), 0);

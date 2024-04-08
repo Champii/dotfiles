@@ -539,9 +539,20 @@ impl Display for Statement {
                     write!(f, "return")
                 }
             }
-
-            Statement::Continue(expr) => write!(f, "continue {}", expr),
-            Statement::Break(expr) => write!(f, "break {}", expr),
+            Statement::Continue(expr) => {
+                if let Some(expr) = expr {
+                    write!(f, "continue {}", expr)
+                } else {
+                    write!(f, "continue")
+                }
+            }
+            Statement::Break(expr) => {
+                if let Some(expr) = expr {
+                    write!(f, "break {}", expr)
+                } else {
+                    write!(f, "break")
+                }
+            }
             Statement::EmptyLine => write!(f, ""),
         }
     }

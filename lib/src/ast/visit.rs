@@ -229,8 +229,16 @@ pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statem
                 visitor.visit_expression(expr);
             }
         }
-        Statement::Continue(expr) => visitor.visit_expression(expr),
-        Statement::Break(expr) => visitor.visit_expression(expr),
+        Statement::Continue(expr) => {
+            if let Some(expr) = expr {
+                visitor.visit_expression(expr);
+            }
+        }
+        Statement::Break(expr) => {
+            if let Some(expr) = expr {
+                visitor.visit_expression(expr);
+            }
+        }
         Statement::EmptyLine => {}
     }
 }
