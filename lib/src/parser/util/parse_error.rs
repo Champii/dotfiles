@@ -18,4 +18,7 @@ pub enum ParseError {
     InternalError(String),
     ShortCircuit, // should not be bubbled up to the user
     ExpectedType(Span),
+    InvalidLHS(Span),
+    InvalidVariant(Span, Span), // enum name, variant name
+    InvalidType(Span),
 }

@@ -91,7 +91,7 @@ impl Parsable for PrimaryExpr {
             return Ok((primary_expr, remaining_tokens));
         }
 
-        let (secondaries, mut remaining_tokens_after_secondaries) =
+        let (secondaries, mut remaining_tokens_after_secondaries, _diags) =
             parse_vec_of::<SecondaryExpr>(remaining_tokens, None, parse_ctx)?;
 
         // if operand is literal, cannot be function call
@@ -343,7 +343,7 @@ impl Parsable for ArgumentList {
                 ],
             )
         {
-            let (args, new_remaining_tokens) =
+            let (args, new_remaining_tokens, _) =
                 parse_indented_vec_of::<Expression>(&remaining_tokens[1..], parse_ctx, true)?;
 
             if args.is_empty() {
@@ -352,7 +352,7 @@ impl Parsable for ArgumentList {
 
             Ok((ArgumentList { args }, new_remaining_tokens))
         } else {
-            let (args, new_remaining_tokens) =
+            let (args, new_remaining_tokens, _diags) =
                 parse_ctx.disallow_multiline_fn_call(|parse_ctx| {
                     parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)
                 })?;
@@ -377,7 +377,7 @@ impl Parsable for Tuple {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let remaining_tokens = expect_token(tokens, TokenType::OpenParen)?;
 
-        let (elements, remaining_tokens) =
+        let (elements, remaining_tokens, _diags) =
             parse_vec_of::<Expression>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
         if elements.len() < 2 {
@@ -407,7 +407,7 @@ impl Parsable for NativeOperator {
 
         match &token.token_type {
             TokenType::NativeOperator(name) => {
-                let (args, remaining_tokens) =
+                let (args, remaining_tokens, _diags) =
                     parse_vec_of(&tokens[1..], Some(TokenType::Coma), _parse_ctx)?;
 
                 Ok((

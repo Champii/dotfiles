@@ -26,7 +26,7 @@ impl Parsable for Match {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (arms, remaining_tokens) = parse_ctx.indent_block(|parse_ctx| {
+        let (arms, remaining_tokens, _diags) = parse_ctx.indent_block(|parse_ctx| {
             parse_vec_of(remaining_tokens, Some(TokenType::Eol), parse_ctx)
         })?;
 
@@ -106,7 +106,7 @@ impl Parsable for PatternKind {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         match tokens[0].token_type {
             TokenType::OpenParen => {
-                if let Ok((patterns, remaining_tokens)) =
+                if let Ok((patterns, remaining_tokens, _diags)) =
                     parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)
                 {
                     if patterns.len() > 1 {
@@ -125,7 +125,7 @@ impl Parsable for PatternKind {
                 Ok((PatternKind::Nested(Box::new(pattern)), remaining_tokens))
             }
             TokenType::OpenBracket => {
-                let (patterns, remaining_tokens) =
+                let (patterns, remaining_tokens, _diags) =
                     parse_vec_of(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
 
                 let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
@@ -203,7 +203,7 @@ impl Parsable for FieldsPatternOrArgumentsPattern {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        if let Ok((fields, remaining_tokens)) =
+        if let Ok((fields, remaining_tokens, _diags)) =
             parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)
         {
             if fields.len() > 0 {
@@ -214,7 +214,8 @@ impl Parsable for FieldsPatternOrArgumentsPattern {
             }
         }
 
-        let (args, remaining_tokens) = parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)?;
+        let (args, remaining_tokens, _diags) =
+            parse_vec_of(tokens, Some(TokenType::Coma), parse_ctx)?;
 
         Ok((
             FieldsPatternOrArgumentsPattern::Arguments(args),

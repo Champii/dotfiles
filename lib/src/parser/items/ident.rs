@@ -14,7 +14,7 @@ impl Parsable for IdentifierPath {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        let (idents, remaining_tokens) =
+        let (idents, remaining_tokens, _diags) =
             parse_vec_of(&tokens, Some(TokenType::DoubleColon), parse_ctx)?;
 
         Ok((IdentifierPath { path: idents }, remaining_tokens))

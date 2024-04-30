@@ -29,7 +29,7 @@ impl Parsable for Instance {
         }
 
         if let TokenType::Eol = remaining_tokens[0].token_type {
-            let (fields, new_remaining_tokens) = parse_indented_vec_of::<(Ident, Expression)>(
+            let (fields, new_remaining_tokens, _) = parse_indented_vec_of::<(Ident, Expression)>(
                 &remaining_tokens[1..],
                 parse_ctx,
                 true,
@@ -53,7 +53,7 @@ impl Parsable for Instance {
                 new_remaining_tokens,
             ))
         } else {
-            let (fields, remaining_tokens) = parse_vec_of::<(Ident, Expression)>(
+            let (fields, remaining_tokens, _diags) = parse_vec_of::<(Ident, Expression)>(
                 remaining_tokens,
                 Some(TokenType::Coma),
                 parse_ctx,

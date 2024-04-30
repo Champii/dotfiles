@@ -55,7 +55,7 @@ impl Parsable for LambdaDecl {
             }
         }
 
-        let (parameters, mut remaining_tokens) =
+        let (parameters, mut remaining_tokens, _diags) =
             parse_vec_of::<Pattern>(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
         // consume token if it's a coma

@@ -42,7 +42,7 @@ impl Parsable for Literal {
                 LiteralKind::Char(*c)
             }
             TokenType::OpenBracket => {
-                let (array, remaining_tokens) =
+                let (array, remaining_tokens, _diags) =
                     parse_vec_of::<Expression>(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
                 let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
                 tokens = remaining_tokens;

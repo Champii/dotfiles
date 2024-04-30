@@ -4,7 +4,7 @@ use crate::{
     lexer::{Token, TokenType},
     parser::{
         util::{expect_token, parse_indented_vec_of},
-        Parsable, ParseCtx,
+        Parsable, ParseCtx, ParseError,
     },
 };
 
@@ -19,8 +19,26 @@ impl Parsable for EnumDecl {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (variants, remaining_tokens) =
+        let (variants, remaining_tokens, mut diags) =
             parse_indented_vec_of(remaining_tokens, parse_ctx, false)?;
+
+        if remaining_tokens.is_empty() {
+            return Ok((EnumDecl { name, variants }, remaining_tokens));
+        }
+        println!("Variants: {:#?}", variants);
+
+        if let TokenType::Indent(level) = remaining_tokens[0].token_type {
+            if level == parse_ctx.indent_level() + parse_ctx.indent_step() {
+                diags.push(ParseError::InvalidVariant(
+                    name.span.clone(),
+                    remaining_tokens[0].span.clone(),
+                ));
+
+                return Err(diags);
+            }
+        } else {
+            return Err(diags);
+        }
 
         Ok((EnumDecl { name, variants }, remaining_tokens))
     }
@@ -72,7 +90,9 @@ impl Parsable for NamedFieldsOrTypesList {
         tokens: &'a [Token],
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
-        if let Ok((fields, mut remaining_tokens)) = parse_indented_vec_of(tokens, parse_ctx, true) {
+        if let Ok((fields, mut remaining_tokens, _)) =
+            parse_indented_vec_of(tokens, parse_ctx, true)
+        {
             if !fields.is_empty() {
                 remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
             }

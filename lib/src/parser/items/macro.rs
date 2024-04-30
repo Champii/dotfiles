@@ -23,7 +23,7 @@ impl Parsable for MacroDecl {
 
         let remaining_tokens = parse_ctx.consume_indent(remaining_tokens)?;
 
-        let (entries, remaining_tokens) =
+        let (entries, remaining_tokens, _diags) =
             parse_vec_of::<MacroEntry>(remaining_tokens, Some(TokenType::Indent(2)), parse_ctx)?;
 
         parse_ctx.dedent();

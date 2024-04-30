@@ -1,7 +1,7 @@
 use crate::{
     ast::{ParseType, ParseTypeInner},
     diagnostic::Diagnostics,
-    lexer::{Span, Token, TokenType},
+    lexer::{Token, TokenType},
     parser::{
         parse_ctx::ParseCtx,
         util::{expect_token, parse_vec_of, ParseError},
@@ -28,42 +28,42 @@ impl Parsable for ParseType {
 
         match token.token_type {
             TokenType::Type(_) | TokenType::OpenParen | TokenType::OpenBracket => {}
-            _ => {
-                return Err(ParseError::UnexpectedToken(
-                    token.clone(),
-                    vec![
-                        TokenType::OpenParen,
-                        TokenType::OpenBracket,
-                        TokenType::Type("".to_string()),
-                    ],
-                )
-                .into())
-            }
+            _ => return Err(ParseError::InvalidType(token.span.clone()).into()),
         }
 
-        if let Ok((func, remaining_tokens)) = parse_function_type(remaining_tokens, parse_ctx) {
-            return Ok((func, remaining_tokens));
-        } else if let Ok((array, remaining_tokens)) = parse_array_type(remaining_tokens, parse_ctx)
-        {
-            return Ok((array, remaining_tokens));
-        } else if let Ok((tuple, remaining_tokens)) = parse_tuple_type(remaining_tokens, parse_ctx)
-        {
-            return Ok((tuple, remaining_tokens));
-        } else if let Ok((inner, remaining_tokens)) =
-            ParseTypeInner::parse(remaining_tokens, parse_ctx)
-        {
-            return Ok((ParseType::Type(inner), remaining_tokens));
-        } else {
-            Err(ParseError::UnexpectedToken(
-                tokens[0].clone(),
-                vec![
-                    TokenType::OpenParen,
-                    TokenType::OpenBracket,
-                    TokenType::Type("".to_string()),
-                ],
-            )
-            .into())
-        }
+        let mut diags = Diagnostics::default();
+
+        match parse_function_type(remaining_tokens, parse_ctx) {
+            Ok((func, remaining_tokens)) => return Ok((func, remaining_tokens)),
+            Err(e) => {
+                diags.merge(e);
+            }
+        };
+
+        match parse_array_type(remaining_tokens, parse_ctx) {
+            Ok((array, remaining_tokens)) => return Ok((array, remaining_tokens)),
+            Err(_e) => {
+                // diags.merge(e);
+            }
+        };
+
+        match parse_tuple_type(remaining_tokens, parse_ctx) {
+            Ok((tuple, remaining_tokens)) => return Ok((tuple, remaining_tokens)),
+            Err(_e) => {
+                // diags.merge(e);
+            }
+        };
+
+        match ParseTypeInner::parse(remaining_tokens, parse_ctx) {
+            Ok((inner, remaining_tokens)) => {
+                return Ok((ParseType::Type(inner), remaining_tokens));
+            }
+            Err(e) => {
+                diags.merge(e);
+            }
+        };
+
+        return Err(diags);
     }
 }
 
@@ -83,7 +83,7 @@ fn parse_function_type<'a>(
         parse_ctx.is_inside_fn_type_decl = true;
     }
 
-    let (list, mut remaining_tokens) =
+    let (list, mut remaining_tokens, diags) =
         parse_vec_of(remaining_tokens, Some(TokenType::Arrow), parse_ctx)?;
 
     if has_toggled_inside_fn_type_decl {
@@ -91,17 +91,7 @@ fn parse_function_type<'a>(
     }
 
     if list.len() < 2 {
-        return Err(ParseError::UnexpectedToken(
-            remaining_tokens
-                .get(0)
-                .unwrap_or(&Token {
-                    token_type: TokenType::Eof,
-                    span: Span::default(),
-                })
-                .clone(),
-            vec![TokenType::Arrow],
-        )
-        .into());
+        return Err(diags);
     }
 
     if parse_ctx.is_inside_fn_type_decl {
@@ -132,7 +122,7 @@ fn parse_tuple_type<'a>(
     let mut remaining_tokens = tokens;
     remaining_tokens = expect_token(remaining_tokens, TokenType::OpenParen)?;
 
-    let (list, mut remaining_tokens) =
+    let (list, mut remaining_tokens, _diags) =
         parse_vec_of(remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
     remaining_tokens = expect_token(remaining_tokens, TokenType::CloseParen)?;
@@ -173,13 +163,13 @@ impl Parsable for ParseTypeInner {
             _ => {
                 return Err(ParseError::UnexpectedToken(
                     token.clone(),
-                    vec![TokenType::Ident("".to_string())],
+                    vec![TokenType::Type("".to_string())],
                 )
                 .into())
             }
         };
 
-        let (generics, mut remaining_tokens) =
+        let (generics, mut remaining_tokens, _diags) =
             parse_vec_of(&remaining_tokens, Some(TokenType::Coma), parse_ctx)?;
 
         if has_paren {

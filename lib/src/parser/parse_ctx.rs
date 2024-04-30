@@ -41,9 +41,9 @@ impl ParseCtx {
         self.indent_level += self.indent_step;
     }
 
-    pub fn indent_block<'a, T, F>(&mut self, f: F) -> Result<(T, &'a [Token]), Diagnostics>
+    pub fn indent_block<T, F>(&mut self, f: F) -> Result<T, Diagnostics>
     where
-        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
+        F: FnOnce(&mut Self) -> Result<T, Diagnostics>,
     {
         self.indent();
         let res = f(self);
@@ -150,14 +150,10 @@ impl ParseCtx {
         Err(ParseError::ShortCircuit.into())
     }
 
-    pub fn disallow_multiline_fn_call<
-        'a,
-        T,
-        F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
-    >(
+    pub fn disallow_multiline_fn_call<T, F: FnOnce(&mut Self) -> Result<T, Diagnostics>>(
         &mut self,
         f: F,
-    ) -> Result<(T, &'a [Token]), Diagnostics> {
+    ) -> Result<T, Diagnostics> {
         let old_state = self.disallowed_multiline_fn_call;
         self.disallowed_multiline_fn_call = true;
 

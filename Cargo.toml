@@ -12,4 +12,4 @@ members = [
   "lib",
 ]
 
-default-members = ["rock"]
+# default-members = ["rock"]

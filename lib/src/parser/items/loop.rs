@@ -16,15 +16,16 @@ impl Parsable for Loop {
             let (binding, remaining) = Ident::parse(&remaining[1..], parse_ctx)?;
             let remaining = expect_token(&remaining, TokenType::Keyword("in".to_string()))?;
 
-            let (expr, remaining) =
-                parse_ctx.disallow_multiline_fn_call(|parse_ctx| Expression::parse(remaining, parse_ctx))?;
+            let (expr, remaining) = parse_ctx
+                .disallow_multiline_fn_call(|parse_ctx| Expression::parse(remaining, parse_ctx))?;
 
             let (block, remaining) = Block::parse(remaining, parse_ctx)?;
 
             Ok((Loop::For(binding, expr, block), remaining))
         } else if TokenType::Keyword("while".to_string()) == remaining[0].token_type {
-            let (expr, remaining) = parse_ctx
-                .disallow_multiline_fn_call(|parse_ctx| Expression::parse(&remaining[1..], parse_ctx))?;
+            let (expr, remaining) = parse_ctx.disallow_multiline_fn_call(|parse_ctx| {
+                Expression::parse(&remaining[1..], parse_ctx)
+            })?;
 
             let (block, remaining) = Block::parse(remaining, parse_ctx)?;
 

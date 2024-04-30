@@ -123,6 +123,27 @@ impl From<ParseError> for Diagnostic {
                 span,
                 kind: DiagnosticType::Error,
             },
+            ParseError::InvalidLHS(span) => Diagnostic {
+                message: format!("Malformed assignment"),
+                labels: vec![(format!("Invalid left-hand side"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
+            ParseError::InvalidVariant(enum_name, variant) => Diagnostic {
+                message: format!("Invalid variant"),
+                labels: vec![
+                    (format!("In this enum"), enum_name.clone()),
+                    (format!("Expected a variant"), variant.clone()),
+                ],
+                span: enum_name,
+                kind: DiagnosticType::Error,
+            },
+            ParseError::InvalidType(span) => Diagnostic {
+                message: format!("Invalid type"),
+                labels: vec![(format!("Expected a type"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
         }
     }
 }

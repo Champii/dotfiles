@@ -29,12 +29,13 @@ pub fn parse_vec_of<'a, T>(
     tokens: &'a [Token],
     delim: Option<TokenType>,
     parse_ctx: &mut ParseCtx,
-) -> Result<(Vec<T>, &'a [Token]), Diagnostics>
+) -> Result<(Vec<T>, &'a [Token], Diagnostics), Diagnostics>
 where
     T: Parsable + std::fmt::Debug,
 {
     let mut remaining_tokens = tokens;
     let mut items = Vec::new();
+    let mut diagnostics = Diagnostics::default();
 
     let mut remaining_tokens_with_delim = tokens;
 
@@ -44,9 +45,13 @@ where
             break;
         }
 
-        let Ok((item, new_remaining_tokens)) = T::parse(remaining_tokens, parse_ctx) else {
-            remaining_tokens = remaining_tokens_with_delim;
-            break;
+        let (item, new_remaining_tokens) = match T::parse(remaining_tokens, parse_ctx) {
+            Ok((item, new_remaining_tokens)) => (item, new_remaining_tokens),
+            Err(e) => {
+                remaining_tokens = remaining_tokens_with_delim;
+                diagnostics = e;
+                break;
+            }
         };
 
         remaining_tokens = new_remaining_tokens;
@@ -65,20 +70,22 @@ where
         }
     }
 
-    Ok((items, remaining_tokens))
+    Ok((items, remaining_tokens, diagnostics))
 }
 
+// It returns the parsed Vec<T>, the remaining tokens, and the last diagnostic that broke the loop
 pub fn parse_indented_vec_of<'a, T>(
     tokens: &'a [Token],
     parse_ctx: &mut ParseCtx,
     consume_eol: bool,
-) -> Result<(Vec<T>, &'a [Token]), Diagnostics>
+) -> Result<(Vec<T>, &'a [Token], Diagnostics), Diagnostics>
 where
     T: Parsable + std::fmt::Debug,
 {
     let mut remaining_tokens = tokens;
     let mut remaining_tokens_after_match = tokens;
     let mut list = Vec::new();
+    let mut diagnostics = Diagnostics::default();
 
     parse_ctx.indent();
 
@@ -92,34 +99,46 @@ where
 
         let tokens_backup = remaining_tokens;
 
-        if let Ok(new_remaining_tokens) = parse_ctx.consume_indent(remaining_tokens) {
-            remaining_tokens = new_remaining_tokens;
-        } else {
-            remaining_tokens = remaining_tokens_after_match;
-            break;
+        match parse_ctx.consume_indent(remaining_tokens) {
+            Ok(new_remaining_tokens) => {
+                remaining_tokens = new_remaining_tokens;
+            }
+            Err(e) => {
+                diagnostics = e;
+                remaining_tokens = remaining_tokens_after_match;
+                break;
+            }
         }
 
-        if let Ok((t, new_remaining_tokens)) = <T>::parse(remaining_tokens, parse_ctx) {
-            remaining_tokens = new_remaining_tokens;
-            remaining_tokens_after_match = new_remaining_tokens;
-            list.push(t);
-        } else {
-            remaining_tokens = tokens_backup;
-            break;
+        match <T>::parse(remaining_tokens, parse_ctx) {
+            Ok((t, new_remaining_tokens)) => {
+                remaining_tokens = new_remaining_tokens;
+                remaining_tokens_after_match = new_remaining_tokens;
+                list.push(t);
+            }
+            Err(e) => {
+                diagnostics = e;
+                remaining_tokens = tokens_backup;
+                break;
+            }
         }
 
         if consume_eol {
-            if let Ok(new_remaining_tokens) = expect_token(remaining_tokens, TokenType::Eol) {
-                remaining_tokens = new_remaining_tokens;
-            } else {
-                break;
+            match expect_token(remaining_tokens, TokenType::Eol) {
+                Ok(new_remaining_tokens) => {
+                    remaining_tokens = new_remaining_tokens;
+                }
+                Err(e) => {
+                    diagnostics = e.into();
+                    break;
+                }
             }
         }
     }
 
     parse_ctx.dedent();
 
-    Ok((list, remaining_tokens))
+    Ok((list, remaining_tokens, diagnostics))
 }
 
 /// Consumes tokens until a token of the given type is found.

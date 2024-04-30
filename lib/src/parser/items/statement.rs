@@ -48,12 +48,20 @@ impl Parsable for Statement {
                 return Ok((Statement::Break(None), &remaining_tokens[1..]));
             }
         }
+        let assignment_res = Assignment::parse(remaining_tokens, parse_ctx);
 
-        if let Ok((assignment, remaining_tokens)) = Assignment::parse(remaining_tokens, parse_ctx) {
-            return Ok((Statement::Assignment(assignment), remaining_tokens));
-        }
+        let diagnostics = match assignment_res {
+            Ok((assignment, remaining_tokens)) => {
+                return Ok((Statement::Assignment(assignment), remaining_tokens))
+            }
+            Err(diags) => diags,
+        };
 
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
+
+        if !remaining_tokens.is_empty() && remaining_tokens[0].token_type == TokenType::Equal {
+            return Err(diagnostics);
+        }
 
         Ok((Statement::Expression(expression), remaining_tokens))
     }
@@ -91,7 +99,7 @@ impl Parsable for AssignmentLHS {
             }
         }
 
-        Err(ParseError::UnexpectedToken(tokens[0].clone(), vec![]).into())
+        Err(ParseError::InvalidLHS(tokens[0].span.clone()).into())
     }
 }
 

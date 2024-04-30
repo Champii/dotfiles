@@ -20,7 +20,7 @@ impl Parsable for StructDecl {
 
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
-        let (fields, mut remaining_tokens) =
+        let (fields, mut remaining_tokens, _) =
             parse_indented_vec_of(remaining_tokens, parse_ctx, true)?;
 
         if !fields.is_empty() {
