@@ -1,3 +1,5 @@
-lol : A -> A
-lol = b -> b
+lol = ->
+    a
+        + c
+            + e
 

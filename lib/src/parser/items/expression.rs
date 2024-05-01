@@ -34,12 +34,65 @@ impl Parsable for Expression {
         match token.token_type {
             TokenType::Operator(_) => {
                 let (operator, remaining_tokens) = Operator::parse(remaining_tokens, parse_ctx)?;
+
                 let (expression, remaining_tokens) =
                     Expression::parse(remaining_tokens, parse_ctx)?;
 
                 Ok((
                     Expression::BinopExpr(unary_expr, operator, Box::new(expression)),
                     remaining_tokens,
+                ))
+            }
+            TokenType::Eol => {
+                let mut has_indent = false;
+                // EOL
+                let mut new_remaining_tokens = &remaining_tokens[1..];
+
+                if let TokenType::Indent(level) = new_remaining_tokens[0].token_type {
+                    if level > parse_ctx.indent_level() {
+                        has_indent = true;
+                        parse_ctx.indent();
+                    } else if level < parse_ctx.indent_level() {
+                        // has_indent = true;
+                    }
+
+                    let Ok(new_new_remaining_tokens) =
+                        parse_ctx.consume_indent(new_remaining_tokens)
+                    else {
+                        if has_indent {
+                            parse_ctx.dedent();
+                        }
+                        return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
+                    };
+
+                    new_remaining_tokens = new_new_remaining_tokens;
+                }
+
+                let Ok((operator, new_remaining_tokens)) =
+                    Operator::parse(new_remaining_tokens, parse_ctx)
+                else {
+                    if has_indent {
+                        parse_ctx.dedent();
+                    }
+                    return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
+                };
+
+                let Ok((expression, new_remaining_tokens)) =
+                    Expression::parse(new_remaining_tokens, parse_ctx)
+                else {
+                    if has_indent {
+                        parse_ctx.dedent();
+                    }
+                    return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
+                };
+
+                if has_indent {
+                    parse_ctx.dedent();
+                }
+
+                Ok((
+                    Expression::BinopExpr(unary_expr, operator, Box::new(expression)),
+                    new_remaining_tokens,
                 ))
             }
             _ => Ok((Expression::UnaryExpr(unary_expr), remaining_tokens)),
@@ -1369,6 +1422,43 @@ mod expression {
 
                 type_annotation: None,
             })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_operator() {
+        let input = r#"foo
+  + 2"#;
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(IdentifierPath {
+                        path: vec![IdentOrType::Ident(Ident {
+                            name: "foo".to_string(),
+                            span: Span::default(),
+                        })],
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(2),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                })))
+            )
         );
         assert_eq!(rest.len(), 0);
     }
