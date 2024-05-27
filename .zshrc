@@ -101,3 +101,14 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+# unbind capslock that prints ~
+function disabled {
+}
+
+# create widget from function
+zle -N disabled
+
+# bind widget to ESC-o
+bindkey '\e[25~' disabled
+
