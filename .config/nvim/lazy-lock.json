@@ -47,6 +47,7 @@
   "popup.nvim": { "branch": "master", "commit": "b7404d35d5d3548a82149238289fa71f7f6de4ac" },
   "project.nvim": { "branch": "main", "commit": "8c6bad7d22eef1b71144b401c9f74ed01526a4fb" },
   "rainbow-delimiters.nvim": { "branch": "master", "commit": "7f3cfa07f243261a0428d782bef6496929e9dcd8" },
+  "remote-nvim.nvim": { "branch": "main", "commit": "2d5158a7b57b90f4d98dfd39eb35ee0dbb1f37cf" },
   "rust-tools.nvim": { "branch": "master", "commit": "0cc8adab23117783a0292a0c8a2fbed1005dc645" },
   "sniprun": { "branch": "master", "commit": "7a8bc30fcf04fd4efec43be368f12eb4266fabf6" },
   "stabilize.nvim": { "branch": "master", "commit": "eeb1873daffaba67246188a5668b366e45ed1de1" },

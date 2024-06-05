@@ -9,6 +9,7 @@ return {
     -- color_scheme = "Elementary",
     -- color_scheme = "Hybrid",
     enable_kitty_keyboard = true,
+    scroll_to_bottom_on_input = false,
     background = {
         -- This is the deepest/back-most layer. It will be rendered first
         {
