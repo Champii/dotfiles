@@ -45,6 +45,11 @@ impl Parsable for Expression {
             }
             TokenType::Eol => {
                 let mut has_indent = false;
+
+                if remaining_tokens.len() <= 1 {
+                    return Ok((Expression::UnaryExpr(unary_expr), remaining_tokens));
+                }
+
                 // EOL
                 let mut new_remaining_tokens = &remaining_tokens[1..];
 

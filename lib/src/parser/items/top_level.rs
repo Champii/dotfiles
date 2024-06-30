@@ -78,7 +78,26 @@ impl Parsable for TopLevel {
                         );
                     }
 
-                    let (op, remaining_tokens) = Operator::parse(&tokens[2..], parse_ctx)?;
+                    let (op, remaining_tokens) = if let Ok((op, remaining_tokens)) =
+                        Operator::parse(&tokens[2..], parse_ctx)
+                    {
+                        (op, remaining_tokens)
+                    } else if let TokenType::SpacedDot = tokens[2].token_type {
+                        let remaining_tokens = expect_token(&tokens[2..], TokenType::SpacedDot)?;
+
+                        let operator = Operator {
+                            value: ".".to_string(),
+                            span: tokens[2].span.clone(),
+                        };
+
+                        (operator, remaining_tokens)
+                    } else {
+                        return Err(ParseError::UnexpectedToken(
+                            tokens[2].clone(),
+                            vec![TokenType::Operator("".to_string())],
+                        )
+                        .into());
+                    };
 
                     let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
@@ -192,7 +211,8 @@ impl Parsable for TopLevel {
         }
 
         let name = match &tokens[0].token_type {
-            TokenType::Ident(name) | TokenType::Operator(name) => Some(name),
+            TokenType::Ident(name) | TokenType::Operator(name) => Some(name.clone()),
+            TokenType::Dot => Some(".".to_string()),
             _ => None,
         };
 

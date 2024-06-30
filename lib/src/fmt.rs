@@ -6,6 +6,7 @@ use std::{
 
 use crate::{ast::*, lexer::TokenType};
 
+// TODO: Implement a custom Display trait to give the indent context
 static INDENT: Mutex<u8> = Mutex::new(0);
 
 fn indent() -> String {
