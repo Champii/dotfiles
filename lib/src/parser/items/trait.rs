@@ -42,11 +42,18 @@ impl Parsable for TraitDecl {
                 continue;
             }
 
+            let mut inject_self = false;
+
+            if TokenType::Arobase == remaining_tokens[0].token_type {
+                remaining_tokens = &remaining_tokens[1..];
+                inject_self = true;
+            }
+
             if let Ok((signature, new_remaining_tokens)) =
                 <(Ident, ParseType)>::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
-                signatures.insert(signature.0.clone(), signature.1);
+                signatures.insert((signature.0.clone(), inject_self), signature.1);
                 continue;
             }
 
@@ -78,6 +85,7 @@ mod parse_trait {
             r#"trait Foo
   bar = a -> a
   baz : Int
+  @selfinject = a -> a
 "#,
         );
 
@@ -85,7 +93,7 @@ mod parse_trait {
             TraitDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
         assert_eq!(trait_decl.name.name, "Foo");
-        assert_eq!(trait_decl.methods.len(), 1);
+        assert_eq!(trait_decl.methods.len(), 2);
         assert_eq!(trait_decl.signatures.len(), 1);
         assert_eq!(rest.len(), 0);
     }

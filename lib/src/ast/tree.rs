@@ -80,7 +80,7 @@ pub struct StructDeclField {
 pub struct TraitDecl {
     pub name: ParseTypeInner,
     pub methods: BTreeMap<Ident, FunctionDecl>,
-    pub signatures: BTreeMap<Ident, ParseType>,
+    pub signatures: BTreeMap<(Ident, bool), ParseType>, // bool is for inject_self
 }
 
 #[derive(Debug, PartialEq)]

@@ -315,8 +315,11 @@ impl Display for TraitDecl {
 
         increase_indent();
 
-        for (name, signature) in &self.signatures {
+        for ((name, inject_self), signature) in &self.signatures {
             write!(f, "{}", indent())?;
+            if *inject_self {
+                write!(f, "@",)?;
+            }
             write!(f, "{} : {}\n", name, signature)?;
         }
 

@@ -1,5 +1,6 @@
-lol = ->
-    [1, 2, 3]
-        . c e, d .toto
-        . e
+trait ToString
+    @toto = a -> lol
+    @to_string : String
 
+impl ToString Int
+    @to_string = -> @show!

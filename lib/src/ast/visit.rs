@@ -169,8 +169,6 @@ pub fn walk_trait<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
     visitor.visit_parse_type_inner(&t.name);
 
     walk_map!(visitor, &t.methods);
-
-    walk_map!(visitor, &t.signatures);
 }
 
 pub fn walk_impl<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a Impl) {
@@ -523,7 +521,10 @@ pub fn walk_trait_decl<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
 
     walk_map!(visitor, &t.methods);
 
-    walk_map!(visitor, &t.signatures);
+    for ((k, _), v) in &t.signatures {
+        visitor.visit_ident(k);
+        visitor.visit_parse_type(v);
+    }
 }
 
 pub fn walk_macro_decl<'a, V: Visitor<'a>>(_visitor: &mut V, _m: &'a MacroDecl) {}
