@@ -56,7 +56,12 @@ impl Lexer {
     }
 
     pub fn next(&mut self) -> Result<Token, LexerError> {
-        if self.current_char() == ' ' && self.peek(1) == '.' && self.peek(2) != '.' {
+        if self.current_char() == ' '
+            && self.peek(1) == '.'
+            && self.peek(2) != '.'
+            // special case for the dot operator
+            && self.peek(2) != ' '
+        {
             let token = self.token(TokenType::SpacedDot, 2);
             self.position = token.span.end;
             self.last_token = Some(token.clone());
@@ -111,6 +116,7 @@ impl Lexer {
             ',' => self.token(TokenType::Coma, 1),
             ':' if self.peek(1) == ':' => self.token(TokenType::DoubleColon, 2),
             ':' => self.token(TokenType::Colon, 1),
+            '.' if self.peek(1) == ' ' => self.operator(),
             '.' if self.peek(1) == '.' => self.token(TokenType::DoubleDot, 2),
             '.' => self.token(TokenType::Dot, 1),
             '?' => self.token(TokenType::Interogation, 1),
@@ -169,12 +175,18 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while OPERATORS_CHARS.contains(&self.peek(end - start)) {
+        if self.peek(0) == '.' {
             end += 1;
+        } else {
+            while OPERATORS_CHARS.contains(&self.peek(end - start)) {
+                end += 1;
+            }
         }
 
         let token = if self.input[start..end] == *"=" {
             self.token(TokenType::Equal, 1)
+        } else if self.input.len() > 2 && self.input[0..2] == *". " {
+            self.token(TokenType::Operator(self.input[0..1].to_string()), 2)
         } else {
             if self.input.len() > end + 1
                 && (self.input[end..end + 1] == *" " || self.input[end..end + 1] == *"\n")

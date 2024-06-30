@@ -1,9 +1,5 @@
 lol = ->
     [1, 2, 3]
-        |> c
-        |> e
-
-infix 4 .
-. : (U -> V) -> (T -> U) -> (T -> V)
-. = a, b -> b a
+        . c e, d .toto
+        . e
 

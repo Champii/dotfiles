@@ -229,6 +229,7 @@ struct MyStruct
 
   - Parser
     - High priority
+      - Add mutability operator to variables
       - `if let` like `if Err e = run!`
       - `Ok a = f! else return Err "error"`
       - Escaped char in strings and char
