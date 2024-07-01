@@ -38,7 +38,9 @@ impl Parsable for TraitDecl {
                 FunctionDecl::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+
                 methods.insert(function.name.clone(), function);
+
                 continue;
             }
 
@@ -46,6 +48,7 @@ impl Parsable for TraitDecl {
 
             if TokenType::Arobase == remaining_tokens[0].token_type {
                 remaining_tokens = &remaining_tokens[1..];
+
                 inject_self = true;
             }
 
@@ -53,7 +56,9 @@ impl Parsable for TraitDecl {
                 <(Ident, ParseType)>::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+
                 signatures.insert((signature.0.clone(), inject_self), signature.1);
+
                 continue;
             }
 

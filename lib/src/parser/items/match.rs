@@ -78,6 +78,7 @@ impl Parsable for Pattern {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining_tokens = tokens;
+
         let binding =
             if let Ok((ident, new_remaining_tokens)) = Ident::parse(remaining_tokens, parse_ctx) {
                 if new_remaining_tokens.len() < 2 {
@@ -85,6 +86,7 @@ impl Parsable for Pattern {
                 } else {
                     if let TokenType::Arobase = new_remaining_tokens[0].token_type {
                         remaining_tokens = &new_remaining_tokens[1..];
+
                         Some(ident)
                     } else {
                         None
@@ -172,6 +174,7 @@ impl Parsable for ArrayPattern {
             && TokenType::Dot == tokens[1].token_type
         {
             let (ident, remaining_tokens) = Ident::parse(&tokens[2..], parse_ctx)?;
+
             return Ok((ArrayPattern::Rest(ident), remaining_tokens));
         } else if let Ok((pattern, remaining_tokens)) = Pattern::parse(tokens, parse_ctx) {
             return Ok((ArrayPattern::Pattern(pattern), remaining_tokens));
@@ -231,7 +234,9 @@ impl Parsable for FieldPattern {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+
         let (pattern, remaining_tokens) = Pattern::parse(remaining_tokens, parse_ctx)?;
 
         Ok((

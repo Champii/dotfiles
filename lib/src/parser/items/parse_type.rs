@@ -106,6 +106,7 @@ fn parse_array_type<'a>(
     parse_ctx: &mut ParseCtx,
 ) -> Result<(ParseType, &'a [Token]), Diagnostics> {
     let mut remaining_tokens = tokens;
+
     remaining_tokens = expect_token(remaining_tokens, TokenType::OpenBracket)?;
 
     let (ty, mut remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
@@ -149,6 +150,7 @@ impl Parsable for ParseTypeInner {
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let mut remaining_tokens = tokens;
         let mut has_paren = false;
+
         if TokenType::OpenParen == remaining_tokens[0].token_type {
             remaining_tokens = &remaining_tokens[1..];
             has_paren = true;

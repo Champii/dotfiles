@@ -45,7 +45,9 @@ impl Parsable for StructDeclField {
         }
 
         let (ident, remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+
         let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
 
         if remaining_tokens.is_empty() {
@@ -89,8 +91,11 @@ impl Parsable for (Ident, ParseType) {
         let remaining_tokens = tokens;
 
         let (ident, remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+
         let (parse_type, remaining_tokens) = ParseType::parse(remaining_tokens, parse_ctx)?;
+
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
         Ok(((ident, parse_type), remaining_tokens))
@@ -103,7 +108,9 @@ impl Parsable for (Ident, Expression) {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let (ident, remaining_tokens) = Ident::parse(tokens, parse_ctx)?;
+
         let remaining_tokens = expect_token(remaining_tokens, TokenType::Colon)?;
+
         let (expression, remaining_tokens) = Expression::parse(remaining_tokens, parse_ctx)?;
 
         Ok(((ident, expression), remaining_tokens))

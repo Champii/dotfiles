@@ -172,6 +172,7 @@ impl Parsable for PrimaryExpr {
                 ParseType::parse(&remaining_tokens_after_secondaries[1..], parse_ctx)?;
 
             primary_expr.type_annotation = Some(type_annotation);
+
             remaining_tokens_after_secondaries = remaining_tokens;
         }
 

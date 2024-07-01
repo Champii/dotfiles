@@ -223,7 +223,9 @@ impl Diagnostics {
 impl From<ParseError> for Diagnostics {
     fn from(err: ParseError) -> Self {
         let mut diagnostics = Diagnostics::default();
+
         diagnostics.push(Diagnostic::from(err));
+
         diagnostics
     }
 }

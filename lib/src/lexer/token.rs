@@ -29,7 +29,7 @@ pub enum TokenType {
     CloseParen,
     OpenBracket,
     CloseBracket,
-    Char(char),
+    Char(String),
     String(String),
     Arrow,
     FatArrow,

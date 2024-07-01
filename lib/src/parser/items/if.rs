@@ -57,6 +57,7 @@ impl Parsable for If {
         let (else_, remaining_tokens) =
             if TokenType::Keyword("else".to_string()) == remaining_tokens[0].token_type {
                 let (else_block, remaining_tokens) = Else::parse(remaining_tokens, parse_ctx)?;
+
                 (Some(else_block), remaining_tokens)
             } else {
                 (None, remaining_tokens)
@@ -83,13 +84,16 @@ impl Parsable for Else {
         if let TokenType::Keyword(keyword) = &remaining_tokens[0].token_type {
             if keyword == "if" {
                 let (if_, remaining_tokens) = If::parse(remaining_tokens, parse_ctx)?;
+
                 Ok((Else::If(Box::new(if_)), remaining_tokens))
             } else {
                 let (block, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
+
                 Ok((Else::Block(block), remaining_tokens))
             }
         } else {
             let (block, remaining_tokens) = Block::parse(remaining_tokens, parse_ctx)?;
+
             Ok((Else::Block(block), remaining_tokens))
         }
     }

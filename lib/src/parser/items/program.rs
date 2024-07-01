@@ -18,8 +18,11 @@ impl Parsable for Program {
         parse_ctx.add_file_relative("./src/main.rk".to_string());
 
         let (module, tokens) = ModuleInner::parse(tokens, parse_ctx)?;
+
         let mut module: Module = module.into();
+
         module.filepath = Some(parse_ctx.current_file.clone().unwrap());
+
         module.name = Some(Ident {
             name: "main".to_string(),
             span: Default::default(),
@@ -41,10 +44,12 @@ impl Parsable for Module {
         parse_ctx: &mut ParseCtx,
     ) -> Result<(Self, &'a [Token]), Diagnostics> {
         let tokens = expect_token(tokens, TokenType::Keyword("mod".to_string()))?;
+
         let (name, mut tokens) = Ident::parse(tokens, parse_ctx)?;
 
         let comment = if let TokenType::Comment(comment) = &tokens[0].token_type {
             tokens = &tokens[1..];
+
             Some(comment.clone().trim().to_string())
         } else {
             None
@@ -77,9 +82,11 @@ impl Parsable for Module {
             ))
         } else {
             let tokens = expect_token(tokens, TokenType::Eol)?;
+
             let old_file_name = parse_ctx.current_file.clone();
 
             parse_ctx.add_file_relative(name.name.clone());
+
             let path = parse_ctx.current_file.clone().unwrap();
 
             let mut module: Module = parse_file::<ModuleInner>(path.clone(), parse_ctx)?.into();
@@ -148,7 +155,9 @@ impl Parsable for ModuleInner {
                 Ok(new_tokens) => tokens = new_tokens,
                 Err(e) => {
                     diagnostics.merge(e);
+
                     tokens = try_recover(tokens);
+
                     continue;
                 }
             }

@@ -11,6 +11,7 @@ static INDENT: Mutex<u8> = Mutex::new(0);
 
 fn indent() -> String {
     let indent = INDENT.lock().unwrap();
+
     let mut s = String::new();
 
     for _ in 0..*indent {
@@ -22,11 +23,13 @@ fn indent() -> String {
 
 fn increase_indent() {
     let mut indent = INDENT.lock().unwrap();
+
     *indent += 4;
 }
 
 fn decrease_indent() {
     let mut indent = INDENT.lock().unwrap();
+
     *indent -= 4;
 }
 
@@ -61,6 +64,7 @@ impl Display for Module {
         for (i, top_level) in self.top_levels.iter().enumerate() {
             write!(f, "{}", indent())?;
             write!(f, "{}", top_level)?;
+
             if i < self.top_levels.len() - 1 {
                 write!(f, "\n")?;
             }
@@ -118,6 +122,7 @@ impl Display for StructDecl {
 impl Display for StructDeclField {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let public_str = if self.public { "< " } else { "" };
+
         write!(f, "{}{} : {}", public_str, self.name, self.ty)
     }
 }
@@ -317,9 +322,11 @@ impl Display for TraitDecl {
 
         for ((name, inject_self), signature) in &self.signatures {
             write!(f, "{}", indent())?;
+
             if *inject_self {
                 write!(f, "@",)?;
             }
+
             write!(f, "{} : {}\n", name, signature)?;
         }
 
@@ -392,6 +399,7 @@ impl Display for ParseType {
                     write!(f, "(")?;
                 } else {
                     has_toggled_inside_fn_type_decl = true;
+
                     *IS_INSIDE_FN_DECL.lock().unwrap() = true;
                 }
 
@@ -495,6 +503,7 @@ impl Display for LambdaDecl {
 
 fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) -> fmt::Result {
     let mono_statement = !force_multiline && block.statements.len() <= 1;
+
     if !mono_statement {
         increase_indent();
         write!(f, "\n")?;
@@ -608,10 +617,12 @@ impl Display for PrimaryExpr {
         if let Some(secondaries) = &self.secondaries {
             for (i, secondary) in secondaries.iter().enumerate() {
                 write!(f, "{}", secondary)?;
+
                 if let SecondaryExpr::Arguments(_) = secondary {
                     if i < secondaries.len() - 1 {
                         if let SecondaryExpr::Dot(_) = secondaries[i + 1] {
                             write!(f, " ")?;
+
                             continue;
                         }
                     }
@@ -910,9 +921,11 @@ impl Display for If {
         write!(f, "if {}\n", self.condition)?;
         write!(f, "{}", indent())?;
         write!(f, "then")?;
+
         if self.then.statements.len() <= 1 {
             write!(f, " ")?;
         }
+
         display_block(&self.then, false, f)?;
 
         if let Some(else_) = &self.else_ {

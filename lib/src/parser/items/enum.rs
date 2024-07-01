@@ -54,6 +54,7 @@ impl Parsable for EnumVariant {
         if name.generics.len() > 0 {
             let types_list = name.generics.clone();
             let remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
+
             return Ok((
                 EnumVariant {
                     name: ParseTypeInner {

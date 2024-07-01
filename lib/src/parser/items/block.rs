@@ -21,13 +21,16 @@ fn parse_statements_loop<'a>(
     loop {
         if let Ok((statement, new_tokens)) = Statement::parse(remaining_tokens, parse_ctx) {
             remaining_tokens = new_tokens;
+
             statements.push(statement);
         } else {
             remaining_tokens = remaining_tokens_with_leading_newlines;
+
             statements = statements
                 .into_iter()
                 .take(nb_statements_without_leading_newlines)
                 .collect();
+
             break;
         }
 
@@ -57,6 +60,7 @@ fn parse_statements_loop<'a>(
                 .unwrap_or(false)
         {
             remaining_tokens = &remaining_tokens[2..];
+
             statements.push(Statement::EmptyLine);
         }
     }

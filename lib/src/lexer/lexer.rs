@@ -37,7 +37,48 @@ impl Lexer {
     #[cfg(test)]
     pub fn with_newline_at_end(mut self, add_empty_newline_at_end: bool) -> Self {
         self.add_empty_newline_at_end = add_empty_newline_at_end;
+
         self
+    }
+
+    pub fn next(&mut self) -> Result<Token, LexerError> {
+        let token = self.match_current_char()?;
+
+        self.position = token.span.end;
+
+        self.last_token = Some(token.clone());
+
+        Ok(token)
+    }
+
+    pub fn collect(&mut self) -> Result<Vec<Token>, LexerError> {
+        let mut tokens = Vec::new();
+
+        loop {
+            let token = self.next()?;
+
+            if token.token_type == TokenType::Eof {
+                break;
+            }
+
+            tokens.push(token);
+        }
+
+        if self.add_empty_newline_at_end {
+            if let Some(token) = tokens.last() {
+                if token.token_type != TokenType::Eol {
+                    // Finish the current line
+                    tokens.push(self.token(TokenType::Eol, 1));
+                }
+            }
+            // add an empty line at the end of the file
+            tokens.push(self.token(TokenType::Indent(0), 0));
+            tokens.push(self.token(TokenType::Eol, 1));
+        }
+
+        tokens.push(self.token(TokenType::Eof, 0));
+
+        Ok(tokens)
     }
 
     fn span(&self, len: usize) -> Span {
@@ -55,19 +96,18 @@ impl Lexer {
         }
     }
 
-    pub fn next(&mut self) -> Result<Token, LexerError> {
+    fn match_current_char(&mut self) -> Result<Token, LexerError> {
+        // Handle the space dot
         if self.current_char() == ' '
             && self.peek(1) == '.'
             && self.peek(2) != '.'
-            // special case for the dot operator
+            // special case to differenciate the dot operator
             && self.peek(2) != ' '
         {
-            let token = self.token(TokenType::SpacedDot, 2);
-            self.position = token.span.end;
-            self.last_token = Some(token.clone());
-            return Ok(token);
+            return Ok(self.token(TokenType::SpacedDot, 2));
         }
 
+        // Skip whitespace except when in the start of the file for indentation
         if self.prev_char() != '\n' && self.position != 0 || self.position == self.input.len() {
             self.skip_whitespace();
         } else {
@@ -75,23 +115,11 @@ impl Lexer {
                 match token.token_type {
                     TokenType::Indent(_) => (),
                     _ => {
-                        let token = self.indent();
-
-                        self.position = token.span.end;
-
-                        self.last_token = Some(token.clone());
-
-                        return Ok(token);
+                        return Ok(self.indent());
                     }
                 }
             } else {
-                let token = self.indent();
-
-                self.position = token.span.end;
-
-                self.last_token = Some(token.clone());
-
-                return Ok(token);
+                return Ok(self.indent());
             }
         }
 
@@ -131,47 +159,10 @@ impl Lexer {
             c => return Err(LexerError::UnknownToken(c, self.span(1))),
         };
 
-        match token.token_type {
-            TokenType::Char(_) | TokenType::String(_) => (),
-            _ => self.position = token.span.end,
-        }
-
-        self.last_token = Some(token.clone());
-
         Ok(token)
     }
 
-    pub fn collect(&mut self) -> Result<Vec<Token>, LexerError> {
-        let mut tokens = Vec::new();
-
-        loop {
-            let token = self.next()?;
-
-            if token.token_type == TokenType::Eof {
-                break;
-            }
-
-            tokens.push(token);
-        }
-
-        if self.add_empty_newline_at_end {
-            if let Some(token) = tokens.last() {
-                if token.token_type != TokenType::Eol {
-                    // Finish the current line
-                    tokens.push(self.token(TokenType::Eol, 1));
-                }
-            }
-            // add an empty line at the end of the file
-            tokens.push(self.token(TokenType::Indent(0), 0));
-            tokens.push(self.token(TokenType::Eol, 1));
-        }
-
-        tokens.push(self.token(TokenType::Eof, 0));
-
-        Ok(tokens)
-    }
-
-    fn operator(&mut self) -> Token {
+    fn operator(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -206,7 +197,7 @@ impl Lexer {
         token
     }
 
-    fn ident_or_keyword_or_type(&mut self) -> Token {
+    fn ident_or_keyword_or_type(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -225,22 +216,21 @@ impl Lexer {
         }
     }
 
-    fn macro_var(&mut self) -> Token {
-        self.position += 1;
+    fn macro_var(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphanumeric() || self.peek(end - start) == '_' {
+        while self.peek(end - start + 1).is_alphanumeric() || self.peek(end - start + 1) == '_' {
             end += 1;
         }
 
         self.token(
-            TokenType::MacroVar(self.input[start..end].to_string()),
-            end - start,
+            TokenType::MacroVar(self.input[start + 1..end + 1].to_string()),
+            end - start + 1,
         )
     }
 
-    fn comment(&mut self) -> Token {
+    fn comment(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -254,37 +244,35 @@ impl Lexer {
         )
     }
 
-    fn macro_invoc(&mut self) -> Token {
-        self.position += 1;
+    fn macro_invoc(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphanumeric() || self.peek(end - start) == '_' {
+        while self.peek(end - start + 1).is_alphanumeric() || self.peek(end - start + 1) == '_' {
             end += 1;
         }
 
         self.token(
-            TokenType::MacroInvoc(self.input[start..end].to_string()),
-            end - start,
+            TokenType::MacroInvoc(self.input[start + 1..end + 1].to_string()),
+            end - start + 1,
         )
     }
 
-    fn native_operator(&mut self) -> Token {
-        self.position += 1;
+    fn native_operator(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_alphabetic() || self.peek(end - start) == '_' {
+        while self.peek(end - start + 1).is_alphabetic() || self.peek(end - start + 1) == '_' {
             end += 1;
         }
 
         self.token(
-            TokenType::NativeOperator(self.input[start..end].to_string()),
-            end - start,
+            TokenType::NativeOperator(self.input[start + 1..end + 1].to_string()),
+            end - start + 1,
         )
     }
 
-    fn number(&mut self) -> Token {
+    fn number(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -315,39 +303,33 @@ impl Lexer {
         )
     }
 
-    fn char(&mut self) -> Token {
-        self.position += 1;
+    fn char(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
-        // We deliberately allow multi-character literals here, it should be catched in the parser
-        // and thus allow for recovery
-        while self.peek(end - start) != '\'' {
+        // We deliberately allow multi-character literals here to handle escaped chars
+        // The other errors should be catched in the parser
+        while self.peek(end - start + 1) != '\'' {
             end += 1;
         }
 
-        self.position = end + 1;
-
         self.token(
-            TokenType::Char(self.input[start..end].chars().next().unwrap()),
-            end - start,
+            TokenType::Char(self.input[start + 1..end + 1].to_owned()),
+            end - start + 2,
         )
     }
 
-    fn string(&mut self) -> Token {
-        self.position += 1;
+    fn string(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start) != '"' {
+        while self.peek(end - start + 1) != '"' {
             end += 1;
         }
 
-        self.position = end + 1;
-
         self.token(
-            TokenType::String(self.input[start..end].to_string()),
-            end - start,
+            TokenType::String(self.input[start + 1..end + 1].to_string()),
+            end - start + 2,
         )
     }
 

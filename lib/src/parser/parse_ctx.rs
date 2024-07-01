@@ -46,8 +46,11 @@ impl ParseCtx {
         F: FnOnce(&mut Self) -> Result<T, Diagnostics>,
     {
         self.indent();
+
         let res = f(self);
+
         self.dedent();
+
         res
     }
 
@@ -116,12 +119,17 @@ impl ParseCtx {
     pub fn add_file_relative(&mut self, name: String) {
         if let Some(current_path) = &self.current_file {
             let mut path = current_path.clone();
+
             path.pop();
+
             path.push(name + ".rk");
+
             self.files_map.insert(path.clone());
+
             self.current_file = Some(path);
         } else {
             self.files_map.insert(PathBuf::from(name.clone()));
+
             self.current_file = Some(PathBuf::from(name));
         }
     }
@@ -132,6 +140,7 @@ impl ParseCtx {
         F: FnOnce(&mut Self) -> Result<(T, &'a [Token]), Diagnostics>,
     {
         let old_state = self.inside_argument_list;
+
         self.inside_argument_list = true;
 
         let res = f(self);
@@ -155,6 +164,7 @@ impl ParseCtx {
         f: F,
     ) -> Result<T, Diagnostics> {
         let old_state = self.disallowed_multiline_fn_call;
+
         self.disallowed_multiline_fn_call = true;
 
         let res = f(self);

@@ -23,29 +23,37 @@ impl Parsable for Literal {
         let literal_kind = match &token.token_type {
             TokenType::Keyword(value) if value == "true" || value == "false" => {
                 tokens = &tokens[1..];
+
                 LiteralKind::Bool(value.parse().unwrap())
             }
             TokenType::Number(value) => {
                 tokens = &tokens[1..];
+
                 LiteralKind::Number(value.parse().unwrap())
             }
             TokenType::Float(value) => {
                 tokens = &tokens[1..];
+
                 LiteralKind::Float(value.parse().unwrap())
             }
             TokenType::String(s) => {
                 tokens = &tokens[1..];
+
                 LiteralKind::String(s.clone())
             }
             TokenType::Char(c) => {
                 tokens = &tokens[1..];
-                LiteralKind::Char(*c)
+
+                LiteralKind::Char(c.clone())
             }
             TokenType::OpenBracket => {
                 let (array, remaining_tokens, _diags) =
                     parse_vec_of::<Expression>(&tokens[1..], Some(TokenType::Coma), parse_ctx)?;
+
                 let remaining_tokens = expect_token(remaining_tokens, TokenType::CloseBracket)?;
+
                 tokens = remaining_tokens;
+
                 LiteralKind::Array(Array { elements: array })
             }
             _ => {
@@ -80,6 +88,7 @@ mod literals {
 
     fn parse_literal(input: &str) -> Literal {
         let tokens = lex_test(input);
+
         let (literal, remaining_tokens) =
             Literal::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 
@@ -101,7 +110,7 @@ mod literals {
         let input = "\"hello\"";
         let literal = parse_literal(input);
 
-        assert_eq!(literal.kind, LiteralKind::String("hello".to_string()));
+        assert_eq!(literal.kind, LiteralKind::String("hello".to_owned()));
     }
 
     #[test]
@@ -109,7 +118,7 @@ mod literals {
         let input = "'a'";
         let literal = parse_literal(input);
 
-        assert_eq!(literal.kind, LiteralKind::Char('a'));
+        assert_eq!(literal.kind, LiteralKind::Char("a".to_owned()));
     }
 
     #[test]

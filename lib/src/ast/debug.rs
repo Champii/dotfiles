@@ -15,6 +15,30 @@ impl AstPrinter {
     fn indent(&self) -> String {
         "  ".repeat(self.indent_level)
     }
+
+    fn name_with_indent<F>(&mut self, name: &str, f: F)
+    where
+        F: FnOnce(&mut Self),
+    {
+        self.name(name);
+
+        self.indent_level += 1;
+
+        f(self);
+
+        self.indent_level -= 1;
+    }
+
+    fn name(&mut self, name: &str) {
+        println!("{}{}", self.indent(), name);
+    }
+
+    fn name_value<T>(&mut self, name: &str, value: T)
+    where
+        T: std::fmt::Display,
+    {
+        println!("{}{} = {}", self.indent(), name, value);
+    }
 }
 
 macro_rules! ast_printer {
@@ -30,43 +54,42 @@ macro_rules! ast_printer {
             {}
 
             fn visit_ident(&mut self, ident: &'a Ident) {
-                println!("{}{} = {}", self.indent(), ident.name(), ident.name);
+                self.name_value(ident.name(), &ident.name);
             }
 
             fn visit_parse_type(&mut self, parse_type: &'a ParseType) {
-                println!("{}{} = {}", self.indent(), parse_type.name(), parse_type.to_string());
+                self.name_value(parse_type.name(), parse_type.to_string());
             }
 
             fn visit_parse_type_inner(&mut self, parse_type: &'a ParseTypeInner) {
-                println!("{}{} = {}", self.indent(), parse_type.name(), parse_type.to_string());
+                self.name_value(parse_type.name(), parse_type.to_string());
             }
 
             fn visit_operator(&mut self, operator: &'a Operator) {
-                println!("{}{} = {}", self.indent(), operator.name(), operator.to_string());
+                self.name_value(operator.name(), operator.to_string());
             }
 
             fn visit_literal(&mut self, literal: &'a Literal) {
                 match &literal.kind {
                     LiteralKind::Number(n) => {
-                        println!("{}{} = {}", self.indent(), "Number", n);
+                        self.name_value("Number", n);
                     }
                     LiteralKind::String(s) => {
-                        println!("{}{} = {:?}", self.indent(), "String", s);
+                        self.name_value("String", s);
                     }
                     LiteralKind::Char(c) => {
-                        println!("{}{} = {}", self.indent(), "Char", c);
+                        self.name_value("Char", c);
                     }
                     LiteralKind::Float(f) => {
-                        println!("{}{} = {}", self.indent(), "Float", f);
+                        self.name_value("Float", f);
                     }
                     LiteralKind::Bool(b) => {
-                        println!("{}{} = {}", self.indent(), "Bool", b);
+                        self.name_value("Bool", b);
                     }
                     LiteralKind::Array(array) => {
-                        println!("{}{}", self.indent(), "Array");
-                        self.indent_level += 1;
-                        walk_list!(self, visit_expression, &array.elements);
-                        self.indent_level -= 1;
+                        self.name_with_indent("Array", |printer| {
+                            walk_list!(printer, visit_expression, &array.elements);
+                        });
                     }
                 }
             }
@@ -80,19 +103,17 @@ macro_rules! ast_printer {
                         println!("{}{} = ..{}", self.indent(), "DoubleDot", name);
                     }
                     SecondaryExpr::Arguments(args) => {
-                        println!("{}{}", self.indent(), "Arguments");
-                        self.indent_level += 1;
-                        walk_list!(self, visit_argument, args);
-                        self.indent_level -= 1;
+                        self.name_with_indent("Arguments", |printer| {
+                            walk_list!(printer, visit_argument, args);
+                        });
                     }
                     SecondaryExpr::Indice(expr) => {
-                        println!("{}{}", self.indent(), "Indice");
-                        self.indent_level += 1;
-                        expr.visit(self);
-                        self.indent_level -= 1;
+                        self.name_with_indent("Indice", |printer| {
+                            expr.visit(printer);
+                        });
                     }
                     SecondaryExpr::Interogation => {
-                        println!("{}{}", self.indent(), "Interogation");
+                        self.name("Interogation");
                     }
                 }
             }
@@ -100,65 +121,58 @@ macro_rules! ast_printer {
             fn visit_pattern(&mut self, pattern: &'a Pattern) {
                 match &pattern.kind {
                     PatternKind::Instance(instance) => {
-                        println!("{}{}", self.indent(), "InstancePattern");
-                        self.indent_level += 1;
-                        instance.visit(self);
-                        self.indent_level -= 1;
+                        self.name_with_indent("InstancePattern", |printer| {
+                            instance.visit(printer);
+                        });
                     }
                     PatternKind::Ident(field) => {
-                        println!("{}{} = {}", self.indent(), "IdentPattern", field);
+                        self.name_value("IdentPattern", field);
                     }
                     PatternKind::Array(array) => {
-                        println!("{}{}", self.indent(), "ArrayPattern");
-                        self.indent_level += 1;
-                        walk_list!(self, visit_pattern, array);
-                        self.indent_level -= 1;
+                        self.name_with_indent("ArrayPattern", |printer| {
+                            walk_list!(printer, visit_pattern, array);
+                        });
                     }
                     PatternKind::Tuple(tuple) => {
-                        println!("{}{}", self.indent(), "TuplePattern");
-                        self.indent_level += 1;
-                        walk_list!(self, visit_pattern, tuple);
-                        self.indent_level -= 1;
+                        self.name_with_indent("TuplePattern", |printer| {
+                            walk_list!(printer, visit_pattern, tuple);
+                        });
                     }
                     PatternKind::Literal(literal) => {
-                        println!("{}{}", self.indent(), "LiteralPattern");
-                        self.indent_level += 1;
-                        literal.visit(self);
-                        self.indent_level -= 1;
+                        self.name_with_indent("LiteralPattern", |printer| {
+                            literal.visit(printer);
+                        });
                     }
                     PatternKind::Wildcard => {
-                        println!("{}{}", self.indent(), "WildcardPattern");
+                        self.name("WildcardPattern");
                     }
                     PatternKind::Nested(nested) => {
-                        println!("{}{}", self.indent(), "NestedPattern");
-                        self.indent_level += 1;
-                        nested.visit(self);
-                        self.indent_level -= 1;
+                        self.name_with_indent("NestedPattern", |printer| {
+                            nested.visit(printer);
+                        });
                     }
                 }
             }
 
             fn visit_assignment(&mut self, assignment: &'a Assignment) {
-                println!("{}{}", self.indent(), "Assignment");
-                self.indent_level += 1;
-                println!("{}{}", self.indent(), "LHS");
-                self.indent_level += 1;
-                assignment.lhs.visit(self);
-                self.indent_level -= 1;
-                println!("{}{}", self.indent(), "RHS");
-                self.indent_level += 1;
-                assignment.rhs.visit(self);
-                self.indent_level -= 1;
-            }
+                self.name_with_indent("Assignment", |printer| {
+                    printer.name_with_indent("LHS", |printer| {
+                        assignment.lhs.visit(printer);
+                    });
 
+                    printer.name_with_indent("RHS", |printer| {
+                        assignment.rhs.visit(printer);
+                    });
+                });
+
+            }
 
             paste! {
                 $(
                     fn [<visit_ $name:snake>](&mut self, node: &'a$name) {
-                        println!("{}{}", self.indent(), node.name());
-                        self.indent_level += 1;
-                        [<walk_ $name:snake>](self, node);
-                        self.indent_level -= 1;
+                        self.name_with_indent(&node.name(), |printer| {
+                            [<walk_ $name:snake>](printer, node);
+                        });
                     }
                 )+
             }

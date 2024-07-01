@@ -14,6 +14,7 @@ impl Parsable for Loop {
 
         if TokenType::Keyword("for".to_string()) == remaining[0].token_type {
             let (binding, remaining) = Ident::parse(&remaining[1..], parse_ctx)?;
+
             let remaining = expect_token(&remaining, TokenType::Keyword("in".to_string()))?;
 
             let (expr, remaining) = parse_ctx
@@ -32,6 +33,7 @@ impl Parsable for Loop {
             Ok((Loop::While(expr, block), remaining))
         } else {
             remaining = expect_token(remaining, TokenType::Keyword("loop".to_string()))?;
+
             let (block, remaining) = Block::parse(remaining, parse_ctx)?;
 
             Ok((Loop::Loop(block), remaining))

@@ -349,7 +349,7 @@ pub enum LiteralKind {
     Float(f64),
     Array(Array),
     String(String),
-    Char(char),
+    Char(String),
 }
 
 #[derive(Debug, PartialEq)]

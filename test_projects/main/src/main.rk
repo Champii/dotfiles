@@ -1,10 +1,2 @@
-trait ToString
-    @toto = a -> lol
-    @to_string : String
-
-impl ToString Int
-    @to_string = -> @show!
-write_file = ->
-    File::open "test.txt"
-        ..write "Hello, World"
-
+main = ->
+    a = 'c'

@@ -23,6 +23,7 @@ impl Parsable for FunctionDecl {
         }
 
         let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+
         remaining_tokens = expect_token(remaining_tokens, TokenType::Equal)?;
 
         let (lambda, remaining_tokens) = LambdaDecl::parse(remaining_tokens, parse_ctx)?;

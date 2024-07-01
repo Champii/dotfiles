@@ -44,7 +44,9 @@ impl Parsable for Impl {
                 FunctionDecl::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+
                 methods.insert(method.name.clone(), method);
+
                 continue;
             }
 
@@ -52,7 +54,9 @@ impl Parsable for Impl {
                 FunctionSig::parse(remaining_tokens, parse_ctx)
             {
                 remaining_tokens = new_remaining_tokens;
+
                 signatures.insert(signature.name.clone(), signature);
+
                 continue;
             }
 

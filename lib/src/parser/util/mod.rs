@@ -92,6 +92,7 @@ where
     loop {
         if remaining_tokens.is_empty() {
             remaining_tokens = remaining_tokens_after_match;
+
             break;
         }
 
@@ -105,7 +106,9 @@ where
             }
             Err(e) => {
                 diagnostics = e;
+
                 remaining_tokens = remaining_tokens_after_match;
+
                 break;
             }
         }
@@ -114,11 +117,14 @@ where
             Ok((t, new_remaining_tokens)) => {
                 remaining_tokens = new_remaining_tokens;
                 remaining_tokens_after_match = new_remaining_tokens;
+
                 list.push(t);
             }
             Err(e) => {
                 diagnostics = e;
+
                 remaining_tokens = tokens_backup;
+
                 break;
             }
         }
@@ -157,6 +163,7 @@ pub fn consume_tokens_until(tokens: &[Token], token_type: TokenType) -> (Vec<Tok
         }
 
         consumed_tokens.push(remaining_tokens[0].clone());
+
         remaining_tokens = &remaining_tokens[1..];
     }
 
@@ -215,6 +222,7 @@ pub fn lex_test(input: &str) -> Vec<Token> {
 
     //ignore indent
     tokens.remove(0);
+
     //ignore EOF
     tokens.pop();
 

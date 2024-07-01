@@ -17,6 +17,7 @@ impl Parsable for MacroDecl {
         let remaining_tokens = expect_token(tokens, TokenType::Keyword("macro".to_string()))?;
 
         let (name, mut remaining_tokens) = Ident::parse(remaining_tokens, parse_ctx)?;
+
         remaining_tokens = expect_token(remaining_tokens, TokenType::Eol)?;
 
         parse_ctx.indent();

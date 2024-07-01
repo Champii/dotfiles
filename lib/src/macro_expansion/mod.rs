@@ -183,6 +183,7 @@ fn replace_body_variables(
                     .enumerate()
                 {
                     let mut new_correspondances = correspondances.clone();
+
                     new_correspondances.nested_corresp[index].entries = new_correspondances
                         .nested_corresp[index]
                         .entries
