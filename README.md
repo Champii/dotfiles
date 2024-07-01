@@ -170,8 +170,8 @@ main = ->
 ```haskell
 enum Error
     SomeError
-     SomeErrorWithContext String
-     SomeErrorWithMoreContext String, Int
+    SomeErrorWithContext String
+    SomeErrorWithMoreContext String, Int
 
 impl Show Error
     @show = ->
@@ -229,6 +229,9 @@ struct MyStruct
 
   - Parser
     - High priority
+      - Add syntax for generic types in ParseType
+      - Allow for multiline double dot
+      - Allow for self inject signatures for methods in impl
       - Add mutability operator to variables
       - `if let` like `if Err e = run!`
       - `Ok a = f! else return Err "error"`
@@ -242,6 +245,7 @@ struct MyStruct
       - Multiline equal
       - Multiline Patterns
       - Allow right indent `if` and `loop` and `match` when at-the-next-line definition
+      - Suffix ++ and -- for variables ?
 
     - Low priority list:
       - Allow typeless struct field when default value and let the inference take over

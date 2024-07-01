@@ -4,3 +4,7 @@ trait ToString
 
 impl ToString Int
     @to_string = -> @show!
+write_file = ->
+    File::open "test.txt"
+        ..write "Hello, World"
+
