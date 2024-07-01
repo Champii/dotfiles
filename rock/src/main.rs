@@ -47,6 +47,7 @@ fn build(_config: &Config) {
 fn format(_config: &Config) {
     let entry_file = "src/main.rk";
     let mut rockc_config = rock_lib::Config::default();
+
     rockc_config.entry_file = PathBuf::from(entry_file);
 
     let program: Program = rock_lib::parser::parse_root_file(&rockc_config).unwrap();
@@ -57,6 +58,7 @@ fn format(_config: &Config) {
 fn expand(_config: &Config) {
     let entry_file = "src/main.rk";
     let mut rockc_config = rock_lib::Config::default();
+
     rockc_config.entry_file = PathBuf::from(entry_file);
 
     let program: Program = match rock_lib::parser::parse_root_file(&rockc_config) {
@@ -113,7 +115,9 @@ impl<'a> Visitor<'a> for ExpandedPrint {
         if let Some(name) = &module.name {
             println!("### {}: ###\n", name.to_string());
         }
+
         println!("{}", module.to_string());
+
         walk_module(self, module);
     }
 }

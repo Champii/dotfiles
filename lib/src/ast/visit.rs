@@ -179,13 +179,11 @@ pub fn walk_impl<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a Impl) {
 
 pub fn walk_function_sig<'a, V: Visitor<'a>>(visitor: &mut V, function_sig: &'a FunctionSig) {
     visitor.visit_ident(&function_sig.name);
-
     visitor.visit_parse_type(&function_sig.sig);
 }
 
 pub fn walk_function_decl<'a, V: Visitor<'a>>(visitor: &mut V, function_decl: &'a FunctionDecl) {
     visitor.visit_ident(&function_decl.name);
-
     visitor.visit_lambda_decl(&function_decl.lambda);
 }
 

@@ -366,10 +366,8 @@ main = -> 1 + 2"#;
         let input_program = parse_string(input).unwrap();
 
         let expanded = expand_macros(input_program).unwrap();
-        println!("{}", expanded);
 
         let expected_program = parse_string(expected).unwrap();
-        println!("{}", expected_program);
 
         assert_eq!(expanded, expected_program);
     }

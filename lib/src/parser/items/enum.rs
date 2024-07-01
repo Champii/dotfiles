@@ -25,7 +25,6 @@ impl Parsable for EnumDecl {
         if remaining_tokens.is_empty() {
             return Ok((EnumDecl { name, variants }, remaining_tokens));
         }
-        println!("Variants: {:#?}", variants);
 
         if let TokenType::Indent(level) = remaining_tokens[0].token_type {
             if level == parse_ctx.indent_level() + parse_ctx.indent_step() {
