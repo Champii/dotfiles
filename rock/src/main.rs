@@ -30,9 +30,12 @@ fn run() -> Result<(), Box<dyn Error>> {
 fn build(_config: &Config) {
     let entry_file = "src/main.rk";
 
-    let out = std::process::Command::new("rockc")
-        .arg("--entry-file")
-        .arg(entry_file)
+    let out = std::process::Command::new("script")
+        .arg("--return")
+        .arg("--quiet")
+        .arg("-c")
+        .arg(format!("rockc --entry-file {}", entry_file))
+        .arg("/dev/null")
         .output()
         .expect("failed to execute process");
 
