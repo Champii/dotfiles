@@ -10,17 +10,40 @@ mod lexer;
 pub mod macro_expansion;
 pub mod parser;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DebugPrint {
+    Ast,
+    AstFull,
+    Expanded,
+    Tokens,
+}
+
+impl From<&str> for DebugPrint {
+    fn from(s: &str) -> Self {
+        match s {
+            "ast" => DebugPrint::Ast,
+            "ast-full" => DebugPrint::AstFull,
+            "expanded" => DebugPrint::Expanded,
+            "tokens" => DebugPrint::Tokens,
+            _ => panic!(
+                "Unknown debug print: {}\nValid options are: ast, ast-full, expanded, tokens",
+                s
+            ),
+        }
+    }
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct Config {
     pub entry_file: PathBuf,
     pub output_dir: PathBuf,
-    pub debug_print: Vec<String>,
+    pub debug_print: Vec<DebugPrint>,
     pub meta_files: Vec<(String, PathBuf)>, // crate name, path
 }
 
 impl Config {
-    pub fn has_debug_print(&self, name: &str) -> bool {
-        self.debug_print.contains(&name.to_string())
+    pub fn has_debug_print(&self, name: DebugPrint) -> bool {
+        self.debug_print.contains(&name)
     }
 }
 
@@ -33,11 +56,11 @@ pub fn compile(config: &Config) {
         }
     };
 
-    if config.has_debug_print("ast-full") {
+    if config.has_debug_print(DebugPrint::AstFull) {
         println!("{:#?}", ast);
     }
 
-    if config.has_debug_print("ast") {
+    if config.has_debug_print(DebugPrint::Ast) {
         debug_ast(&ast);
     }
 
@@ -49,7 +72,7 @@ pub fn compile(config: &Config) {
         }
     };
 
-    if config.has_debug_print("expanded") {
+    if config.has_debug_print(DebugPrint::Expanded) {
         println!("{:#?}", ast);
     }
 }

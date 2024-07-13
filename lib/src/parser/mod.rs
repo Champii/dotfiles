@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 use crate::diagnostic::Diagnostics;
 use crate::lexer::Lexer;
-use crate::Config;
+use crate::{Config, DebugPrint};
 pub use parsable::Parsable;
 pub use parse_ctx::ParseCtx;
 pub use util::ParseError;
@@ -45,7 +45,7 @@ pub fn parse_string<T: Parsable>(input: &str) -> Result<T, Diagnostics> {
 pub fn parse<T: Parsable>(mut lexer: Lexer, parse_ctx: &mut ParseCtx) -> Result<T, Diagnostics> {
     let tokens = lexer.collect().map_err(ParseError::Lexer)?;
 
-    if parse_ctx.config.has_debug_print("tokens") {
+    if parse_ctx.config.has_debug_print(DebugPrint::Tokens) {
         println!("{:#?}", tokens);
     }
 

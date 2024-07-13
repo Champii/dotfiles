@@ -1,6 +1,7 @@
 use std::{error::Error, path::PathBuf};
 
 use clap::Parser;
+use rock_lib::DebugPrint;
 
 fn main() {
     if let Err(e) = run() {
@@ -48,7 +49,11 @@ impl From<Config> for rock_lib::Config {
         Self {
             entry_file: config.entry_file,
             output_dir: config.output_dir,
-            debug_print: config.debug_print.split(',').map(String::from).collect(),
+            debug_print: config
+                .debug_print
+                .split(',')
+                .map(DebugPrint::from)
+                .collect(),
             meta_files: config.meta_files,
         }
     }
