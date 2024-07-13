@@ -25,7 +25,7 @@ pub struct ParseCtx {
 impl ParseCtx {
     pub fn new(config: &Config) -> Self {
         ParseCtx {
-            indent_step: 2,
+            indent_step: 4,
             indent_level: 0,
             inside_argument_list: false,
             _diagnostics: Vec::new(),

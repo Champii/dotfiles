@@ -103,7 +103,7 @@ mod instance {
 
     #[test]
     fn test_parse_struct_instance_multiline() {
-        let input = "Test\n  a: 1\n  b: 2\n  c: a + 4";
+        let input = "Test\n    a: 1\n    b: 2\n    c: a + 4";
         let tokens = lex_test(input);
         let (struct_instance, rest) =
             Instance::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();

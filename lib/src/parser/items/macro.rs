@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn test_parse_macro_decl() {
-        let input = "macro mymacro\n  $a:ident =>\n    statement";
+        let input = "macro mymacro\n    $a:ident =>\n        statement";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
         let (macro_decl, rest) =
@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_parse_macro_entry() {
-        let input = "$a:ident =>\n    statement";
+        let input = "$a:ident =>\n        statement";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
         let (macro_entry, rest) =
@@ -272,7 +272,7 @@ mod tests {
 
     #[test]
     fn test_parse_macro_invoc() {
-        let input = "%mymacro\n  a\n  b";
+        let input = "%mymacro\n    a\n    b";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
         let (macro_invoc, rest) =

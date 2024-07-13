@@ -94,7 +94,7 @@ mod parse_struct {
 
     #[test]
     fn test_parse_impl_with_methods() {
-        let input = "impl Test\n  new = -> lol\n  @add = -> a\n";
+        let input = "impl Test\n    new = -> lol\n    @add = -> a\n";
         let tokens = lex_test(input);
         let (r#impl, rest) = Impl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 

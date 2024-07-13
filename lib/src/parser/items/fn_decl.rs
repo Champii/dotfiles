@@ -276,8 +276,8 @@ mod tests {
     #[test]
     fn test_parse_function_decl_multiline() {
         let input = r#"myfn = a, b, c ->
-  statement
-  3 + 3
+    statement
+    3 + 3
 "#;
         let tokens = lex_test(input);
         let (function_decl, rest) =

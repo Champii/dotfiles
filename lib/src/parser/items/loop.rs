@@ -54,7 +54,7 @@ mod parse_loop {
 
     #[test]
     fn parse_for() {
-        let input = "for x in y\n  2";
+        let input = "for x in y\n    2";
         let tokens = lex_test(input);
         let (loop_, remaining) =
             Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -95,7 +95,7 @@ mod parse_loop {
 
     #[test]
     fn parse_while() {
-        let input = "while x\n  2";
+        let input = "while x\n    2";
         let tokens = lex_test(input);
         let (loop_, remaining) =
             Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -132,7 +132,7 @@ mod parse_loop {
 
     #[test]
     fn parse_loop() {
-        let input = "loop\n  2";
+        let input = "loop\n    2";
         let tokens = lex_test(input);
         let (loop_, remaining) =
             Loop::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();

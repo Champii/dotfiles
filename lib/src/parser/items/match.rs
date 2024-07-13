@@ -265,8 +265,8 @@ mod r#match {
     #[test]
     fn test_parse_match() {
         let input = r#"match a
-  a => 2
-  (a, b) => a + b"#;
+    a => 2
+    (a, b) => a + b"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Match::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -393,7 +393,7 @@ mod r#match {
     #[test]
     fn test_parse_match_with_condition() {
         let input = r#"match a
-  (a, b) if a => a"#;
+    (a, b) if a => a"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Match::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();

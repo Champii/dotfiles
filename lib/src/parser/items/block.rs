@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_parse_block_with_indent() {
-        let input = "\n  statement\n  statement";
+        let input = "\n    statement\n    statement";
         let tokens = lex_test(input);
         let (block, rest) = Block::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
 

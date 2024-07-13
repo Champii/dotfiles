@@ -153,7 +153,7 @@ mod parse_struct {
 
     #[test]
     fn test_parse_struct_with_fields() {
-        let input = "struct Test\n  field: Type\n  field2: Type2\n";
+        let input = "struct Test\n    field: Type\n    field2: Type2\n";
         let tokens = lex_test(input);
         let (struct_decl, rest) =
             StructDecl::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();

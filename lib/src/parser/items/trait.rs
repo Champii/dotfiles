@@ -88,9 +88,9 @@ mod parse_trait {
     fn test_parse_trait() {
         let tokens = lex_test(
             r#"trait Foo
-  bar = a -> a
-  baz : Int
-  @selfinject = a -> a
+    bar = a -> a
+    baz : Int
+    @selfinject = a -> a
 "#,
         );
 

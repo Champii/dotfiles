@@ -911,8 +911,8 @@ mod expression {
     #[test]
     fn multiline_dot() {
         let input = r#"foo
-  .bar
-  .baz"#;
+    .bar
+    .baz"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -1180,9 +1180,9 @@ mod expression {
     #[test]
     fn multiline_fn_call() {
         let input = r#"foo
-  bar
-  baz
-  2 + 2"#;
+    bar
+    baz
+    2 + 2"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -1337,8 +1337,8 @@ mod expression {
     #[test]
     fn double_dot_multiline() {
         let input = r#"foo bar
-  ..baz
-  ..foofoo"#;
+    ..baz
+    ..foofoo"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
@@ -1435,7 +1435,7 @@ mod expression {
     #[test]
     fn multiline_operator() {
         let input = r#"foo
-  + 2"#;
+    + 2"#;
         let tokens = lex_test(input);
         let (expression, rest) =
             Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
