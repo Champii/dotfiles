@@ -75,7 +75,7 @@ local purple_dark                        = '#b83fff'
 
 local black                              = '#000000'
 
-
+local purple_light_light                 = "#ac6496"
 
 -- }}}
 
@@ -314,19 +314,22 @@ local plugin_syntax = {
     ['@lsp.type.function']        = { fg = blue },
     ['@lsp.type.interface']       = { fg = purple_dark },
     ['@lsp.type.struct']          = { fg = green },
-    ['@lsp.type.enum']            = { fg = yellow_light },
+    ['@lsp.type.enum']            = { fg = purple_light_light },
     ['@lsp.type.typeParameter']   = { fg = orange },
     ['@lsp.type.keyword']         = {},
     ['@lsp.type.label']           = {},
-    ['@lsp.type.macro']           = {},
+    ['@lsp.type.macro']           = { fg = purple },
     ['@lsp.type.method']          = { fg = blue_dark },
     ['@lsp.type.builtinType']     = { fg = orange },
     ['@lsp.type.selfTypeKeyword'] = { fg = orange },
-    ['@lsp.type.namespace']       = {},
+    ['@lsp.type.namespace']       = { fg = grey_light },
     ['@lsp.type.parameter']       = { fg = yellow },
     ['@lsp.type.property']        = { fg = green_blue },
     ['@lsp.type.type']            = {},
     ['@lsp.type.variable']        = {},
+
+    ['@lsp.mod.crateRoot']        = { fg = grey_lighter },
+    -- ['@lsp.mod.public']           = { fg = grey_light },
 
 
     -- nvim-cmp

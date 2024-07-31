@@ -95,5 +95,10 @@ return {
         { key = 'D', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
         { key = 'L', mods = 'CTRL', action = wezterm.action.DisableDefaultAssignment }, -- disable CTRL+SHIFT+L as debug overlay
         { key = 'K', mods = 'CTRL', action = wezterm.action.DisableDefaultAssignment }, -- disable CTRL+SHIFT+K as clearscrollback=scrollbackOnly
+        {
+            key = 'PageDown',
+            mods = '',
+            action = wezterm.action.ScrollToBottom,
+        },
     },
 }

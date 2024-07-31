@@ -127,10 +127,14 @@ local plugins = {
                             ["rust-analyzer"] = {
                                 cargo = {
                                     features = "all",
+                                    extraEnv = {
+                                        CARGO_TARGET_DIR = "/home/champii/.cache/rust-analyzer"
+                                    },
                                 },
                                 procMacro = {
                                     enable = true,
                                 },
+
                             },
                         },
                     }
@@ -187,6 +191,14 @@ local plugins = {
            "nvim-telescope/telescope.nvim", -- For picking b/w different remote methods
        },
        config = true,
+    },
+    {
+        "nosduco/remote-sshfs.nvim",
+        dependencies = { "nvim-telescope/telescope.nvim" },
+        opts = {
+            -- Refer to the configuration section below
+            -- or leave empty for defaults
+        },
     }
 }
 

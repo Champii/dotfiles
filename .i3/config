@@ -53,7 +53,6 @@ bindsym $mod+Shift+s move scratchpad
 bindsym $mod+Tab scratchpad show
 
 bindsym $mod+s [instance="auryo"] scratchpad show
-
 bindsym $mod+m [instance="rambox"] scratchpad show
 
 bindsym $mod+1 workspace 1:>_
@@ -78,39 +77,18 @@ bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-workspace 1:>_ output eDP1
-workspace 2:fn  output HDMI1
-workspace 3:www output DP-2
-
 bindsym Ctrl+$mod+l workspace next
 bindsym Ctrl+$mod+h workspace prev
 
-# bindsym $mod+h focus left
-# bindsym $mod+j focus down
-# bindsym $mod+k focus up
-# bindsym $mod+l focus right
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
 
-# Emacs integration
-# Check ~/.doom.scratch/init.el and ~/.doom.scratch/i3-msg-proxy.sh
-bindsym $mod+h exec "~/.bin/i3-msg-proxy focus left"
-bindsym $mod+j exec "~/.bin/i3-msg-proxy focus down"
-bindsym $mod+k exec "~/.bin/i3-msg-proxy focus up"
-bindsym $mod+l exec "~/.bin/i3-msg-proxy focus right"
-
-#bindsym $mod+Left focus left
-#bindsym $mod+Down focus down
-#bindsym $mod+Up focus up
-#bindsym $mod+Right focus right
-
-bindsym $mod+Shift+h exec "~/.bin/i3-msg-proxy move left"
-bindsym $mod+Shift+j exec "~/.bin/i3-msg-proxy move down"
-bindsym $mod+Shift+k exec "~/.bin/i3-msg-proxy move up"
-bindsym $mod+Shift+l exec "~/.bin/i3-msg-proxy move right"
-
-#bindsym $mod+Shift+Left move left
-#bindsym $mod+Shift+Down move down
-#bindsym $mod+Shift+Up move up
-#bindsym $mod+Shift+Right move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
 
 # change focus between tiling / floating windows
 bindsym $mod+Shift+t focus mode_toggle
@@ -119,24 +97,14 @@ bindsym $mod+Shift+t focus mode_toggle
 bindsym $mod+a focus parent
 
 # split in horizontal orientation and spawn a term
-bindsym $mod+x exec "~/.bin/i3-msg-proxy 'split h, exec wezterm'"
-bindsym $mod+z exec "~/.bin/i3-msg-proxy 'split v, exec wezterm'"
-# bindsym $mod+x split h, exec wezterm
+bindsym $mod+x split h, exec wezterm
+bindsym $mod+z split v, exec wezterm
 
-# split in vertical orientation and spawn a term
-# bindsym $mod+z split v, exec wezterm
-
-# split in horizontal orientation
+# change split orientation to horizontal
 bindsym $mod+Shift+x split h
 
-# split in vertical orientation
+# change split orientation to vertical
 bindsym $mod+Shift+z split v
-
-# change split in horizontal orientation
-#bindsym $mod+h split h
-
-# change split in vertical orientation
-#bindsym $mod+v split v
 
 default_orientation horizontal
 
@@ -144,20 +112,10 @@ floating_modifier $mod
 
 bindsym $mod+Shift+space floating toggle
 
-#bindsym $mod+Mod1+Left resize shrink width 1 px or 1 ppt
-#bindsym $mod+Mod1+Down resize grow height 1 px or 1 ppt
-#bindsym $mod+Mod1+Up resize shrink height 1 px or 1 ppt
-#bindsym $mod+Mod1+Right resize grow width 1 px or 1 ppt
-
-# bindsym $mod+Mod1+h resize shrink width 1 px or 1 ppt
-# bindsym $mod+Mod1+j resize grow height 1 px or 1 ppt
-# bindsym $mod+Mod1+k resize shrink height 1 px or 1 ppt
-# bindsym $mod+Mod1+l resize grow width 1 px or 1 ppt
-
-bindsym $mod+Mod1+h exec "~/.bin/i3-msg-proxy 'resize shrink width 1 px or 1 ppt'"
-bindsym $mod+Mod1+j exec "~/.bin/i3-msg-proxy 'resize grow height 1 px or 1 ppt'"
-bindsym $mod+Mod1+k exec "~/.bin/i3-msg-proxy 'resize shrink height 1 px or 1 ppt'"
-bindsym $mod+Mod1+l exec "~/.bin/i3-msg-proxy 'resize grow width 1 px or 1 ppt'"
+bindsym $mod+Mod1+h exec resize shrink width 1 px or 1 ppt
+bindsym $mod+Mod1+j exec resize grow height 1 px or 1 ppt
+bindsym $mod+Mod1+k exec resize shrink height 1 px or 1 ppt
+bindsym $mod+Mod1+l exec resize grow width 1 px or 1 ppt
 
 bindsym $mod+Shift+c reload
 
@@ -167,8 +125,6 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 
 smart_borders on
 
-gaps outer 0
-# gaps inner 12
 
 # Necessary for i3-gaps to work properly (pixel can be any value)
 for_window [class="^.*"] border pixel 1
@@ -176,47 +132,10 @@ for_window [class="^.*"] border pixel 1
 # firefox notifications
 for_window [window_role="alert"] floating enable
 
-set $mode_gaps Gaps: (o) outer, (i) inner
-set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
-set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
-
-bindsym $mod+Shift+g mode "$mode_gaps"
-
-mode "$mode_gaps" {
-        bindsym o      mode "$mode_gaps_outer"
-        bindsym i      mode "$mode_gaps_inner"
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-
-mode "$mode_gaps_inner" {
-        bindsym plus  gaps inner current plus 5
-        bindsym minus gaps inner current minus 5
-        bindsym 0     gaps inner current set 0
-
-        bindsym Shift+plus  gaps inner all plus 5
-        bindsym Shift+minus gaps inner all minus 5
-        bindsym Shift+0     gaps inner all set 0
-
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-
-mode "$mode_gaps_outer" {
-        bindsym plus  gaps outer current plus 5
-        bindsym minus gaps outer current minus 5
-        bindsym 0     gaps outer current set 0
-
-        bindsym Shift+plus  gaps outer all plus 5
-        bindsym Shift+minus gaps outer all minus 5
-        bindsym Shift+0     gaps outer all set 0
-
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-
+# Create a mark
 bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
+# Jump to a mark
 bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # Volume keys
@@ -233,15 +152,9 @@ bindsym XF86MonBrightnessDown exec xbacklight -dec 5 # decrease screen brightnes
 bindsym Shift+XF86MonBrightnessUp exec xbacklight -set 100 # increase screen brightness
 bindsym Shift+XF86MonBrightnessDown exec xbacklight -set 1 # decrease screen brightness
 
-exec_always xrandr --output HDMI-A-0 --auto
-exec_always xrandr --output HDMI-A-1 --auto --right-of HDMI-A-0
-exec_always xrandr --output DVI-D-0 --auto --right-of HDMI-A-1
-
 bindsym $mod+b exec --no-startup-id raiseorlaunch -s brave
-# bindsym $mod+n exec --no-startup-id raiseorlaunch -s -- emacsclient -c
 bindsym $mod+p exec --no-startup-id raiseorlaunch -s scrcpy
 bindsym $mod+Shift+v exec --no-startup-id raiseorlaunch -s vlc
-# bindsym $mod+v exec --no-startup-id raiseorlaunch -s nvim
 
 bindsym $mod+Shift+b exec qutebrowser
 bindsym $mod+n exec emacsclient -c
@@ -263,8 +176,7 @@ workspace_auto_back_and_forth yes
 bindsym $mod+Return exec wezterm
 
 # kill focused window
-bindsym $mod+Shift+q "exec ~/.bin/i3-msg-proxy kill"
-
+bindsym $mod+Shift+q kill
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -275,61 +187,34 @@ bindsym $mod+f fullscreen toggle
 bindsym $mod+Ctrl+e layout toggle split
 
 
-
 # focus the child container
 #bindsym $mod+d focus child
 
 # WMFocus
-# bindsym $mod+Tab exec ~/.cargo/bin/wmfocus
 bindsym $mod+d exec --no-startup-id wezterm --profile 'floating' -e 'i3-dmenu-desktop --dmenu=fzf'
 for_window [title="~ : i3-dmenu-deskto"] floating enable
 for_window [title="Emacs Everywhere"] floating enable
-# for_window [title="scratchpad"] move scratchpad
-
 
 
 # Background
-#exec feh --bg-scale ~/pictures/wall_code.jpg
-#exec feh --bg-scale ~/pictures/wall2.jpg
-#exec feh --bg-scale ~/pictures/wall3.jpg
-# exec feh --bg-scale ~/pictures/wall4.jpg
-# exec feh --bg-scale ~/pictures/wall_new.jpeg
 # exec --no-startup-id feh --randomize --bg-scale ~/wallpapers
-exec --no-startup-id feh --bg-scale ~/wallpapers/sun.png
+exec --no-startup-id feh --bg-scale /usr/share/lightdm-webkit/themes/lightdm-webkit-theme-aether/src/img/wallpapers/space-2.jpg
 
 # Lock
 bindsym Control+Mod1+l exec betterlockscreen -l blur
 
 # Compositor
 exec --no-startup-id picom
-exec --no-startup-id deadd-notification-center
-
+# exec --no-startup-id deadd-notification-center
 
 # Touchpad toggler
-bindsym $mod+t exec --no-startup-id ~/.i3/toggle_touchpad.sh
-
+# bindsym $mod+t exec --no-startup-id ~/.i3/toggle_touchpad.sh
 
 # Touchpad gesture
 exec libinput-gestures
 
-# Albert demon
-# exec albert
-
-
-bindsym $mod+Shift+Ctrl+0 exec xrandr --output HDMI-1 --off && xrandr --output DP-2 --off && pkill lemonbar && exec lemonbar
-bindsym $mod+e exec emacsclient --eval "(emacs-everywhere)"
-
-
-
-
 # Screenshot
-# bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/pictures/'
 bindsym Print exec flameshot gui
-
-bindsym --release $mod+h exec --no-startup-id "i3-vim-nav h"
-bindsym --release $mod+j exec --no-startup-id "i3-vim-nav j"
-bindsym --release $mod+k exec --no-startup-id "i3-vim-nav k"
-bindsym --release $mod+l exec --no-startup-id "i3-vim-nav l"
 
 #Default assignations
 assign [title="^first"] number 1
@@ -337,12 +222,4 @@ assign [class="emacs"] number 2
 assign [class="brave-browser"] number 3
 
 exec --no-startup-id wezterm -e zsh -c 'echo -ne "\033]30;scratchpad\007"; zsh'
-# exec --no-startup-id emacs
 
-# for_window [title="emacs@arch"] move scratchpad
-
-# exec --no-startup-id wezterm -e zsh -c 'echo -ne "\033]30;first\007"; zsh'
-# exec --no-startup-id emacs
-# exec --no-startup-id brave
-
-# exec light-locker
