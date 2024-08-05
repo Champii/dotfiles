@@ -46,7 +46,6 @@ require("ibl").setup {
             "TelescopePrompt",
             "TelescopeResults",
             "dashboard",
-            "",
         },
         buftypes = {
             "terminal",
@@ -54,7 +53,6 @@ require("ibl").setup {
             "quickfix",
             "prompt",
             "dashboard",
-            "",
         },
     },
 
