@@ -179,7 +179,17 @@ local plugins = {
         tag = 'stable',
         dependencies = { 'nvim-lua/plenary.nvim' },
         config = function()
-            require('crates').setup()
+            require('crates').setup{
+                lsp = {
+                    enabled = true,
+                    on_attach = function(client, bufnr)
+                        -- the same on_attach function as for your other lsp's
+                    end,
+                    actions = true,
+                    completion = true,
+                    hover = true,
+                },
+            }
         end,
     },
     {
@@ -199,7 +209,77 @@ local plugins = {
             -- Refer to the configuration section below
             -- or leave empty for defaults
         },
-    }
+    },
+    {
+        "OXY2DEV/markview.nvim",
+        lazy = false,      -- Recommended
+        -- ft = "markdown" -- If you decide to lazy-load anyway
+
+        dependencies = {
+            -- You will not need this if you installed the
+            -- parsers manually
+            -- Or if the parsers are in your $RUNTIMEPATH
+            "nvim-treesitter/nvim-treesitter",
+            "nvim-tree/nvim-web-devicons"
+        }
+    },
+    {
+        "desdic/macrothis.nvim",
+        opts = {},
+        keys = {
+            { "<Leader>mmd", function() require('macrothis').delete() end, desc = "delete" },
+            { "<Leader>mme", function() require('macrothis').edit() end, desc = "edit" },
+            { "<Leader>mml", function() require('macrothis').load() end, desc = "load" },
+            { "<Leader>mmn", function() require('macrothis').rename() end, desc = "rename" },
+            { "<Leader>mmq", function() require('macrothis').quickfix() end, desc = "run macro on all files in quickfix" },
+            { "<Leader>mmr", function() require('macrothis').run() end, desc = "run macro" },
+            { "<Leader>mms", function() require('macrothis').save() end, desc = "save" },
+            { "<Leader>mmx", function() require('macrothis').register() end, desc = "edit register" },
+            { "<Leader>mmp", function() require('macrothis').copy_register_printable() end, desc = "Copy register as printable" },
+            { "<Leader>mmm", function() require('macrothis').copy_macro_printable() end, desc = "Copy macro as printable" },
+        }
+    },
+    'gaborvecsei/memento.nvim',
+    {
+        'nvimdev/dashboard-nvim',
+        event = 'VimEnter',
+        config = function()
+            require('dashboard').setup {
+                -- config
+                theme = 'hyper',
+                config = {
+                    week_header = {
+                        enable = false,
+                    },
+                    shortcut = {
+                        { desc = '󰊳 Update', group = '@property', action = 'Lazy update', key = 'u' },
+                        {
+                            icon = ' ',
+                            icon_hl = '@variable',
+                            desc = 'Files',
+                            group = 'Label',
+                            action = 'Telescope find_files',
+                            key = 'f',
+                        },
+                        {
+                            desc = ' Apps',
+                            group = 'DiagnosticHint',
+                            action = 'Telescope app',
+                            key = 'a',
+                        },
+                        {
+                            desc = ' dotfiles',
+                            group = 'Number',
+                            action = 'Telescope dotfiles',
+                            key = 'd',
+                        },
+                    },
+                },
+               
+            }
+        end,
+        dependencies = { {'nvim-tree/nvim-web-devicons'}}
+    },
 }
 
 require("lazy").setup(plugins)

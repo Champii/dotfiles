@@ -28,13 +28,36 @@ vim.g.rainbow_delimiters = { highlight = highlight }
 require("ibl").setup {
     indent = {
         highlight = highlight,
-        char = "│"
+        char = "│",
     },
     scope = {
         enabled = false,
         highlight = highlight,
         -- show_start = false,
-    }
+    },
+    exclude = {
+        filetypes = {
+            "lspinfo",
+            "packer",
+            "checkhealth",
+            "help",
+            "man",
+            "gitcommit",
+            "TelescopePrompt",
+            "TelescopeResults",
+            "dashboard",
+            "",
+        },
+        buftypes = {
+            "terminal",
+            "nofile",
+            "quickfix",
+            "prompt",
+            "dashboard",
+            "",
+        },
+    },
+
 }
 hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 --[[ hooks.register(

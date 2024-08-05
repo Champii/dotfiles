@@ -104,8 +104,12 @@ map('n', '<Tab>', ':tabnext<CR>', opts)
 
 map('n', '<Leader>pp', ": lua require'telescope'.extensions.projects.projects{}<CR>", opts)
 
+-- mememto
+
+map('n', '<Leader>gx', ": lua require('memento').toggle()<CR>", opts)
+
 local whichkey = require "which-key"
-local keymap = {
+--[[ local keymap = {
     d = {
         name = "Debug",
         R = { "<cmd>lua require'dap'.run_to_cursor()<cr>", "Run to Cursor" },
@@ -151,4 +155,4 @@ whichkey.register(keymap_v, {
     silent = true,
     noremap = true,
     nowait = false,
-})
+}) ]]
