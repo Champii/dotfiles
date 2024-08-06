@@ -3,6 +3,7 @@ use crate::{lexer::Token, Config};
 mod and;
 mod delimited;
 mod fns;
+mod indented;
 mod iresult;
 mod many;
 mod map;
@@ -16,6 +17,7 @@ mod tuples;
 pub use and::*;
 pub use delimited::*;
 pub use fns::*;
+pub use indented::*;
 pub use iresult::*;
 pub use many::*;
 pub use map::*;
@@ -33,6 +35,7 @@ pub struct ParseCtx<'a> {
     pub tokens: &'a [Token],
     pub indent_level: usize,
     pub config: &'a Config,
+    pub indent_step: usize,
 }
 
 impl ParseCtx<'_> {
@@ -58,6 +61,31 @@ impl ParseCtx<'_> {
         ))
     }
 
+    pub fn indent(&self) -> Result<Self, ParseError> {
+        Ok(ParseCtx {
+            indent_level: self.indent_level + self.indent_step,
+            ..*self
+        })
+    }
+
+    pub fn dedent(&self) -> Result<Self, ParseError> {
+        Ok(ParseCtx {
+            indent_level: self.indent_level - self.indent_step,
+            ..*self
+        })
+    }
+
+    pub fn with_indent<'a, F, T>(self, f: F) -> IResult<'a, T>
+    where
+        F: FnOnce(Self) -> IResult<'a, T>,
+    {
+        let new_ctx = self.indent()?;
+        let (new_ctx, res) = f(new_ctx)?;
+        let new_ctx = new_ctx.dedent()?;
+
+        Ok((new_ctx, res))
+    }
+
     pub fn seek(&self) -> Result<Token, ParseError> {
         if self.tokens.is_empty() {
             return Err(ParseError::UnexpectedEOF);
@@ -78,6 +106,7 @@ impl ParseCtx<'_> {
         ParseCtx {
             tokens,
             indent_level: 0,
+            indent_step: 4,
             config,
         }
     }

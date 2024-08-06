@@ -1,10 +1,10 @@
 use crate::new_parser::{
     engine::*,
     items::{primitives::indent, utils::empty_lines},
-    TopLevel, TopLevelKind,
+    Ident, TopLevel, TopLevelKind,
 };
 
-use super::function_decl;
+use super::{function_decl, struct_decl};
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
     (
@@ -82,13 +82,15 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                     },
                 ),
             ) */
-            function_decl,
+            function_decl
+                .map(TopLevelKind::FunctionDecl)
+                .or(struct_decl.map(TopLevelKind::StructDecl)),
         ),
         empty_lines,
     )
-        .map(|(_, _, (function_decl,), _)| TopLevel {
-            ident: function_decl.name.clone(),
-            kind: TopLevelKind::FunctionDecl(function_decl),
+        .map(|(_, _, (kind,), _)| TopLevel {
+            ident: Ident::default(), // FIXME
+            kind,
         })
         .process(stream)
 }

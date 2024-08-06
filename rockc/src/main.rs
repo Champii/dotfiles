@@ -26,8 +26,8 @@ pub struct Config {
     entry_file: PathBuf,
     #[arg(long, default_value = "build")]
     output_dir: PathBuf,
-    #[arg(long, default_value = "")]
-    debug_print: String,
+    #[arg(long, default_value = None)]
+    debug_print: Option<String>,
     #[arg(value_parser = parse_meta_files)]
     meta_files: Vec<(String, PathBuf)>, // crate name, path
 }
@@ -51,9 +51,8 @@ impl From<Config> for rock_lib::Config {
             output_dir: config.output_dir,
             debug_print: config
                 .debug_print
-                .split(',')
-                .map(DebugPrint::from)
-                .collect(),
+                .map(|s| s.split(',').map(DebugPrint::from).collect())
+                .unwrap_or_default(),
             meta_files: config.meta_files,
         }
     }
