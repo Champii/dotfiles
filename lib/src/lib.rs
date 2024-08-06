@@ -49,10 +49,11 @@ impl Config {
 }
 
 pub fn compile(config: &Config) {
-    let ast: Program = match parser::parse_root_file(&config) {
+    let ast: Program = match new_parser::parse(&config) {
         Ok(ast) => ast,
         Err(e) => {
-            e.report();
+            // e.report();
+            eprintln!("{:?}", e);
             return;
         }
     };

@@ -1,4 +1,4 @@
-use super::{parser_trait::Parser, IResult, Input, Token};
+use super::{parse_error::ParseError, parser_trait::Parser, IResult, Input, Token};
 
 pub struct Many<P> {
     parser: P,
@@ -12,7 +12,6 @@ where
 
     fn process<'a, 'b>(&'b mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let mut output = Vec::new();
-        println!("START MANY {:#?}", tokens);
 
         loop {
             if tokens.is_empty() {
@@ -21,7 +20,6 @@ where
 
             if let Ok((new_tokens, t)) = self.parser.process(tokens) {
                 tokens = new_tokens;
-                println!("REMAINING TOKENS {:#?}", new_tokens);
                 output.push(t);
             } else {
                 break;
@@ -34,4 +32,42 @@ where
 
 pub fn many<'a, T: Parser>(parser: T) -> Many<T> {
     Many { parser }
+}
+
+pub struct Many1<P> {
+    parser: P,
+}
+
+impl<P> Parser for Many1<P>
+where
+    P: Parser,
+{
+    type Output = Vec<P::Output>;
+
+    fn process<'a, 'b>(&'b mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
+        let mut output = Vec::new();
+
+        loop {
+            if tokens.is_empty() {
+                break;
+            }
+
+            if let Ok((new_tokens, t)) = self.parser.process(tokens) {
+                tokens = new_tokens;
+                output.push(t);
+            } else {
+                break;
+            }
+        }
+
+        if output.is_empty() {
+            return Err(ParseError::ExpectedOneOrMore);
+        }
+
+        Ok((tokens, output))
+    }
+}
+
+pub fn many1<'a, T: Parser>(parser: T) -> Many1<T> {
+    Many1 { parser }
 }
