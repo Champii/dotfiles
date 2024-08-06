@@ -97,7 +97,7 @@ mod new_parser {
                                         },
                                     })]
                                 }),
-                                secondaries: None,
+                                secondaries: Some(vec![]),
                                 type_annotation: None,
                             })
                         ))]
@@ -113,7 +113,17 @@ mod new_parser {
 
     #[test]
     fn parse_top_level() {
-        let tokens = lex_test("a = foo -> foo\n");
+        use crate::lexer::Lexer;
+
+        let mut tokens = Lexer::new(std::path::PathBuf::new(), "a = foo -> foo\n")
+            .unwrap()
+            .with_newline_at_end(false)
+            .collect()
+            .unwrap();
+
+        tokens.pop();
+
+        // let tokens = lex_test();
         let config = Config::default();
 
         let (tokens, top_level) = top_level(ParseCtx::from(&tokens, &config)).unwrap();
@@ -170,7 +180,7 @@ mod new_parser {
                                             },
                                         })]
                                     }),
-                                    secondaries: None,
+                                    secondaries: Some(vec![]),
                                     type_annotation: None,
                                 })
                             ))]

@@ -11,7 +11,7 @@ pub fn function_decl<'a>(stream: Input<'a>) -> IResult<'a, FunctionDecl> {
         ident,
         TokenType::Equal,
         lambda_decl,
-        TokenType::Eol.opt(),
+        TokenType::Eol,
     )
         .map(|(inject_self, ident, _, lambda, _)| FunctionDecl {
             name: ident,

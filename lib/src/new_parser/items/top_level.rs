@@ -4,93 +4,31 @@ use crate::new_parser::{
     Ident, TopLevel, TopLevelKind,
 };
 
-use super::{function_decl, struct_decl};
+use super::{function_decl, macro_decl, macro_invoc, struct_decl};
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
     (
         empty_lines,
         indent,
-        (
-            /* seek(TokenType::Keyword("macro".to_string()), parse_macro_decl)
-            .map(|macro_decl| TopLevel {
+        function_decl
+            .map(|fn_decl| TopLevel {
+                ident: fn_decl.name.clone(),
+                kind: TopLevelKind::FunctionDecl(fn_decl),
+            })
+            .or(struct_decl.map(|struct_decl| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::StructDecl(struct_decl),
+            }))
+            .or(macro_decl.map(|macro_decl| TopLevel {
                 ident: macro_decl.name.clone(),
                 kind: TopLevelKind::MacroDecl(macro_decl),
-            }) */
-            /* .or(
-                seek(TokenType::Keyword("struct".to_string()), parse_struct_decl).map(|struct_decl| {
-                    TopLevel {
-                        ident: Ident::default(), // FIXME
-                        kind: TopLevelKind::StructDecl(struct_decl),
-                    }
-                }),
-            )
-            .or(
-                seek(TokenType::Keyword("enum".to_string()), parse_enum_decl).map(|enum_decl| {
-                    TopLevel {
-                        ident: Ident::default(), // FIXME
-                        kind: TopLevelKind::EnumDecl(enum_decl),
-                    }
-                }),
-            )
-            .or(
-                seek(TokenType::Keyword("trait".to_string()), parse_trait_decl).map(|trait_decl| {
-                    TopLevel {
-                        ident: Ident::default(), // FIXME
-                        kind: TopLevelKind::TraitDecl(trait_decl),
-                    }
-                }),
-            )
-            .or(
-                seek(TokenType::Keyword("impl".to_string()), parse_impl).map(|impl_| {
-                    TopLevel {
-                        ident: Ident::default(), // FIXME
-                        kind: TopLevelKind::Impl(impl_),
-                    }
-                }),
-            )
-            .or(seek(
-                TokenType::Keyword("infix".to_string()),
-                parse_infix_operator,
-            )
-            .map(|(precedence, op)| {
-                TopLevel {
-                    ident: Ident::default(), // FIXME
-                    kind: TopLevelKind::InfixOperator(precedence, op),
-                }
             }))
-            .or(
-                seek(TokenType::Keyword("mod".to_string()), parse_module).map(|module| TopLevel {
-                    ident: module.name.clone().unwrap_or_default(),
-                    kind: TopLevelKind::Module(ModuleDecl(module)),
-                }),
-            )
-            .or(
-                seek(TokenType::Keyword("extern".to_string()), parse_function_sig).map(
-                    |function_sig| TopLevel {
-                        ident: function_sig.name.clone(),
-                        kind: TopLevelKind::Extern(function_sig),
-                    },
-                ),
-            )
-            .or(
-                seek(TokenType::Keyword("type".to_string()), parse_new_type).map(
-                    |(parse_type_inner, parse_type)| {
-                        TopLevel {
-                            ident: Ident::default(), // FIXME
-                            kind: TopLevelKind::NewType(parse_type_inner, parse_type),
-                        }
-                    },
-                ),
-            ) */
-            function_decl
-                .map(TopLevelKind::FunctionDecl)
-                .or(struct_decl.map(TopLevelKind::StructDecl)),
-        ),
+            .or(macro_invoc.map(|macro_invoc| TopLevel {
+                ident: macro_invoc.name.clone(),
+                kind: TopLevelKind::MacroInvoc(macro_invoc),
+            })),
         empty_lines,
     )
-        .map(|(_, _, (kind,), _)| TopLevel {
-            ident: Ident::default(), // FIXME
-            kind,
-        })
+        .map(|(_, _, top_level, _)| top_level)
         .process(stream)
 }
