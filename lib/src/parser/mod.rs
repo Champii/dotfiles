@@ -1,7 +1,7 @@
 mod items;
 mod parsable;
 mod parse_ctx;
-mod util;
+pub mod util;
 
 use std::path::PathBuf;
 
