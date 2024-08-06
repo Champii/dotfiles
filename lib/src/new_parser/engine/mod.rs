@@ -1,0 +1,95 @@
+use crate::{lexer::Token, Config};
+
+mod and;
+mod delimited;
+mod fns;
+mod iresult;
+mod many;
+mod map;
+mod opt;
+mod or;
+mod parse_error;
+mod parser_trait;
+mod token_type;
+mod tuples;
+
+pub use and::*;
+pub use delimited::*;
+pub use fns::*;
+pub use iresult::*;
+pub use many::*;
+pub use map::*;
+pub use opt::*;
+pub use or::*;
+pub use parse_error::*;
+pub use parser_trait::*;
+pub use token_type::*;
+pub use tuples::*;
+
+pub type Input<'a> = ParseCtx<'a>;
+
+#[derive(Clone, Debug)]
+pub struct ParseCtx<'a> {
+    pub tokens: &'a [Token],
+    pub indent_level: usize,
+    pub config: &'a Config,
+}
+
+impl ParseCtx<'_> {
+    pub fn is_empty(&self) -> bool {
+        self.tokens.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.tokens.len()
+    }
+
+    pub fn consume(&self) -> Result<(Self, Token), ParseError> {
+        if self.tokens.is_empty() {
+            return Err(ParseError::UnexpectedEOF);
+        }
+
+        Ok((
+            ParseCtx {
+                tokens: &self.tokens[1..],
+                ..*self
+            },
+            self.tokens[0].clone(),
+        ))
+    }
+
+    pub fn seek(&self) -> Result<Token, ParseError> {
+        if self.tokens.is_empty() {
+            return Err(ParseError::UnexpectedEOF);
+        }
+
+        Ok(self.tokens[0].clone())
+    }
+
+    pub fn seek_nth(&self, n: usize) -> Result<Token, ParseError> {
+        if self.tokens.len() < n {
+            return Err(ParseError::UnexpectedEOF);
+        }
+
+        Ok(self.tokens[n].clone())
+    }
+
+    pub fn from<'a>(tokens: &'a [Token], config: &'a Config) -> ParseCtx<'a> {
+        ParseCtx {
+            tokens,
+            indent_level: 0,
+            config,
+        }
+    }
+}
+
+/* impl<'a> From<&'a [Token]> for ParseCtx<'a> {
+    fn from(tokens: &'a [Token]) -> Self {
+        ParseCtx {
+            tokens,
+            indent_level: 0,
+        }
+    }
+} */
+
+impl Copy for ParseCtx<'_> {}

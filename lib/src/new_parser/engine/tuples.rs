@@ -1,4 +1,4 @@
-use super::{parser_trait::Parser, IResult, Input, Token};
+use super::{parser_trait::Parser, IResult, Input};
 
 macro_rules! impl_parsable_for_tuple {
     ($($name:ident $name2:ident),*) => {

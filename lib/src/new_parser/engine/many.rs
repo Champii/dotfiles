@@ -1,4 +1,4 @@
-use super::{parse_error::ParseError, parser_trait::Parser, IResult, Input, Token};
+use super::{parse_error::ParseError, parser_trait::Parser, IResult, Input};
 
 pub struct Many<P> {
     parser: P,
