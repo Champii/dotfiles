@@ -4,7 +4,7 @@ use crate::new_parser::{
     Ident, TopLevel, TopLevelKind,
 };
 
-use super::{function_decl, macro_decl, macro_invoc, struct_decl};
+use super::{enum_decl, function_decl, macro_decl, macro_invoc, struct_decl};
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
     (
@@ -26,6 +26,10 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
             .or(macro_invoc.map(|macro_invoc| TopLevel {
                 ident: macro_invoc.name.clone(),
                 kind: TopLevelKind::MacroInvoc(macro_invoc),
+            }))
+            .or(enum_decl.map(|enum_decl| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::EnumDecl(enum_decl),
             })),
         empty_lines,
     )

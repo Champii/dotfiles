@@ -1,5 +1,6 @@
 mod array;
 mod block;
+mod enum_decl;
 mod expression;
 mod function_decl;
 mod ident_path;
@@ -19,6 +20,7 @@ mod utils;
 
 pub use array::*;
 pub use block::*;
+pub use enum_decl::*;
 pub use expression::*;
 pub use function_decl::*;
 pub use ident_path::*;
