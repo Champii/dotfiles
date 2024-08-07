@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 mod array;
 mod block;
 mod enum_decl;
@@ -13,8 +16,6 @@ mod primitives;
 mod program;
 mod statement;
 mod struct_decl;
-#[cfg(test)]
-mod tests;
 mod top_level;
 mod utils;
 

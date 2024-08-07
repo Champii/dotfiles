@@ -11,7 +11,10 @@ impl Parser for TokenType {
         if token.token_type == *self {
             Ok((stream, self.clone()))
         } else {
-            Err(ParseError::UnexpectedToken(token))
+            Err(ParseError::UnexpectedToken(
+                self.discriminant().to_string(),
+                token,
+            ))
         }
     }
 }

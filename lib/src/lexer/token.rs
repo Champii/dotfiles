@@ -110,3 +110,44 @@ impl Display for Token {
         write!(f, "{}", self.token_type.to_string())
     }
 }
+
+impl TokenType {
+    pub fn discriminant(&self) -> &'static str {
+        match self {
+            TokenType::Ident(_) => "Ident",
+            TokenType::Type(_) => "Type",
+            TokenType::Number(_) => "Number",
+            TokenType::Float(_) => "Float",
+            TokenType::Operator(_) => "Operator",
+            TokenType::Comment(_) => "Comment",
+            TokenType::StuckOperator(_) => "StuckOperator",
+            TokenType::NativeOperator(_) => "NativeOperator",
+            TokenType::Keyword(_) => "Keyword",
+            TokenType::MacroVar(_) => "MacroVar",
+            TokenType::MacroInvoc(_) => "MacroInvoc",
+            TokenType::MacroRepeatOpen => "MacroRepeatOpen",
+            TokenType::MacroRepeatClose => "MacroRepeatClose",
+            TokenType::Equal => "Equal",
+            TokenType::OpenParen => "OpenParen",
+            TokenType::CloseParen => "CloseParen",
+            TokenType::OpenBracket => "OpenBracket",
+            TokenType::CloseBracket => "CloseBracket",
+            TokenType::Char(_) => "Char",
+            TokenType::String(_) => "String",
+            TokenType::Arrow => "Arrow",
+            TokenType::FatArrow => "FatArrow",
+            TokenType::Coma => "Coma",
+            TokenType::Colon => "Colon",
+            TokenType::DoubleColon => "DoubleColon",
+            TokenType::Dot => "Dot",
+            TokenType::DoubleDot => "DoubleDot",
+            TokenType::SpacedDot => "SpacedDot",
+            TokenType::Arobase => "Arobase",
+            TokenType::Interogation => "Interogation",
+            TokenType::Indent(_) => "Indent",
+            TokenType::Underscore => "Underscore",
+            TokenType::Eol => "Eol",
+            TokenType::Eof => "Eof",
+        }
+    }
+}

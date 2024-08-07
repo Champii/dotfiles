@@ -82,6 +82,7 @@ fn parse_macro_head_recursive_inner<'a>(
             TokenType::MacroVar(name) => {
                 if remaining_tokens.get(1).unwrap().token_type != TokenType::Colon {
                     return Err(ParseError::UnexpectedToken(
+                        TokenType::Colon.discriminant().to_string(),
                         remaining_tokens.get(1).unwrap().clone(),
                         // vec![TokenType::Colon],
                     )
@@ -111,6 +112,7 @@ fn parse_macro_head_recursive_inner<'a>(
                     }));
                 } else {
                     return Err(ParseError::UnexpectedToken(
+                        TokenType::Ident(String::new()).discriminant().to_string(),
                         remaining_tokens.get(2).unwrap().clone(),
                         /* vec![
                             TokenType::Ident("ident".to_string()),
