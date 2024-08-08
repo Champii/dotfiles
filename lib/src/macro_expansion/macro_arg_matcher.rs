@@ -2,7 +2,8 @@ use crate::{
     ast::{Expression, MacroFragment},
     diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
-    parser::{Parsable, ParseError},
+    new_parser::{expression, ParseCtx, ParseError, Parser},
+    Config,
 };
 
 use super::correspondances::Correspondance;
@@ -90,9 +91,9 @@ impl<'a> MacroArgMatcher<'a> {
                             }
                         }
                         MacroFragment::Expr(name) => {
-                            if let Ok((_, remaining_tokens)) = Expression::parse(
-                                thread.args,
-                                &mut crate::parser::ParseCtx::new(&crate::Config::default()),
+                            let config = Config::default();
+                            if let Ok((remaining_tokens, _)) = expression.process(
+                                ParseCtx::from(thread.args, &config), // &mut crate::parser::ParseCtx::new(&crate::Config::default()),
                             ) {
                                 thread.correspondances.insert_direct(
                                     name.name.clone(),
@@ -100,7 +101,14 @@ impl<'a> MacroArgMatcher<'a> {
                                         .to_vec(),
                                 );
 
-                                thread.args = remaining_tokens;
+                                thread.args =
+                                    &thread.args[thread.args.len() - remaining_tokens.len()..];
+
+                                println!(
+                                    "LEN thread {} len remaining {}",
+                                    thread.args.len(),
+                                    remaining_tokens.len()
+                                );
 
                                 new_threads.push(MacroThread {
                                     args: thread.args,

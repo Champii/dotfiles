@@ -1,9 +1,9 @@
-use crate::new_parser::{delimited, engine::*, IdentOrType, IdentifierPath, TokenType};
+use crate::new_parser::{delimited1, engine::*, IdentOrType, IdentifierPath, TokenType};
 
 use super::{ident, parse_type};
 
 pub fn ident_path(stream: Input) -> IResult<IdentifierPath> {
-    delimited(ident_or_type, TokenType::DoubleColon)
+    delimited1(ident_or_type, TokenType::DoubleColon)
         .map(|idents| IdentifierPath { path: idents })
         .process(stream)
 }

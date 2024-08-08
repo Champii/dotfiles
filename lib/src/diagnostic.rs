@@ -1,7 +1,7 @@
 use ariadne::{Color, ColorGenerator, Label, Report, ReportKind, Source};
 
 use crate::lexer::{LexerError, Span};
-use crate::parser::ParseError;
+use crate::new_parser::ParseError;
 
 #[derive(Debug, Clone)]
 pub enum DiagnosticType {
@@ -21,16 +21,13 @@ pub struct Diagnostic {
 impl From<ParseError> for Diagnostic {
     fn from(err: ParseError) -> Self {
         match err {
-            ParseError::UnexpectedToken(token, expected) => Diagnostic {
-                message: format!("Unexpected token: {:?}", token.token_type),
-                labels: vec![(
-                    format!("Expected one of {:?}", expected),
-                    token.span.clone(),
-                )],
-                span: token.span,
+            ParseError::UnexpectedToken(got, expected) => Diagnostic {
+                message: format!("Unexpected token: {:?}", got),
+                labels: vec![(format!("Expected {:?}", expected), expected.span.clone())],
+                span: expected.span,
                 kind: DiagnosticType::Error,
             },
-            ParseError::UnexpectedKeyword(token, expected) => Diagnostic {
+            /* ParseError::UnexpectedKeyword(token, expected) => Diagnostic {
                 message: format!("Unexpected keyword: {:?}", token.token_type,),
                 labels: vec![(
                     format!("Expected one of {:?}", expected),
@@ -38,7 +35,7 @@ impl From<ParseError> for Diagnostic {
                 )],
                 span: token.span,
                 kind: DiagnosticType::Error,
-            },
+            }, */
             ParseError::Lexer(LexerError::UnknownToken(c, span)) => Diagnostic {
                 message: format!("Lexer: Unknown token: {:?}", c),
                 labels: vec![],
@@ -66,7 +63,7 @@ impl From<ParseError> for Diagnostic {
                     kind: DiagnosticType::Error,
                 }
             }
-            ParseError::InvalidPrecedence(precedence, token) => Diagnostic {
+            /* ParseError::InvalidPrecedence(precedence, token) => Diagnostic {
                 message: format!("Invalid precedence: {:?}", precedence),
                 labels: vec![(
                     format!("Precedence must be between 0 and 9"),
@@ -83,29 +80,38 @@ impl From<ParseError> for Diagnostic {
                 ],
                 span,
                 kind: DiagnosticType::Error,
-            },
-            ParseError::UnexpectedEof(token_type) => Diagnostic {
+            }, */
+            ParseError::UnexpectedEOF => Diagnostic {
                 message: format!("Unexpected end of file"),
-                labels: vec![(
-                    format!("Expected token of type {:?}", token_type),
-                    Span::default(),
-                )],
+                labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
-            ParseError::LeftoverTokens(tokens) => Diagnostic {
+            /* ParseError::LeftoverTokens(tokens) => Diagnostic {
                 message: format!("Leftover tokens"),
                 labels: vec![(format!("Expected end of file"), tokens[0].span.clone())],
                 span: tokens[0].span.clone(),
                 kind: DiagnosticType::Error,
-            },
+            }, */
             ParseError::UnknownFile(file) => Diagnostic {
                 message: format!("Unknown file: {:?}", file),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
-            ParseError::InternalError(message) => Diagnostic {
+            ParseError::UnexpectedIndent(level) => Diagnostic {
+                message: format!("Unexpected indent level: {level}"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            ParseError::ExpectedOneOrMore => Diagnostic {
+                message: format!("Expected one or more"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            /* ParseError::InternalError(message) => Diagnostic {
                 message: format!("Internal error: {:?}", message),
                 labels: vec![],
                 span: Span::default(),
@@ -143,7 +149,7 @@ impl From<ParseError> for Diagnostic {
                 labels: vec![(format!("Expected a type"), span.clone())],
                 span,
                 kind: DiagnosticType::Error,
-            },
+            }, */
         }
     }
 }

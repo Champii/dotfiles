@@ -1060,7 +1060,9 @@ main = ->
 < MyTrait
 "#;
 
-        let program: Program = crate::parser::parse_string(input).unwrap();
+        let config = crate::Config::default();
+
+        let program: Program = crate::new_parser::parse_string(input, &config).unwrap();
 
         println!("{}", input);
         println!("{}", program);

@@ -209,22 +209,3 @@ pub fn look_ahead(tokens: &[Token], expected: &[TokenType]) -> bool {
 
     true
 }
-
-#[cfg(test)]
-pub fn lex_test(input: &str) -> Vec<Token> {
-    use crate::lexer::Lexer;
-
-    let mut tokens = Lexer::new(std::path::PathBuf::new(), input)
-        .unwrap()
-        .with_newline_at_end(false)
-        .collect()
-        .unwrap();
-
-    //ignore indent
-    tokens.remove(0);
-
-    //ignore EOF
-    tokens.pop();
-
-    tokens
-}

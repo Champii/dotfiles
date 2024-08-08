@@ -3,6 +3,7 @@ use super::{parser_trait::Parser, IResult, Input};
 pub struct Delimited<P, D> {
     parser: P,
     delimiter: D,
+    at_least_one_result: bool,
 }
 
 impl<P, D> Parser for Delimited<P, D>
@@ -48,10 +49,26 @@ where
             }
         }
 
+        if self.at_least_one_result && items.is_empty() {
+            return Err(super::ParseError::ExpectedOneOrMore);
+        }
+
         Ok((remaining_tokens, items))
     }
 }
 
 pub fn delimited<P, D>(parser: P, delimiter: D) -> Delimited<P, D> {
-    Delimited { parser, delimiter }
+    Delimited {
+        parser,
+        delimiter,
+        at_least_one_result: false,
+    }
+}
+
+pub fn delimited1<P, D>(parser: P, delimiter: D) -> Delimited<P, D> {
+    Delimited {
+        parser,
+        delimiter,
+        at_least_one_result: true,
+    }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    lexer::{Token, TokenType},
+    lexer::{Span, Token, TokenType},
     new_parser::{engine::*, Ident, MacroDecl, MacroEntry, MacroFragment, MacroInvoc},
 };
 
@@ -10,21 +10,29 @@ pub fn macro_decl(stream: Input) -> IResult<MacroDecl> {
         TokenType::Keyword("macro".to_string()),
         ident,
         TokenType::Eol,
-        indented((indent, many(macro_entry))),
+        indented(many(macro_entry)),
     )
-        .map(|(_, name, _, (_, entries))| MacroDecl { name, entries })
+        .map(|(_, name, _, entries)| MacroDecl { name, entries })
         .process(stream)
 }
 
 pub fn macro_entry(stream: Input) -> IResult<MacroEntry> {
     (
         empty_lines,
+        indent,
         parse_macro_head_recursive,
         TokenType::FatArrow,
         TokenType::Eol,
         parse_macro_block_recursive,
     )
-        .map(|(_, defs, _, _, body)| MacroEntry { defs, body })
+        .map(|(_, _, defs, _, _, mut body)| {
+            body.push(MacroFragment::Token(Token {
+                token_type: TokenType::Eof,
+                span: Span::default(),
+            }));
+
+            MacroEntry { defs, body }
+        })
         .process(stream)
 }
 
@@ -231,7 +239,7 @@ mod tests {
     fn test_parse_macro_entry() {
         let input = "$a:ident =>\n        statement";
         let tokens = lex(input);
-        let tokens = &tokens[1..]; // skip the Indent(0)
+        // let tokens = &tokens[1..]; // skip the Indent(0)
         let config = Config::default();
 
         let (rest, macro_entry) = macro_entry(ParseCtx::from(&tokens, &config)).unwrap();

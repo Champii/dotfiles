@@ -34,7 +34,7 @@ pub fn struct_decl_field(stream: Input) -> IResult<StructDeclField> {
 
 #[cfg(test)]
 mod parse_struct {
-    use crate::parser::util::lex_test;
+    use crate::new_parser::items::utils::lex_test;
     use crate::Config;
 
     use super::*;

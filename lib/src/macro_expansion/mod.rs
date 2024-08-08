@@ -4,7 +4,7 @@ use crate::{
     ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
     diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
-    parser::{Parsable, ParseCtx},
+    new_parser::{module_inline, ParseCtx, Parser},
     Config,
 };
 
@@ -84,6 +84,8 @@ fn expand_macros_once(
         module.top_levels.extend(result?);
     }
 
+    println!("Expanded module: {:#?}", module);
+
     Ok(module)
 }
 
@@ -98,6 +100,7 @@ fn expand_top_level(
 
     for entry in entries {
         let defs = &entry.defs;
+
         let mut macro_matcher = MacroArgMatcher::new(
             &args,
             defs.clone(),
@@ -116,7 +119,11 @@ fn expand_top_level(
 
         let body = body.into_iter().flatten().collect::<Vec<_>>();
 
-        let (module, _) = ModuleInner::parse(&body, &mut ParseCtx::new(&Config::default()))?;
+        println!("Body: {:#?}", body);
+
+        let (_, module) = module_inline.process(ParseCtx::from(&body, &Config::default()))?;
+
+        println!("Module: {:#?}", module);
 
         top_levels.extend(module.top_levels);
 
@@ -209,26 +216,29 @@ fn replace_body_variables(
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::parse_string;
+    use crate::new_parser::parse_string;
 
     use super::*;
 
     #[test]
     fn simple_macro_expand() {
         let input = r#"macro mymacro
-  a b c =>
-    main = -> 1
+    a b c =>
+        main = -> 1
 %mymacro a b c"#;
 
         let expected = r#"macro mymacro
-  a b c =>
-    main = -> 1
+    a b c =>
+        main = -> 1
 main = -> 1"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
+        println!("Input program: {:#?}", input_program);
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }
@@ -236,11 +246,13 @@ main = -> 1"#;
     #[test]
     fn simple_macro_expand_fail() {
         let input = r#"macro mymacro
-  a b c =>
-    main = -> 1
+    a b c =>
+        main = -> 1
 %mymacro a c b"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
         let expanded = expand_macros(input_program);
 
         assert!(expanded.is_err());
@@ -249,19 +261,25 @@ main = -> 1"#;
     #[test]
     fn argument_matching() {
         let input = r#"macro mymacro
-  $a:ident $b:ident $c:ident =>
-    $a = $b -> $c
+    $a:ident $b:ident $c:ident =>
+        $a = $b -> $c
 %mymacro x y z "#;
 
         let expected = r#"macro mymacro
-  $a:ident $b:ident $c:ident =>
-    $a = $b -> $c
+    $a:ident $b:ident $c:ident =>
+        $a = $b -> $c
 x = y -> z"#;
 
-        let input_program = parse_string(input).unwrap();
-        let expanded = expand_macros(input_program).unwrap();
+        let config = Config::default();
 
-        let expected_program = parse_string(expected).unwrap();
+        let input_program = parse_string(input, &config).unwrap();
+
+        println!("Input program: {:#?}", input_program);
+        let expanded = expand_macros(input_program).unwrap();
+        println!("Expanded program: {:#?}", expanded);
+
+        let expected_program = parse_string(expected, &config).unwrap();
+        println!("Expected program: {:#?}", expected_program);
 
         assert_eq!(expanded, expected_program);
     }
@@ -269,19 +287,21 @@ x = y -> z"#;
     #[test]
     fn argument_repetition() {
         let input = r#"macro mymacro
-  $a:ident $($b:ident)* $c:ident =>
-    $a = $($b,)* -> $c
+    $a:ident $($b:ident)* $c:ident =>
+        $a = $($b,)* -> $c
 %mymacro a b c d e"#;
 
         let expected = r#"macro mymacro
-  $a:ident $($b:ident)* $c:ident =>
-    $a = $($b,)* -> $c
+    $a:ident $($b:ident)* $c:ident =>
+        $a = $($b,)* -> $c
 a = b, c, d, -> e"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }
@@ -289,25 +309,27 @@ a = b, c, d, -> e"#;
     #[test]
     fn multi_entries_macro() {
         let input = r#"macro mymacro
-  $a:ident $b:ident $c:ident =>
-    $a = $b -> $c
-  $a:ident =>
-    $a = -> 1
+    $a:ident $b:ident $c:ident =>
+        $a = $b -> $c
+    $a:ident =>
+        $a = -> 1
 %mymacro x y z
 %mymacro x"#;
 
         let expected = r#"macro mymacro
-  $a:ident $b:ident $c:ident =>
-    $a = $b -> $c
-  $a:ident =>
-    $a = -> 1
+    $a:ident $b:ident $c:ident =>
+        $a = $b -> $c
+    $a:ident =>
+        $a = -> 1
 x = y -> z
 x = -> 1"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }
@@ -315,18 +337,20 @@ x = -> 1"#;
     #[test]
     fn no_repetition() {
         let input = r#"macro mymacro
-  $a:ident $($b:ident)* $c:ident =>
-    $a = $($b,)* -> $c
+    $a:ident $($b:ident)* $c:ident =>
+        $a = $($b,)* -> $c
 %mymacro a c"#;
         let expected = r#"macro mymacro
-  $a:ident $($b:ident)* $c:ident =>
-    $a = $($b,)* -> $c
+    $a:ident $($b:ident)* $c:ident =>
+        $a = $($b,)* -> $c
 a = -> c"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }
@@ -334,19 +358,21 @@ a = -> c"#;
     #[test]
     fn empty_repetition_matches_less_args() {
         let input = r#"macro mymacro
-  $name:ident $($args:ident)* =>
-    $name = $($args,)* -> 1
+    $name:ident $($args:ident)* =>
+        $name = $($args,)* -> 1
 %mymacro a"#;
 
         let expected = r#"macro mymacro
-  $name:ident $($args:ident)* =>
-    $name = $($args,)* -> 1
+    $name:ident $($args:ident)* =>
+        $name = $($args,)* -> 1
 a = -> 1"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }
@@ -354,20 +380,22 @@ a = -> 1"#;
     #[test]
     fn parse_macro_expr() {
         let input = r#"macro mymacro
-  $a:expr =>
-    main = -> $a
+    $a:expr =>
+        main = -> $a
 %mymacro 1 + 2"#;
 
         let expected = r#"macro mymacro
-  $a:expr =>
-    main = -> $a
+    $a:expr =>
+        main = -> $a
 main = -> 1 + 2"#;
 
-        let input_program = parse_string(input).unwrap();
+        let config = Config::default();
+
+        let input_program = parse_string(input, &config).unwrap();
 
         let expanded = expand_macros(input_program).unwrap();
 
-        let expected_program = parse_string(expected).unwrap();
+        let expected_program = parse_string(expected, &config).unwrap();
 
         assert_eq!(expanded, expected_program);
     }

@@ -1,20 +1,20 @@
 use std::{error::Error, path::PathBuf};
 
 use clap::Parser;
-use rock_lib::DebugPrint;
+use rock_lib::{diagnostic::Diagnostics, DebugPrint};
 
 fn main() {
     if let Err(e) = run() {
-        eprintln!("Error: {}", e);
+        e.report();
 
         std::process::exit(1);
     }
 }
 
-fn run() -> Result<(), Box<dyn Error>> {
+fn run() -> Result<(), Diagnostics> {
     let config = Config::parse();
 
-    rock_lib::compile(&config.into());
+    rock_lib::compile(&config.into())?;
 
     Ok(())
 }

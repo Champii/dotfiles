@@ -11,6 +11,7 @@ mod opt;
 mod or;
 mod parse_error;
 mod parser_trait;
+mod preceded;
 mod token_type;
 mod tuples;
 
@@ -25,6 +26,7 @@ pub use opt::*;
 pub use or::*;
 pub use parse_error::*;
 pub use parser_trait::*;
+pub use preceded::*;
 pub use token_type::*;
 pub use tuples::*;
 

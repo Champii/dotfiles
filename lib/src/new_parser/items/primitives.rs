@@ -85,9 +85,12 @@ pub fn macro_invoc_token(stream: Input) -> IResult<String> {
     })
 }
 
-pub fn operator(stream: Input) -> IResult<String> {
-    token!(stream, TokenType::Operator(name) => {
-        name.clone()
+pub fn operator(stream: Input) -> IResult<Operator> {
+    token_with_span!(stream, span, TokenType::Operator(name) => {
+        Operator {
+            value: name.clone(),
+            span,
+        }
     })
 }
 

@@ -1,8 +1,2 @@
-enum Lol
-    Mdr
-    Toto
-        m: Int
-        mdr: Toto
-    Tata Lol
-    Tototo
-        a: Haha Mdr
+lol = -> 1 + 2
+

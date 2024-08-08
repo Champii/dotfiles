@@ -1,9 +1,12 @@
 use std::{error::Error, path::PathBuf};
 
 use clap::{Parser, Subcommand};
-use rock_lib::ast::{
-    visit::{walk_module, Visitor},
-    Module, Program,
+use rock_lib::{
+    ast::{
+        visit::{walk_module, Visitor},
+        Module, Program,
+    },
+    diagnostic::Diagnostic,
 };
 
 fn main() {
@@ -53,7 +56,7 @@ fn format(_config: &Config) {
 
     rockc_config.entry_file = PathBuf::from(entry_file);
 
-    let program: Program = rock_lib::parser::parse_root_file(&rockc_config).unwrap();
+    let program: Program = rock_lib::new_parser::parse(&rockc_config).unwrap();
 
     program.visit(&mut AstFormater);
 }
@@ -64,10 +67,11 @@ fn expand(_config: &Config) {
 
     rockc_config.entry_file = PathBuf::from(entry_file);
 
-    let program: Program = match rock_lib::parser::parse_root_file(&rockc_config) {
+    let program: Program = match rock_lib::new_parser::parse(&rockc_config) {
         Ok(program) => program,
         Err(e) => {
-            e.report();
+            let diagnostic = Diagnostic::from(e);
+            diagnostic.report();
             std::process::exit(1);
         }
     };

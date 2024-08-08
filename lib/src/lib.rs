@@ -1,15 +1,16 @@
 use std::path::PathBuf;
 
 use ast::debug::debug_ast;
+use diagnostic::Diagnostics;
 
 use crate::ast::Program;
 pub mod ast;
-mod diagnostic;
+pub mod diagnostic;
 mod fmt;
 mod lexer;
 pub mod macro_expansion;
 pub mod new_parser;
-pub mod parser;
+// pub mod parser;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DebugPrint {
@@ -48,13 +49,13 @@ impl Config {
     }
 }
 
-pub fn compile(config: &Config) {
+pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
     let ast: Program = match new_parser::parse(&config) {
         Ok(ast) => ast,
         Err(e) => {
             // e.report();
-            eprintln!("{:?}", e);
-            return;
+            // eprintln!("{:?}", e);
+            return Err(Diagnostics::from(e));
         }
     };
 
@@ -69,12 +70,14 @@ pub fn compile(config: &Config) {
     let ast = match macro_expansion::expand_macros(ast) {
         Ok(ast) => ast,
         Err(e) => {
-            e.report();
-            return;
+            // e.report();
+            return Err(Diagnostics::from(e));
         }
     };
 
     if config.has_debug_print(DebugPrint::Expanded) {
         println!("{:#?}", ast);
     }
+
+    Ok(ast)
 }

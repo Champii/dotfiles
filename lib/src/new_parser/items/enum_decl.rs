@@ -54,7 +54,7 @@ pub fn named_fields_or_types_list(stream: Input) -> IResult<NamedFieldsOrTypesLi
 #[cfg(test)]
 mod parse_enum {
     use super::*;
-    use crate::{parser::util::lex_test, Config};
+    use crate::{new_parser::items::utils::lex_test, Config};
 
     #[test]
     fn test_parse_enum() {

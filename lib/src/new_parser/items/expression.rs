@@ -3,12 +3,29 @@ use crate::new_parser::{
     engine::*, Argument, Expression, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
 };
 
-use super::ident_path;
 use super::literal;
 use super::parse_type;
+use super::{ident_path, indent, operator};
 
 pub fn expression(stream: Input) -> IResult<Expression> {
-    unary_expr.map(Expression::UnaryExpr).process(stream)
+    (
+        unary_expr,
+        (operator, expression)
+            .or(preceded(
+                TokenType::Eol,
+                // if indent > level
+                indented(preceded(indent, (operator, expression))),
+            ))
+            .opt(),
+    )
+        .map(|(unary, binop_opt)| {
+            if let Some((op, expr)) = binop_opt {
+                Expression::BinopExpr(unary, op, Box::new(expr))
+            } else {
+                Expression::UnaryExpr(unary)
+            }
+        })
+        .process(stream)
 }
 
 pub fn unary_expr(stream: Input) -> IResult<UnaryExpr> {
