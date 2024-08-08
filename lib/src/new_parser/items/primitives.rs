@@ -85,13 +85,26 @@ pub fn macro_invoc_token(stream: Input) -> IResult<String> {
     })
 }
 
-pub fn operator(stream: Input) -> IResult<Operator> {
+pub fn operator_token(stream: Input) -> IResult<Operator> {
     token_with_span!(stream, span, TokenType::Operator(name) => {
         Operator {
             value: name.clone(),
             span,
         }
     })
+}
+
+pub fn stuck_operator_token(stream: Input) -> IResult<Operator> {
+    token_with_span!(stream, span, TokenType::StuckOperator(name) => {
+        Operator {
+            value: name.clone(),
+            span,
+        }
+    })
+}
+
+pub fn operator(stream: Input) -> IResult<Operator> {
+    operator_token.or(stuck_operator_token).process(stream)
 }
 
 pub fn type_token(stream: Input) -> IResult<String> {

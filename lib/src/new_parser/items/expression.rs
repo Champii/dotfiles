@@ -3,9 +3,9 @@ use crate::new_parser::{
     engine::*, Argument, Expression, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
 };
 
-use super::literal;
-use super::parse_type;
 use super::{ident_path, indent, operator};
+use super::{literal, stuck_operator_token};
+use super::{parse_if, parse_type};
 
 pub fn expression(stream: Input) -> IResult<Expression> {
     (
@@ -13,8 +13,11 @@ pub fn expression(stream: Input) -> IResult<Expression> {
         (operator, expression)
             .or(preceded(
                 TokenType::Eol,
-                // if indent > level
                 indented(preceded(indent, (operator, expression))),
+            ))
+            .or(preceded(
+                TokenType::Eol,
+                preceded(indent, (operator, expression)),
             ))
             .opt(),
     )
@@ -29,27 +32,40 @@ pub fn expression(stream: Input) -> IResult<Expression> {
 }
 
 pub fn unary_expr(stream: Input) -> IResult<UnaryExpr> {
-    primary_expr.map(UnaryExpr::PrimaryExpr).process(stream)
+    (stuck_operator_token, unary_expr)
+        .map(|(op, unary)| UnaryExpr::UnaryExpr(op, Box::new(unary)))
+        .or(primary_expr.map(UnaryExpr::PrimaryExpr))
+        .process(stream)
 }
 
 pub fn primary_expr(stream: Input) -> IResult<PrimaryExpr> {
     (
         operand,
-        many((secondary, TokenType::Dot)),
-        (TokenType::Colon, parse_type).opt(),
+        many(secondary),
+        preceded(TokenType::Colon, parse_type).opt(),
     )
         .map(|(operand, secondaries, type_annotation)| PrimaryExpr {
             operand,
-            secondaries: Some(secondaries.into_iter().map(|(op, _)| op).collect()),
-            type_annotation: type_annotation.map(|(_, ty)| ty),
+            secondaries: Some(secondaries),
+            type_annotation,
         })
         .process(stream)
 }
 
 pub fn operand(stream: Input) -> IResult<Operand> {
-    literal
-        .map(Operand::Literal)
+    parse_if
+        .map(Box::new)
+        .map(Operand::If)
+        /* .or(parse_match.map(Operand::Match))
+        .or(parse_loop.map(Operand::Loop))
+        .or(parse_unsafe.map(Operand::Unsafe))
+        .or(lambda_decl.map(Operand::LambdaDecl))
+        .or(instance.map(Operand::Instance))
+        .or(tuple.map(Operand::Tuple))
+        .or(native_operator.map(Operand::NativeOperator)) */
+        .or(literal.map(Operand::Literal))
         .or(ident_path.map(Operand::Ident))
+        // .or(self_ident.map(Operand::SelfIdent))
         .process(stream)
 }
 
@@ -60,9 +76,1029 @@ pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
 pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
     (
         TokenType::OpenParen,
-        many(expression),
+        delimited(expression, TokenType::Coma),
         TokenType::CloseParen,
     )
         .map(|(_, args, _)| args.into_iter().map(|arg| Argument { arg }).collect())
         .process(stream)
+}
+
+#[cfg(test)]
+mod expression {
+    use super::*;
+    use crate::{
+        ast::*,
+        lexer::Span,
+        new_parser::{lex_test, Ident, IdentifierPath, Operator},
+        Config,
+    };
+
+    #[test]
+    fn test_parse_expression() {
+        let input = "1 + 2";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(1),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(2),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                })))
+            )
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_nested_expression() {
+        let input = "a.a + b + 2";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(IdentifierPath {
+                        path: vec![IdentOrType::Ident(Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        })],
+                    }),
+                    secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "a".to_string(),
+                        span: Span::default(),
+                    }))]),
+                    type_annotation: None,
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Ident(IdentifierPath {
+                            path: vec![IdentOrType::Ident(Ident {
+                                name: "b".to_string(),
+                                span: Span::default(),
+                            })],
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    }),
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(2),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    })))
+                ))
+            )
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn nested_parenthesis_expression() {
+        let input = "(1 + (2 + 3))";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Expression(Box::new(Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(1),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    }),
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Expression(Box::new(Expression::BinopExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            }),
+                            Operator {
+                                value: "+".to_string(),
+                                span: Span::default(),
+                            },
+                            Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(3),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })))
+                        ))),
+                        secondaries: None,
+                        type_annotation: None,
+                    })))
+                ))),
+                secondaries: None,
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn call_expression() {
+        let input = "hello 1, 2, 3";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Arguments(vec![
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(2),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(3),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                ])]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn indice_expression() {
+        let input = "hello[1]";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Indice(Box::new(
+                    Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(1),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    }))
+                ))]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression() {
+        let input = "hello.world";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                    name: "world".to_string(),
+                    span: Span::default(),
+                }))]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression_with_literal() {
+        let input = "4.test";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Literal(Literal {
+                    kind: crate::ast::LiteralKind::Number(4),
+                    span: Span::default(),
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                    name: "test".to_string(),
+                    span: Span::default(),
+                }))]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn dot_expression_with_number() {
+        let input = "some_tuple.1";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "some_tuple".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Number(1))]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn complex_secondaries() {
+        let input = "hello[1].world 1, 2, 3";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "hello".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Indice(Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                        PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        }
+                    )))),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "world".to_string(),
+                        span: Span::default(),
+                    })),
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(1),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(3),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                ]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_dot() {
+        let input = r#"foo
+    .bar
+    .baz"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "bar".to_string(),
+                        span: Span::default(),
+                    })),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    })),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn spaced_dot_closes_fn_call() {
+        let input = "foo a, b .bar";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "b".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "bar".to_string(),
+                        span: Span::default(),
+                    }))
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn spaced_dot_closes_fn_call_nested() {
+        let input = "foo a, b a .bar .baz";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "b".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: Some(vec![SecondaryExpr::Arguments(vec![Argument {
+                                    arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(
+                                        PrimaryExpr {
+                                            operand: Operand::Ident(IdentifierPath {
+                                                path: vec![IdentOrType::Ident(Ident {
+                                                    name: "a".to_string(),
+                                                    span: Span::default(),
+                                                })],
+                                            }),
+                                            secondaries: None,
+                                            type_annotation: None,
+                                        },
+                                    )),
+                                },]),]),
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "bar".to_string(),
+                        span: Span::default(),
+                    })),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    })),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn tuple() {
+        let input = "(1, 2, 3)";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Tuple(Tuple {
+                    elements: vec![
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(1),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(2),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Literal(Literal {
+                                kind: crate::ast::LiteralKind::Number(3),
+                                span: Span::default(),
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    ],
+                }),
+                secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn nested_spaced_dot_should_close_fn_call() {
+        let input = "foo a, (b .lol) .toto";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Expression(Box::new(Expression::UnaryExpr(
+                                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                        operand: Operand::Ident(IdentifierPath {
+                                            path: vec![IdentOrType::Ident(Ident {
+                                                name: "b".to_string(),
+                                                span: Span::default(),
+                                            })],
+                                        }),
+                                        secondaries: Some(vec![SecondaryExpr::Dot(
+                                            IdentOrNumber::Ident(Ident {
+                                                name: "lol".to_string(),
+                                                span: Span::default(),
+                                            })
+                                        )]),
+                                        type_annotation: None,
+                                    })
+                                ))),
+                                secondaries: None,
+                                type_annotation: None,
+                            })),
+                        },
+                    ]),
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                        name: "toto".to_string(),
+                        span: Span::default(),
+                    })),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_fn_call() {
+        let input = r#"foo
+    bar
+    baz
+    2 + 2"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Arguments(vec![
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "baz".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        })),
+                    },
+                    Argument {
+                        arg: Expression::BinopExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            }),
+                            Operator {
+                                value: "+".to_string(),
+                                span: Span::default(),
+                            },
+                            Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Literal(Literal {
+                                    kind: crate::ast::LiteralKind::Number(2),
+                                    span: Span::default(),
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })))
+                        ),
+                    },
+                ])]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn self_ident() {
+        let input = "@foo";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::SelfIdent(Ident {
+                    name: "foo".to_string(),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn empty_self_ident() {
+        let input = "@";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::SelfIdent(Ident {
+                    name: "".to_string(),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn double_dot() {
+        let input = "foo bar ..baz";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        }))
+                    }]),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    }),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn double_dot_multiline() {
+        let input = r#"foo bar
+    ..baz
+    ..foofoo"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Arguments(vec![Argument {
+                        arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                            operand: Operand::Ident(IdentifierPath {
+                                path: vec![IdentOrType::Ident(Ident {
+                                    name: "bar".to_string(),
+                                    span: Span::default(),
+                                })],
+                            }),
+                            secondaries: None,
+                            type_annotation: None,
+                        }))
+                    }]),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "baz".to_string(),
+                        span: Span::default(),
+                    }),
+                    SecondaryExpr::DoubleDot(Ident {
+                        name: "foofoo".to_string(),
+                        span: Span::default(),
+                    }),
+                ]),
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn interogation() {
+        let input = "foo? bar, baz?";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "foo".to_string(),
+                        span: Span::default(),
+                    })],
+                }),
+                secondaries: Some(vec![
+                    SecondaryExpr::Interogation,
+                    SecondaryExpr::Arguments(vec![
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "bar".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            }))
+                        },
+                        Argument {
+                            arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "baz".to_string(),
+                                        span: Span::default(),
+                                    })],
+                                }),
+                                secondaries: Some(vec![SecondaryExpr::Interogation]),
+                                type_annotation: None,
+                            }))
+                        }
+                    ]),
+                ]),
+
+                type_annotation: None,
+            })),
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_operator() {
+        let input = r#"foo
+    + 2"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::BinopExpr(
+                UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Ident(IdentifierPath {
+                        path: vec![IdentOrType::Ident(Ident {
+                            name: "foo".to_string(),
+                            span: Span::default(),
+                        })],
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                }),
+                Operator {
+                    value: "+".to_string(),
+                    span: Span::default(),
+                },
+                Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                    operand: Operand::Literal(Literal {
+                        kind: crate::ast::LiteralKind::Number(2),
+                        span: Span::default(),
+                    }),
+                    secondaries: None,
+                    type_annotation: None,
+                })))
+            )
+        );
+        assert_eq!(rest.len(), 0);
+    }
 }

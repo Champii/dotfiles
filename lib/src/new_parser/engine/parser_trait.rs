@@ -1,4 +1,4 @@
-use super::{and::And, map::Map, opt::Opt, or::Or, IResult, Input};
+use super::{and::And, map::Map, opt::Opt, or::Or, Followed, IResult, Input};
 
 pub trait Parser {
     type Output;
@@ -34,5 +34,12 @@ pub trait Parser {
         Self: Sized,
     {
         Opt::new(self)
+    }
+
+    fn followed_by<Parser2>(self, next: Parser2) -> Followed<Self, Parser2>
+    where
+        Self: Sized,
+    {
+        Followed::new(self, next)
     }
 }

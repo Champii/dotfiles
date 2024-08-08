@@ -3,6 +3,7 @@ use crate::{lexer::Token, Config};
 mod and;
 mod delimited;
 mod fns;
+mod followed;
 mod indented;
 mod iresult;
 mod many;
@@ -18,6 +19,7 @@ mod tuples;
 pub use and::*;
 pub use delimited::*;
 pub use fns::*;
+pub use followed::*;
 pub use indented::*;
 pub use iresult::*;
 pub use many::*;
@@ -38,6 +40,7 @@ pub struct ParseCtx<'a> {
     pub indent_level: usize,
     pub config: &'a Config,
     pub indent_step: usize,
+    pub disallowed_multiline_fn_call: bool,
 }
 
 impl ParseCtx<'_> {
@@ -110,7 +113,15 @@ impl ParseCtx<'_> {
             indent_level: 0,
             indent_step: 4,
             config,
+            disallowed_multiline_fn_call: false,
         }
+    }
+
+    pub fn disallow_multiline_fn_call(&self) -> Result<Self, ParseError> {
+        Ok(ParseCtx {
+            disallowed_multiline_fn_call: true,
+            ..*self
+        })
     }
 }
 
