@@ -19,11 +19,11 @@ where
     type Output = Parser1::Output;
 
     fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
-        let res = self.parser.process(tokens)?;
+        let (tokens, res) = self.parser.process(tokens)?;
 
-        self.next.process(tokens)?;
+        let (tokens, _) = self.next.process(tokens)?;
 
-        Ok(res)
+        Ok((tokens, res))
     }
 }
 

@@ -1,9 +1,9 @@
 use crate::lexer::TokenType;
 use crate::new_parser::{
-    engine::*, Argument, Expression, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
+    engine::*, Argument, Expression, IdentOrNumber, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
 };
 
-use super::{ident_path, indent, operator};
+use super::{ident, ident_path, indent, int, operator, parenthesis, r#loop};
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type};
 
@@ -46,7 +46,11 @@ pub fn primary_expr(stream: Input) -> IResult<PrimaryExpr> {
     )
         .map(|(operand, secondaries, type_annotation)| PrimaryExpr {
             operand,
-            secondaries: Some(secondaries),
+            secondaries: if secondaries.is_empty() {
+                None
+            } else {
+                Some(secondaries)
+            },
             type_annotation,
         })
         .process(stream)
@@ -63,28 +67,59 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         .or(instance.map(Operand::Instance))
         .or(tuple.map(Operand::Tuple))
         .or(native_operator.map(Operand::NativeOperator)) */
+        .or(r#loop.map(Box::new).map(Operand::Loop))
+        // TODO: disallow function calls after literal
         .or(literal.map(Operand::Literal))
         .or(ident_path.map(Operand::Ident))
+        .or(parenthesis(expression)
+            .map(Box::new)
+            .map(Operand::Expression))
         // .or(self_ident.map(Operand::SelfIdent))
         .process(stream)
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
-    arguments.map(SecondaryExpr::Arguments).process(stream)
+    indice
+        .map(SecondaryExpr::Indice)
+        .or(dot.map(SecondaryExpr::Dot))
+        .or(arguments.map(SecondaryExpr::Arguments))
+        .process(stream)
 }
 
 pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
-    (
-        TokenType::OpenParen,
-        delimited(expression, TokenType::Coma),
-        TokenType::CloseParen,
-    )
-        .map(|(_, args, _)| args.into_iter().map(|arg| Argument { arg }).collect())
+    TokenType::StuckOperator("!".to_string())
+        .map(|_| vec![])
+        .or(TokenType::Operator("!".to_string()).map(|_| vec![]))
+        .or(delimited1(
+            expression.map(|arg| Argument { arg }),
+            TokenType::Coma,
+        ))
         .process(stream)
+}
+
+pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
+    preceded(TokenType::Dot, ident_or_number).process(stream)
+}
+
+pub fn ident_or_number(stream: Input) -> IResult<IdentOrNumber> {
+    ident
+        .map(IdentOrNumber::Ident)
+        .or(int.map(IdentOrNumber::Number))
+        .process(stream)
+}
+
+pub fn indice(stream: Input) -> IResult<Box<Expression>> {
+    preceded(
+        TokenType::OpenBracket,
+        followed(expression.map(Box::new), TokenType::CloseBracket),
+    )
+    .process(stream)
 }
 
 #[cfg(test)]
 mod expression {
+    use std::path::PathBuf;
+
     use super::*;
     use crate::{
         ast::*,
@@ -109,19 +144,31 @@ mod expression {
                 UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
                         kind: crate::ast::LiteralKind::Number(1),
-                        span: Span::default(),
+                        span: Span {
+                            start: 0,
+                            end: 1,
+                            file_path: PathBuf::default(),
+                        },
                     }),
                     secondaries: None,
                     type_annotation: None,
                 }),
                 Operator {
                     value: "+".to_string(),
-                    span: Span::default(),
+                    span: Span {
+                        start: 2,
+                        end: 3,
+                        file_path: PathBuf::default(),
+                    },
                 },
                 Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
                         kind: crate::ast::LiteralKind::Number(2),
-                        span: Span::default(),
+                        span: Span {
+                            start: 4,
+                            end: 5,
+                            file_path: PathBuf::default(),
+                        },
                     }),
                     secondaries: None,
                     type_annotation: None,
@@ -149,12 +196,20 @@ mod expression {
                     operand: Operand::Ident(IdentifierPath {
                         path: vec![IdentOrType::Ident(Ident {
                             name: "a".to_string(),
-                            span: Span::default(),
+                            span: Span {
+                                start: 0,
+                                end: 1,
+                                file_path: PathBuf::default(),
+                            },
                         })],
                     }),
                     secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
                         name: "a".to_string(),
-                        span: Span::default(),
+                        span: Span {
+                            start: 2,
+                            end: 3,
+                            file_path: PathBuf::default(),
+                        },
                     }))]),
                     type_annotation: None,
                 }),
@@ -167,7 +222,11 @@ mod expression {
                         operand: Operand::Ident(IdentifierPath {
                             path: vec![IdentOrType::Ident(Ident {
                                 name: "b".to_string(),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 6,
+                                    end: 7,
+                                    file_path: PathBuf::default(),
+                                },
                             })],
                         }),
                         secondaries: None,
@@ -180,7 +239,11 @@ mod expression {
                     Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                         operand: Operand::Literal(Literal {
                             kind: crate::ast::LiteralKind::Number(2),
-                            span: Span::default(),
+                            span: Span {
+                                start: 10,
+                                end: 11,
+                                file_path: PathBuf::default(),
+                            },
                         }),
                         secondaries: None,
                         type_annotation: None,
@@ -268,7 +331,11 @@ mod expression {
                 operand: Operand::Ident(IdentifierPath {
                     path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
-                        span: Span::default(),
+                        span: Span {
+                            start: 0,
+                            end: 5,
+                            file_path: PathBuf::default(),
+                        },
                     })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Arguments(vec![
@@ -276,7 +343,11 @@ mod expression {
                         arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                             operand: Operand::Literal(Literal {
                                 kind: crate::ast::LiteralKind::Number(1),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 6,
+                                    end: 7,
+                                    file_path: PathBuf::default(),
+                                },
                             }),
                             secondaries: None,
                             type_annotation: None,
@@ -286,7 +357,11 @@ mod expression {
                         arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                             operand: Operand::Literal(Literal {
                                 kind: crate::ast::LiteralKind::Number(2),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 9,
+                                    end: 10,
+                                    file_path: PathBuf::default(),
+                                },
                             }),
                             secondaries: None,
                             type_annotation: None,
@@ -296,13 +371,48 @@ mod expression {
                         arg: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                             operand: Operand::Literal(Literal {
                                 kind: crate::ast::LiteralKind::Number(3),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 12,
+                                    end: 13,
+                                    file_path: PathBuf::default(),
+                                },
                             }),
                             secondaries: None,
                             type_annotation: None,
                         })),
                     },
                 ])]),
+                type_annotation: None,
+            })),
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn bang_call_expression() {
+        let input = "hello!";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(IdentifierPath {
+                    path: vec![IdentOrType::Ident(Ident {
+                        name: "hello".to_string(),
+                        span: Span {
+                            start: 0,
+                            end: 5,
+                            file_path: PathBuf::default(),
+                        },
+                    })],
+                }),
+                secondaries: Some(vec![SecondaryExpr::Arguments(vec![])]),
                 type_annotation: None,
             })),
         );
@@ -326,14 +436,22 @@ mod expression {
                 operand: Operand::Ident(IdentifierPath {
                     path: vec![IdentOrType::Ident(Ident {
                         name: "hello".to_string(),
-                        span: Span::default(),
+                        span: Span {
+                            start: 0,
+                            end: 5,
+                            file_path: PathBuf::default(),
+                        },
                     })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Indice(Box::new(
                     Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                         operand: Operand::Literal(Literal {
                             kind: crate::ast::LiteralKind::Number(1),
-                            span: Span::default(),
+                            span: Span {
+                                start: 6,
+                                end: 7,
+                                file_path: PathBuf::default(),
+                            },
                         }),
                         secondaries: None,
                         type_annotation: None,
@@ -807,7 +925,11 @@ mod expression {
                 operand: Operand::Ident(IdentifierPath {
                     path: vec![IdentOrType::Ident(Ident {
                         name: "foo".to_string(),
-                        span: Span::default(),
+                        span: Span {
+                            start: 0,
+                            end: 3,
+                            file_path: PathBuf::default(),
+                        },
                     })],
                 }),
                 secondaries: Some(vec![SecondaryExpr::Arguments(vec![
@@ -816,7 +938,11 @@ mod expression {
                             operand: Operand::Ident(IdentifierPath {
                                 path: vec![IdentOrType::Ident(Ident {
                                     name: "bar".to_string(),
-                                    span: Span::default(),
+                                    span: Span {
+                                        start: 4,
+                                        end: 7,
+                                        file_path: PathBuf::default(),
+                                    },
                                 })],
                             }),
                             secondaries: None,
@@ -828,7 +954,11 @@ mod expression {
                             operand: Operand::Ident(IdentifierPath {
                                 path: vec![IdentOrType::Ident(Ident {
                                     name: "baz".to_string(),
-                                    span: Span::default(),
+                                    span: Span {
+                                        start: 8,
+                                        end: 11,
+                                        file_path: PathBuf::default(),
+                                    },
                                 })],
                             }),
                             secondaries: None,
@@ -840,19 +970,31 @@ mod expression {
                             UnaryExpr::PrimaryExpr(PrimaryExpr {
                                 operand: Operand::Literal(Literal {
                                     kind: crate::ast::LiteralKind::Number(2),
-                                    span: Span::default(),
+                                    span: Span {
+                                        start: 12,
+                                        end: 13,
+                                        file_path: PathBuf::default(),
+                                    },
                                 }),
                                 secondaries: None,
                                 type_annotation: None,
                             }),
                             Operator {
                                 value: "+".to_string(),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 14,
+                                    end: 15,
+                                    file_path: PathBuf::default(),
+                                },
                             },
                             Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                                 operand: Operand::Literal(Literal {
                                     kind: crate::ast::LiteralKind::Number(2),
-                                    span: Span::default(),
+                                    span: Span {
+                                        start: 16,
+                                        end: 17,
+                                        file_path: PathBuf::default(),
+                                    },
                                 }),
                                 secondaries: None,
                                 type_annotation: None,
@@ -1064,7 +1206,8 @@ mod expression {
     #[test]
     fn multiline_operator() {
         let input = r#"foo
-    + 2"#;
+    + 2
+    + 3"#;
         let tokens = lex_test(input);
         let config = Config::default();
 
@@ -1089,14 +1232,28 @@ mod expression {
                     value: "+".to_string(),
                     span: Span::default(),
                 },
-                Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                    operand: Operand::Literal(Literal {
-                        kind: crate::ast::LiteralKind::Number(2),
-                        span: Span::default(),
+                Box::new(Expression::BinopExpr(
+                    UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(2),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
                     }),
-                    secondaries: None,
-                    type_annotation: None,
-                })))
+                    Operator {
+                        value: "+".to_string(),
+                        span: Span::default(),
+                    },
+                    Box::new(Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Literal(Literal {
+                            kind: crate::ast::LiteralKind::Number(3),
+                            span: Span::default(),
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    })))
+                ))
             )
         );
         assert_eq!(rest.len(), 0);

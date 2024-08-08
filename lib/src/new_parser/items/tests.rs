@@ -97,7 +97,7 @@ mod new_parser {
                                         },
                                     })]
                                 }),
-                                secondaries: Some(vec![]),
+                                secondaries: None,
                                 type_annotation: None,
                             })
                         ))]
@@ -180,7 +180,7 @@ mod new_parser {
                                             },
                                         })]
                                     }),
-                                    secondaries: Some(vec![]),
+                                    secondaries: None,
                                     type_annotation: None,
                                 })
                             ))]
@@ -266,7 +266,7 @@ mod new_parser {
                                     file_path: PathBuf::new(),
                                 }
                             }),
-                            secondaries: Some(vec![]),
+                            secondaries: None,
                             type_annotation: None,
                         }))),
                     }

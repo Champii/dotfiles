@@ -2,11 +2,13 @@ mod consume_tokens_until;
 mod debug;
 mod empty_lines;
 mod get_span;
+mod parenthesis;
 
 pub use consume_tokens_until::*;
 pub use debug::*;
 pub use empty_lines::*;
 pub use get_span::*;
+pub use parenthesis::*;
 
 #[cfg(test)]
 pub use crate::lexer::Token;

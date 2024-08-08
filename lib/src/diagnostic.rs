@@ -235,3 +235,138 @@ impl From<ParseError> for Diagnostics {
         diagnostics
     }
 }
+
+// Old
+impl From<crate::parser::ParseError> for Diagnostics {
+    fn from(err: crate::parser::ParseError) -> Self {
+        let mut diagnostics = Diagnostics::default();
+
+        diagnostics.push(Diagnostic::from(err));
+
+        diagnostics
+    }
+}
+
+impl From<crate::parser::ParseError> for Diagnostic {
+    fn from(err: crate::parser::ParseError) -> Self {
+        match err {
+            crate::parser::ParseError::UnexpectedToken(got, expected) => Diagnostic {
+                message: format!("Unexpected token: {:?}", got),
+                labels: vec![(format!("Expected {:?}", expected), got.span.clone())],
+                span: got.span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::UnexpectedKeyword(token, expected) => Diagnostic {
+                message: format!("Unexpected keyword: {:?}", token.token_type,),
+                labels: vec![(
+                    format!("Expected one of {:?}", expected),
+                    token.span.clone(),
+                )],
+                span: token.span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::Lexer(LexerError::UnknownToken(c, span)) => Diagnostic {
+                message: format!("Lexer: Unknown token: {:?}", c),
+                labels: vec![],
+                span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::MacroNoCorrespondance {
+                macro_name,
+                invoc_name,
+                invoc_arg,
+            } => {
+                let mut labels = vec![
+                    (format!("For this macro"), macro_name.clone()),
+                    (format!("In this macro invocation"), invoc_name.clone()),
+                ];
+
+                if let Some(invoc_arg) = invoc_arg {
+                    labels.push((format!("With this token"), invoc_arg.clone()));
+                }
+
+                Diagnostic {
+                    message: format!("Macro: Nothing expected this token"),
+                    labels,
+                    span: macro_name.clone(),
+                    kind: DiagnosticType::Error,
+                }
+            }
+            crate::parser::ParseError::InvalidPrecedence(precedence, token) => Diagnostic {
+                message: format!("Invalid precedence: {:?}", precedence),
+                labels: vec![(
+                    format!("Precedence must be between 0 and 9"),
+                    token.span.clone(),
+                )],
+                span: token.span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::IndentMismatch(got, expected, span) => Diagnostic {
+                message: format!("Indent mismatch: got {}, expected {}", got, expected),
+                labels: vec![
+                    (format!("Expected indent level: {}", expected), span.clone()),
+                    (format!("Got indent level: {}", got), span.clone()),
+                ],
+                span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::UnexpectedEof(_token) => Diagnostic {
+                message: format!("Unexpected end of file"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::LeftoverTokens(tokens) => Diagnostic {
+                message: format!("Leftover tokens"),
+                labels: vec![(format!("Expected end of file"), tokens[0].span.clone())],
+                span: tokens[0].span.clone(),
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::UnknownFile(file) => Diagnostic {
+                message: format!("Unknown file: {:?}", file),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::InternalError(message) => Diagnostic {
+                message: format!("Internal error: {:?}", message),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::ShortCircuit => Diagnostic {
+                message: format!("Short circuit, should never be printed !"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::ExpectedType(span) => Diagnostic {
+                message: format!("Expected a type"),
+                labels: vec![(format!("But got"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::InvalidLHS(span) => Diagnostic {
+                message: format!("Malformed assignment"),
+                labels: vec![(format!("Invalid left-hand side"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::InvalidVariant(enum_name, variant) => Diagnostic {
+                message: format!("Invalid variant"),
+                labels: vec![
+                    (format!("In this enum"), enum_name.clone()),
+                    (format!("Expected a variant"), variant.clone()),
+                ],
+                span: enum_name,
+                kind: DiagnosticType::Error,
+            },
+            crate::parser::ParseError::InvalidType(span) => Diagnostic {
+                message: format!("Invalid type"),
+                labels: vec![(format!("Expected a type"), span.clone())],
+                span,
+                kind: DiagnosticType::Error,
+            },
+        }
+    }
+}
