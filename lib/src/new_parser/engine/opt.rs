@@ -25,6 +25,6 @@ where
     }
 }
 
-fn opt<P>(parser: P) -> Opt<P> {
+pub fn opt<P>(parser: P) -> Opt<P> {
     Opt { parser }
 }

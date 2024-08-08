@@ -18,7 +18,6 @@ mod tuples;
 
 pub use and::*;
 pub use delimited::*;
-pub use fns::*;
 pub use followed::*;
 pub use indented::*;
 pub use iresult::*;
@@ -29,8 +28,6 @@ pub use or::*;
 pub use parse_error::*;
 pub use parser_trait::*;
 pub use preceded::*;
-pub use token_type::*;
-pub use tuples::*;
 
 pub type Input<'a> = ParseCtx<'a>;
 

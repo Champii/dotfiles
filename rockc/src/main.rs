@@ -1,4 +1,4 @@
-use std::{error::Error, path::PathBuf};
+use std::path::PathBuf;
 
 use clap::Parser;
 use rock_lib::{diagnostic::Diagnostics, DebugPrint};

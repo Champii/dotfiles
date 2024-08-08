@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{MacroDecl, MacroFragment, Module, ModuleInner, Program, TopLevel, TopLevelKind},
+    ast::{MacroDecl, MacroFragment, Module, Program, TopLevel, TopLevelKind},
     diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
     new_parser::{module_inline, ParseCtx, Parser},

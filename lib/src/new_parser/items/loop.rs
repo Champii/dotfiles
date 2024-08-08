@@ -45,7 +45,7 @@ mod parse_loop {
             Block, Expression, Ident, IdentOrType, IdentifierPath, Literal, LiteralKind, Loop,
             Operand, PrimaryExpr, Statement, UnaryExpr,
         },
-        new_parser::{engine::*, lex_test},
+        new_parser::lex_test,
         Config,
     };
 

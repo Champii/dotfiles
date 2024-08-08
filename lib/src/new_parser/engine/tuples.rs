@@ -2,6 +2,7 @@ use super::{parser_trait::Parser, IResult, Input};
 
 macro_rules! impl_parsable_for_tuple {
     ($($name:ident $name2:ident),*) => {
+        #[allow(non_snake_case)]
         impl<$($name: Parser<Output = $name2>, $name2),*> Parser for &mut ($($name,)*) {
             type Output = ($($name::Output,)*);
 
@@ -16,6 +17,7 @@ macro_rules! impl_parsable_for_tuple {
             }
         }
 
+        #[allow(non_snake_case)]
         impl<$($name: Parser<Output = $name2>, $name2),*> Parser for ($($name,)*) {
             type Output = ($($name::Output,)*);
 
@@ -30,6 +32,7 @@ macro_rules! impl_parsable_for_tuple {
             }
         }
 
+        #[allow(non_snake_case)]
         impl<$($name: Parser<Output = $name2> + Clone, $name2),*> Parser for &($($name,)*) where Self: Clone {
             type Output = ($($name::Output,)*);
 

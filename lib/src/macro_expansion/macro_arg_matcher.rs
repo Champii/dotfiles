@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Expression, MacroFragment},
+    ast::MacroFragment,
     diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
     new_parser::{expression, ParseCtx, ParseError, Parser},

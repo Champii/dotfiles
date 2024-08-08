@@ -28,7 +28,7 @@ where
 
             let (new_remaining_tokens, item) = match self.parser.process(remaining_tokens) {
                 Ok((new_remaining_tokens, item)) => (new_remaining_tokens, item),
-                Err(e) => {
+                Err(_) => {
                     remaining_tokens = remaining_tokens_with_delim;
                     // diagnostics = e;
                     break;
