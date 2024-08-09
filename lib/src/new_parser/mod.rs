@@ -10,22 +10,6 @@ use crate::ast::tree::*;
 use crate::lexer::{Lexer, TokenType};
 use crate::{Config, DebugPrint};
 
-/* // Execute parser F if token type is found but does not consume it
-fn seek<'a, T, F>(token_type: TokenType, parser: F) -> impl Fn(Input<'a>) -> IResult<'a, T>
-where
-    F: Fn(Input<'a>) -> IResult<'a, T>,
-{
-    move |stream| {
-        let (_, token) = stream.consume()?;
-
-        if token.token_type == token_type {
-            parser(stream)
-        } else {
-            Err(ParseError::UnexpectedToken(token.clone()))
-        }
-    }
-} */
-
 pub fn parse(config: &Config) -> Result<Program, ParseError> {
     let file_path = config.entry_file.clone();
 

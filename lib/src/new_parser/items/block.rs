@@ -8,7 +8,7 @@ use super::{indent, statement};
 pub fn block(stream: Input) -> IResult<Block> {
     preceded(
         TokenType::Eol,
-        indented(delimited1(preceded(indent, statement), TokenType::Eol)),
+        indented(separated1(preceded(indent, statement), TokenType::Eol)),
     )
     .or(statement.map(|statement| vec![statement]))
     .map(|statements| Block { statements })

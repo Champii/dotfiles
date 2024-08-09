@@ -1,5 +1,6 @@
 lol = ->
-    1 b
+    match true
+        Player foo: (Ok a) => 2
 
 
 

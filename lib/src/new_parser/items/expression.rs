@@ -3,7 +3,7 @@ use crate::new_parser::{
     engine::*, Argument, Expression, IdentOrNumber, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
 };
 
-use super::{ident, ident_path, indent, int, operator, parenthesis, r#loop};
+use super::{ident, ident_path, indent, int, operator, parenthesis, r#loop, r#match};
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type};
 
@@ -68,6 +68,7 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         .or(tuple.map(Operand::Tuple))
         .or(native_operator.map(Operand::NativeOperator)) */
         .or(r#loop.map(Box::new).map(Operand::Loop))
+        .or(r#match.map(Box::new).map(Operand::Match))
         // TODO: disallow function calls after literal
         .or(literal.map(Operand::Literal))
         .or(ident_path.map(Operand::Ident))
@@ -90,7 +91,7 @@ pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
     TokenType::StuckOperator("!".to_string())
         .map(|_| vec![])
         .or(TokenType::Operator("!".to_string()).map(|_| vec![]))
-        .or(delimited1(
+        .or(separated1(
             expression.map(|arg| Argument { arg }),
             TokenType::Coma,
         ))

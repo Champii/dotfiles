@@ -13,6 +13,7 @@ mod or;
 mod parse_error;
 mod parser_trait;
 mod preceded;
+mod separated;
 mod token_type;
 mod tuples;
 
@@ -28,6 +29,7 @@ pub use or::*;
 pub use parse_error::*;
 pub use parser_trait::*;
 pub use preceded::*;
+pub use separated::*;
 
 pub type Input<'a> = ParseCtx<'a>;
 

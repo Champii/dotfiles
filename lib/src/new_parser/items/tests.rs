@@ -67,14 +67,7 @@ mod new_parser {
                 },
                 lambda: LambdaDecl {
                     parameters: vec![Pattern {
-                        binding: Some(Ident {
-                            name: "foo".to_string(),
-                            span: Span {
-                                start: 4,
-                                end: 7,
-                                file_path: PathBuf::new(),
-                            },
-                        }),
+                        binding: None,
                         kind: PatternKind::Ident(Ident {
                             name: "foo".to_string(),
                             span: Span {
@@ -150,14 +143,7 @@ mod new_parser {
                     },
                     lambda: LambdaDecl {
                         parameters: vec![Pattern {
-                            binding: Some(Ident {
-                                name: "foo".to_string(),
-                                span: Span {
-                                    start: 4,
-                                    end: 7,
-                                    file_path: PathBuf::new(),
-                                },
-                            }),
+                            binding: None,
                             kind: PatternKind::Ident(Ident {
                                 name: "foo".to_string(),
                                 span: Span {

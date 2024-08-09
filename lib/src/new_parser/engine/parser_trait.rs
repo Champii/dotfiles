@@ -42,4 +42,15 @@ pub trait Parser {
     {
         Followed::new(self, next)
     }
+
+    fn debug(self) -> Map<Self, fn(Self::Output) -> Self::Output>
+    where
+        Self: Sized,
+        <Self as Parser>::Output: std::fmt::Debug,
+    {
+        Map::new(self, move |output| {
+            println!("{:#?}", output);
+            output
+        })
+    }
 }
