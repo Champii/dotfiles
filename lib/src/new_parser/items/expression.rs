@@ -1,7 +1,7 @@
 use crate::lexer::{Span, Token, TokenType};
 use crate::new_parser::{
-    engine::*, Argument, Expression, Ident, IdentOrNumber, LambdaDecl, Operand, PrimaryExpr,
-    SecondaryExpr, Tuple, UnaryExpr,
+    engine::*, Argument, Expression, Ident, IdentOrNumber, Operand, PrimaryExpr, SecondaryExpr,
+    Tuple, UnaryExpr,
 };
 
 use super::{
@@ -124,7 +124,9 @@ pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
         indice
             .map(SecondaryExpr::Indice)
             .or(dot.map(SecondaryExpr::Dot))
-            .or(arguments.map(SecondaryExpr::Arguments)),
+            .or(double_dot.map(SecondaryExpr::DoubleDot))
+            .or(arguments.map(SecondaryExpr::Arguments))
+            .or(TokenType::Interogation.map(|_| SecondaryExpr::Interogation)),
     )
     .process(stream)
 }
@@ -133,15 +135,47 @@ pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
     TokenType::StuckOperator("!".to_string())
         .map(|_| vec![])
         .or(TokenType::Operator("!".to_string()).map(|_| vec![]))
-        .or(separated1(
+        .or(inside_argument_list(separated1(
             expression.map(|arg| Argument { arg }),
             TokenType::Coma,
-        ))
+        )))
         .process(stream)
 }
 
+pub fn inside_argument_list<P: Parser>(mut parser: P) -> impl FnMut(Input) -> IResult<P::Output> {
+    move |mut stream| {
+        let old_value = stream.inside_argument_list;
+        stream.inside_argument_list = true;
+
+        let (mut stream, t) = parser.process(stream)?;
+
+        stream.inside_argument_list = old_value;
+
+        Ok((stream, t))
+    }
+}
+
+pub fn arguments_list_short_circuit(mut stream: Input) -> IResult<()> {
+    stream.argument_list_short_circuit()?;
+
+    Ok((stream, ()))
+}
+
 pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
-    preceded(TokenType::Dot, ident_or_number).process(stream)
+    // TODO: argument list short circuit
+    preceded(
+        TokenType::Dot.or(preceded(arguments_list_short_circuit, TokenType::SpacedDot)),
+        ident_or_number,
+    )
+    .process(stream)
+}
+
+pub fn double_dot(stream: Input) -> IResult<IdentOrNumber> {
+    preceded(
+        TokenType::DoubleDot,
+        preceded(arguments_list_short_circuit, ident_or_number),
+    )
+    .process(stream)
 }
 
 pub fn ident_or_number(stream: Input) -> IResult<IdentOrNumber> {
@@ -1111,13 +1145,19 @@ mod expression {
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
 
+        println!("{:#?}", expression);
+
         assert_eq!(
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::Ident(IdentifierPath {
                     path: vec![IdentOrType::Ident(Ident {
                         name: "foo".to_string(),
-                        span: Span::default(),
+                        span: Span {
+                            start: 0,
+                            end: 3,
+                            file_path: PathBuf::default(),
+                        },
                     })],
                 }),
                 secondaries: Some(vec![
@@ -1126,17 +1166,25 @@ mod expression {
                             operand: Operand::Ident(IdentifierPath {
                                 path: vec![IdentOrType::Ident(Ident {
                                     name: "bar".to_string(),
-                                    span: Span::default(),
+                                    span: Span {
+                                        start: 4,
+                                        end: 7,
+                                        file_path: PathBuf::default(),
+                                    },
                                 })],
                             }),
                             secondaries: None,
                             type_annotation: None,
                         }))
                     }]),
-                    SecondaryExpr::DoubleDot(Ident {
+                    SecondaryExpr::DoubleDot(IdentOrNumber::Ident(Ident {
                         name: "baz".to_string(),
-                        span: Span::default(),
-                    }),
+                        span: Span {
+                            start: 10,
+                            end: 13,
+                            file_path: PathBuf::default(),
+                        },
+                    })),
                 ]),
                 type_annotation: None,
             })),
@@ -1178,14 +1226,14 @@ mod expression {
                             type_annotation: None,
                         }))
                     }]),
-                    SecondaryExpr::DoubleDot(Ident {
+                    SecondaryExpr::DoubleDot(IdentOrNumber::Ident(Ident {
                         name: "baz".to_string(),
                         span: Span::default(),
-                    }),
-                    SecondaryExpr::DoubleDot(Ident {
+                    })),
+                    SecondaryExpr::DoubleDot(IdentOrNumber::Ident(Ident {
                         name: "foofoo".to_string(),
                         span: Span::default(),
-                    }),
+                    })),
                 ]),
                 type_annotation: None,
             })),

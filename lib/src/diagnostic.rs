@@ -117,6 +117,12 @@ impl From<ParseError> for Diagnostic {
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
+            ParseError::ShortCircuit => Diagnostic {
+                message: format!("Short circuit, should never be printed !"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
             /* ParseError::InternalError(message) => Diagnostic {
                 message: format!("Internal error: {:?}", message),
                 labels: vec![],

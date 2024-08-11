@@ -42,6 +42,7 @@ pub struct ParseCtx<'a> {
     pub config: &'a Config,
     pub indent_step: usize,
     pub disallowed_multiline_fn_call: bool,
+    pub inside_argument_list: bool,
 }
 
 impl ParseCtx<'_> {
@@ -115,6 +116,7 @@ impl ParseCtx<'_> {
             indent_step: 4,
             config,
             disallowed_multiline_fn_call: false,
+            inside_argument_list: false,
         }
     }
 
@@ -123,6 +125,16 @@ impl ParseCtx<'_> {
             disallowed_multiline_fn_call: true,
             ..*self
         })
+    }
+
+    pub fn argument_list_short_circuit(&mut self) -> Result<(), ParseError> {
+        if !self.inside_argument_list {
+            return Ok(());
+        }
+
+        self.inside_argument_list = false;
+
+        Err(ParseError::ShortCircuit.into())
     }
 }
 

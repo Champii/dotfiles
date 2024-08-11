@@ -15,6 +15,7 @@ pub enum ParseError {
     },
     // used to short-circuit the parser
     Fail,
+    ShortCircuit, // should not be bubbled up to the user
 }
 
 impl ParseError {
@@ -28,6 +29,7 @@ impl ParseError {
             ParseError::ExpectedOneOrMore => "ExpectedOneOrMore",
             ParseError::MacroNoCorrespondance { .. } => "MacroNoCorrespondance",
             ParseError::Fail => "Fail",
+            ParseError::ShortCircuit => "ShortCircuit",
         }
     }
 }
