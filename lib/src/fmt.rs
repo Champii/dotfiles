@@ -372,6 +372,20 @@ impl Display for IdentifierPath {
     }
 }
 
+impl Display for TypePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        for (i, ident) in self.path.iter().enumerate() {
+            write!(f, "{}", ident)?;
+
+            if i < self.path.len() - 1 {
+                write!(f, "::")?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
 impl Display for IdentOrType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

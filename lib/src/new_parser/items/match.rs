@@ -34,6 +34,8 @@ pub fn match_arm(stream: Input) -> IResult<MatchArm> {
 
 #[cfg(test)]
 mod r#match {
+    use std::path::PathBuf;
+
     use super::*;
     use crate::{ast::*, lexer::Span, new_parser::lex_test, Config};
 
@@ -47,6 +49,8 @@ mod r#match {
 
         let (rest, expression) = r#match.process(ParseCtx::from(&tokens, &config)).unwrap();
 
+        println!("EXPR: {:#?}", expression);
+
         assert_eq!(
             expression,
             Match {
@@ -54,7 +58,11 @@ mod r#match {
                     operand: Operand::Ident(crate::ast::IdentifierPath {
                         path: vec![IdentOrType::Ident(Ident {
                             name: "a".to_string(),
-                            span: Span::default(),
+                            span: Span {
+                                start: 6,
+                                end: 7,
+                                file_path: PathBuf::default(),
+                            },
                         })]
                     }),
                     secondaries: None,
@@ -66,7 +74,11 @@ mod r#match {
                             binding: None,
                             kind: PatternKind::Ident(Ident {
                                 name: "a".to_string(),
-                                span: Span::default(),
+                                span: Span {
+                                    start: 12,
+                                    end: 13,
+                                    file_path: PathBuf::default(),
+                                }
                             })
                         },
                         condition: None,
@@ -75,7 +87,11 @@ mod r#match {
                                 UnaryExpr::PrimaryExpr(PrimaryExpr {
                                     operand: Operand::Literal(Literal {
                                         kind: LiteralKind::Number(2),
-                                        span: Span::default()
+                                        span: Span {
+                                            start: 17,
+                                            end: 18,
+                                            file_path: PathBuf::default(),
+                                        }
                                     }),
                                     secondaries: None,
                                     type_annotation: None,
@@ -91,14 +107,22 @@ mod r#match {
                                     binding: None,
                                     kind: PatternKind::Ident(Ident {
                                         name: "a".to_string(),
-                                        span: Span::default(),
+                                        span: Span {
+                                            start: 24,
+                                            end: 25,
+                                            file_path: PathBuf::default(),
+                                        }
                                     })
                                 },
                                 Pattern {
                                     binding: None,
                                     kind: PatternKind::Ident(Ident {
                                         name: "b".to_string(),
-                                        span: Span::default(),
+                                        span: Span {
+                                            start: 27,
+                                            end: 28,
+                                            file_path: PathBuf::default(),
+                                        }
                                     })
                                 }
                             ])

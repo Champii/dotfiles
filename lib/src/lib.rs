@@ -10,7 +10,7 @@ mod fmt;
 mod lexer;
 pub mod macro_expansion;
 pub mod new_parser;
-pub mod parser;
+// pub mod parser;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DebugPrint {

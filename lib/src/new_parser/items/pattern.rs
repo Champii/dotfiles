@@ -6,7 +6,7 @@ use crate::{
     },
 };
 
-use super::{ident, ident_path, literal, parenthesis, seek, type_token};
+use super::{ident, ident_path, literal, parenthesis, seek, type_path, type_token};
 
 pub fn pattern(stream: Input) -> IResult<Pattern> {
     (followed(ident, TokenType::Arobase).opt(), pattern_kind)
@@ -47,28 +47,22 @@ pub fn array_pattern(stream: Input) -> IResult<ArrayPattern> {
 }
 
 pub fn instance_pattern(stream: Input) -> IResult<InstancePattern> {
-    (
-        seek(type_token),
-        ident_path,
-        field_pattern_or_arguments_pattern,
-    )
-        .map(|(_, name, args)| InstancePattern { name, args })
+    (type_path, field_pattern_or_arguments_pattern)
+        .map(|(name, args)| InstancePattern { name, args })
         .process(stream)
 }
 
 pub fn field_pattern_or_arguments_pattern(
     stream: Input,
 ) -> IResult<FieldsPatternOrArgumentsPattern> {
-    separated1(field_pattern.debug(), TokenType::Coma)
+    separated1(field_pattern, TokenType::Coma)
         .map(FieldsPatternOrArgumentsPattern::Fields)
-        .or(separated1(pattern, TokenType::Coma)
-            .debug()
-            .map(FieldsPatternOrArgumentsPattern::Arguments))
+        .or(separated1(pattern, TokenType::Coma).map(FieldsPatternOrArgumentsPattern::Arguments))
         .process(stream)
 }
 
 pub fn field_pattern(stream: Input) -> IResult<FieldPattern> {
-    (ident.debug(), TokenType::Colon.debug(), pattern)
+    (ident, TokenType::Colon, pattern)
         .map(|(name, _, pattern)| FieldPattern { name, pattern })
         .process(stream)
 }
@@ -116,7 +110,7 @@ mod pattern {
             Pattern {
                 binding: None,
                 kind: PatternKind::Instance(InstancePattern {
-                    name: IdentifierPath {
+                    name: TypePath {
                         path: vec![IdentOrType::Type(ParseType::Type(ParseTypeInner {
                             name: "Player".to_string(),
                             generics: vec![],
@@ -134,7 +128,7 @@ mod pattern {
                                 kind: PatternKind::Nested(Box::new(Pattern {
                                     binding: None,
                                     kind: PatternKind::Instance(InstancePattern {
-                                        name: IdentifierPath {
+                                        name: TypePath {
                                             path: vec![IdentOrType::Type(ParseType::Type(
                                                 ParseTypeInner {
                                                     name: "Ok".to_string(),
@@ -190,7 +184,7 @@ mod pattern {
             Pattern {
                 binding: None,
                 kind: PatternKind::Instance(InstancePattern {
-                    name: IdentifierPath {
+                    name: TypePath {
                         path: vec![IdentOrType::Type(ParseType::Type(ParseTypeInner {
                             name: "Player".to_string(),
                             generics: vec![],
@@ -203,7 +197,7 @@ mod pattern {
                             kind: PatternKind::Nested(Box::new(Pattern {
                                 binding: None,
                                 kind: PatternKind::Instance(InstancePattern {
-                                    name: IdentifierPath {
+                                    name: TypePath {
                                         path: vec![IdentOrType::Type(ParseType::Type(
                                             ParseTypeInner {
                                                 name: "Ok".to_string(),

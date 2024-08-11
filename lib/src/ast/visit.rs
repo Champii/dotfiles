@@ -86,6 +86,7 @@ generate_visitor_trait!(
     Assignment
     AssignmentLHS
     IdentifierPath
+    TypePath
     Statement
     Loop
     Expression
@@ -201,6 +202,10 @@ pub fn walk_identifier_path<'a, V: Visitor<'a>>(
     walk_list!(visitor, visit_ident, &identifier_path.path);
 }
 
+pub fn walk_type_path<'a, V: Visitor<'a>>(visitor: &mut V, identifier_path: &'a TypePath) {
+    walk_list!(visitor, visit_ident, &identifier_path.path);
+}
+
 pub fn walk_ident<'a, V: Visitor<'a>>(visitor: &mut V, identifier: &'a Ident) {
     visitor.visit_name(&identifier.name);
 }
@@ -295,7 +300,7 @@ pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression
 }
 
 pub fn walk_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a Instance) {
-    visitor.visit_identifier_path(&s.name);
+    visitor.visit_type_path(&s.name);
 
     walk_map!(visitor, &s.fields);
 }
@@ -387,7 +392,7 @@ pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind
 }
 
 pub fn walk_instance_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a InstancePattern) {
-    visitor.visit_identifier_path(&e.name);
+    visitor.visit_type_path(&e.name);
     visitor.visit_fields_pattern_or_arguments_pattern(&e.args);
 }
 

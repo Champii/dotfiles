@@ -1,9 +1,13 @@
-use crate::lexer::TokenType;
+use crate::lexer::{Span, Token, TokenType};
 use crate::new_parser::{
-    engine::*, Argument, Expression, IdentOrNumber, Operand, PrimaryExpr, SecondaryExpr, UnaryExpr,
+    engine::*, Argument, Expression, Ident, IdentOrNumber, LambdaDecl, Operand, PrimaryExpr,
+    SecondaryExpr, Tuple, UnaryExpr,
 };
 
-use super::{ident, ident_path, indent, int, operator, parenthesis, r#loop, r#match};
+use super::{
+    block, function_shorthand, get_span, ident, ident_path, indent, instance, int, lambda_decl,
+    operator, operator_token, parenthesis, r#loop, r#match,
+};
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type};
 
@@ -60,31 +64,69 @@ pub fn operand(stream: Input) -> IResult<Operand> {
     parse_if
         .map(Box::new)
         .map(Operand::If)
-        /* .or(parse_match.map(Operand::Match))
-        .or(parse_loop.map(Operand::Loop))
-        .or(parse_unsafe.map(Operand::Unsafe))
-        .or(lambda_decl.map(Operand::LambdaDecl))
-        .or(instance.map(Operand::Instance))
-        .or(tuple.map(Operand::Tuple))
-        .or(native_operator.map(Operand::NativeOperator)) */
         .or(r#loop.map(Box::new).map(Operand::Loop))
         .or(r#match.map(Box::new).map(Operand::Match))
-        // TODO: disallow function calls after literal
-        .or(literal.map(Operand::Literal))
-        .or(ident_path.map(Operand::Ident))
+        .or(preceded(TokenType::Keyword("unsafe".to_string()), block).map(Operand::Unsafe))
+        .or(self_ident)
+        .or(instance.map(Operand::Instance))
+        .or(tuple.map(Operand::Tuple))
+        .or(function_shorthand.map(Operand::LambdaDecl))
         .or(parenthesis(expression)
             .map(Box::new)
             .map(Operand::Expression))
-        // .or(self_ident.map(Operand::SelfIdent))
+        // TODO: disallow function calls after literal
+        .or(literal.map(Operand::Literal))
+        .or(lambda_decl.map(Operand::LambdaDecl))
+        // .or(native_operator.map(Operand::NativeOperator))
+        .or(ident_path.map(Operand::Ident))
+        .process(stream)
+}
+
+/* pub fn native_operator(stream: Input) -> IResult<Operand> {
+    preceded(TokenType::Operator(".".to_string()), ident)
+        .map(Operand::NativeOperator)
+        .process(stream)
+} */
+
+pub fn tuple(stream: Input) -> IResult<Tuple> {
+    parenthesis(separated1(expression, TokenType::Coma))
+        .map(|elements| Tuple { elements })
+        .process(stream)
+        .map(|(stream, tuple)| {
+            if tuple.elements.len() < 2 {
+                Err(ParseError::UnexpectedToken(
+                    TokenType::OpenParen.discriminant().to_string(),
+                    Token {
+                        token_type: TokenType::OpenParen,
+                        span: Span::default(),
+                    },
+                ))
+            } else {
+                Ok((stream, tuple))
+            }
+        })?
+}
+
+pub fn self_ident(stream: Input) -> IResult<Operand> {
+    preceded(TokenType::Arobase, ident.map(Operand::SelfIdent))
+        .or((get_span, TokenType::Arobase).map(|(span, _)| {
+            Operand::SelfIdent(Ident {
+                name: "self".to_string(),
+                span,
+            })
+        }))
         .process(stream)
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
-    indice
-        .map(SecondaryExpr::Indice)
-        .or(dot.map(SecondaryExpr::Dot))
-        .or(arguments.map(SecondaryExpr::Arguments))
-        .process(stream)
+    preceded(
+        not(operator_token),
+        indice
+            .map(SecondaryExpr::Indice)
+            .or(dot.map(SecondaryExpr::Dot))
+            .or(arguments.map(SecondaryExpr::Arguments)),
+    )
+    .process(stream)
 }
 
 pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
@@ -189,6 +231,8 @@ mod expression {
         let (rest, expression) = expression
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
+
+        println!("{:#?}", expression);
 
         assert_eq!(
             expression,
@@ -1047,7 +1091,7 @@ mod expression {
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                 operand: Operand::SelfIdent(Ident {
-                    name: "".to_string(),
+                    name: "self".to_string(),
                     span: Span::default(),
                 }),
                 secondaries: None,

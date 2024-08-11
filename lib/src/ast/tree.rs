@@ -272,7 +272,7 @@ pub enum ArrayPattern {
 
 #[derive(Debug, PartialEq)]
 pub struct InstancePattern {
-    pub name: IdentifierPath,
+    pub name: TypePath,
     pub args: FieldsPatternOrArgumentsPattern,
 }
 
@@ -321,7 +321,7 @@ pub enum Loop {
 
 #[derive(Debug, PartialEq)]
 pub struct Instance {
-    pub name: IdentifierPath,
+    pub name: TypePath,
     pub fields: BTreeMap<Ident, Expression>,
 }
 
@@ -333,6 +333,11 @@ pub enum IdentOrType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IdentifierPath {
+    pub path: Vec<IdentOrType>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct TypePath {
     pub path: Vec<IdentOrType>,
 }
 

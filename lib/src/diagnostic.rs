@@ -111,6 +111,12 @@ impl From<ParseError> for Diagnostic {
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
+            ParseError::Fail => Diagnostic {
+                message: format!("Fail"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
             /* ParseError::InternalError(message) => Diagnostic {
                 message: format!("Internal error: {:?}", message),
                 labels: vec![],
@@ -236,7 +242,7 @@ impl From<ParseError> for Diagnostics {
     }
 }
 
-// Old
+/* // Old
 impl From<crate::parser::ParseError> for Diagnostics {
     fn from(err: crate::parser::ParseError) -> Self {
         let mut diagnostics = Diagnostics::default();
@@ -369,4 +375,4 @@ impl From<crate::parser::ParseError> for Diagnostic {
             },
         }
     }
-}
+} */

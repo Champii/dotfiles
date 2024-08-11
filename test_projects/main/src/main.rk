@@ -1,7 +1,1 @@
-lol = ->
-    match true
-        Player foo: (Ok a) => 2
-
-
-
-
+myfn = -> (1 + 2)

@@ -32,7 +32,7 @@ macro_rules! token_with_span {
     }};
 }
 
-pub fn ident(stream: Input) -> IResult<Ident> {
+pub fn ident_token(stream: Input) -> IResult<Ident> {
     token_with_span!(stream, span, TokenType::Ident(name) =>
         Ident { name, span }
     )

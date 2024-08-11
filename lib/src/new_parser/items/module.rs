@@ -1,5 +1,3 @@
-use items::primitives::ident;
-
 use crate::{lexer::TokenType, new_parser::*};
 
 use super::top_level;

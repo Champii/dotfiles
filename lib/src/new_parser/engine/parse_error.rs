@@ -13,6 +13,8 @@ pub enum ParseError {
         invoc_name: Span,
         invoc_arg: Option<Span>,
     },
+    // used to short-circuit the parser
+    Fail,
 }
 
 impl ParseError {
@@ -25,6 +27,7 @@ impl ParseError {
             ParseError::UnexpectedIndent(_) => "UnexpectedIndent",
             ParseError::ExpectedOneOrMore => "ExpectedOneOrMore",
             ParseError::MacroNoCorrespondance { .. } => "MacroNoCorrespondance",
+            ParseError::Fail => "Fail",
         }
     }
 }
