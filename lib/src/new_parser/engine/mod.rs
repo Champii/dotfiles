@@ -136,6 +136,16 @@ impl ParseCtx<'_> {
 
         Err(ParseError::ShortCircuit.into())
     }
+
+    /* pub fn disallow_multiline_fn_call_short_circuit(&mut self) -> Result<(), ParseError> {
+        if !self.disallowed_multiline_fn_call {
+            return Ok(());
+        }
+
+        self.disallowed_multiline_fn_call = false;
+
+        Err(ParseError::ShortCircuit.into())
+    } */
 }
 
 /* impl<'a> From<&'a [Token]> for ParseCtx<'a> {

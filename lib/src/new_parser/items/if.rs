@@ -34,23 +34,6 @@ pub fn parse_else(stream: Input) -> IResult<Else> {
     .map(debug)
 }
 
-pub fn disallow_multiline_fn_call<T, F>(parser: F) -> impl Fn(Input) -> IResult<T>
-where
-    F: Fn(Input) -> IResult<T>,
-{
-    move |mut stream| {
-        let old_state = stream.disallowed_multiline_fn_call;
-
-        stream = stream.disallow_multiline_fn_call()?;
-
-        let (mut stream, res) = parser(stream)?;
-
-        stream.disallowed_multiline_fn_call = old_state;
-
-        Ok((stream, res))
-    }
-}
-
 #[cfg(test)]
 mod test_if {
     use super::*;

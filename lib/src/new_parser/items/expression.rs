@@ -71,14 +71,14 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         .or(instance.map(Operand::Instance))
         .or(tuple.map(Operand::Tuple))
         .or(function_shorthand.map(Operand::LambdaDecl))
-        .or(parenthesis(expression)
+        .or(parenthesis(reset_inside_argument_list(expression))
             .map(Box::new)
             .map(Operand::Expression))
         // TODO: disallow function calls after literal
         .or(literal.map(Operand::Literal))
         .or(lambda_decl.map(Operand::LambdaDecl))
         // .or(native_operator.map(Operand::NativeOperator))
-        .or(ident_path.map(Operand::Ident))
+        .or(preceded(not(operator), ident_path.map(Operand::Ident)))
         .process(stream)
 }
 
@@ -119,26 +119,42 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
-    preceded(
-        not(operator_token),
-        indice
-            .map(SecondaryExpr::Indice)
-            .or(dot.map(SecondaryExpr::Dot))
-            .or(double_dot.map(SecondaryExpr::DoubleDot))
-            .or(arguments.map(SecondaryExpr::Arguments))
-            .or(TokenType::Interogation.map(|_| SecondaryExpr::Interogation)),
-    )
-    .process(stream)
+    // preceded(
+    // not(operator_token),
+    indice
+        .map(SecondaryExpr::Indice)
+        .or(dot.map(SecondaryExpr::Dot))
+        .or(double_dot.map(SecondaryExpr::DoubleDot))
+        .or(arguments.map(SecondaryExpr::Arguments))
+        .or(TokenType::Interogation.map(|_| SecondaryExpr::Interogation))
+        // )
+        .process(stream)
 }
 
 pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
     TokenType::StuckOperator("!".to_string())
         .map(|_| vec![])
         .or(TokenType::Operator("!".to_string()).map(|_| vec![]))
-        .or(inside_argument_list(separated1(
-            expression.map(|arg| Argument { arg }),
-            TokenType::Coma,
-        )))
+        .or(preceded(
+            not(operator),
+            inside_argument_list(separated1(
+                expression.map(|arg| Argument { arg }),
+                TokenType::Coma,
+            )),
+        ))
+        .or(preceded(
+            not(operator),
+            preceded(
+                not_multi_line_fn_call_short_circuit,
+                preceded(
+                    TokenType::Eol,
+                    inside_argument_list(indented(separated1(
+                        preceded(indent, expression.map(|arg| Argument { arg }).debug()),
+                        TokenType::Eol,
+                    ))),
+                ),
+            ),
+        ))
         .process(stream)
 }
 
@@ -147,11 +163,70 @@ pub fn inside_argument_list<P: Parser>(mut parser: P) -> impl FnMut(Input) -> IR
         let old_value = stream.inside_argument_list;
         stream.inside_argument_list = true;
 
-        let (mut stream, t) = parser.process(stream)?;
+        match parser.process(stream) {
+            Ok((mut stream, t)) => {
+                stream.inside_argument_list = old_value;
 
-        stream.inside_argument_list = old_value;
+                Ok((stream, t))
+            }
+            Err(e) => {
+                stream.inside_argument_list = old_value;
 
-        Ok((stream, t))
+                Err(e)
+            }
+        }
+    }
+}
+
+pub fn reset_inside_argument_list<P: Parser>(
+    mut parser: P,
+) -> impl FnMut(Input) -> IResult<P::Output> {
+    move |mut stream| {
+        let old_value = stream.inside_argument_list;
+        stream.inside_argument_list = false;
+
+        match parser.process(stream) {
+            Ok((mut stream, t)) => {
+                stream.inside_argument_list = old_value;
+
+                Ok((stream, t))
+            }
+            Err(e) => {
+                stream.inside_argument_list = old_value;
+
+                Err(e)
+            }
+        }
+    }
+}
+
+pub fn disallow_multiline_fn_call<P: Parser>(
+    mut parser: P,
+) -> impl FnMut(Input) -> IResult<P::Output> {
+    move |mut stream| {
+        let old_value = stream.disallowed_multiline_fn_call;
+        stream.disallowed_multiline_fn_call = true;
+
+        match parser.process(stream) {
+            Ok((mut stream, t)) => {
+                stream.disallowed_multiline_fn_call = old_value;
+
+                Ok((stream, t))
+            }
+            Err(e) => {
+                stream.disallowed_multiline_fn_call = old_value;
+
+                Err(e)
+            }
+        }
+    }
+}
+
+pub fn not_multi_line_fn_call_short_circuit(stream: Input) -> IResult<()> {
+    if stream.disallowed_multiline_fn_call {
+        Err(ParseError::ShortCircuit.into())
+    } else {
+        Ok((stream, ()))
     }
 }
 
@@ -162,9 +237,12 @@ pub fn arguments_list_short_circuit(mut stream: Input) -> IResult<()> {
 }
 
 pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
-    // TODO: argument list short circuit
     preceded(
-        TokenType::Dot.or(preceded(arguments_list_short_circuit, TokenType::SpacedDot)),
+        (TokenType::Eol, indented((indent, TokenType::Dot)))
+            .map(|_| ())
+            .or(TokenType::Dot
+                .or(preceded(arguments_list_short_circuit, TokenType::SpacedDot))
+                .map(|_| ())),
         ident_or_number,
     )
     .process(stream)
@@ -172,7 +250,9 @@ pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
 
 pub fn double_dot(stream: Input) -> IResult<IdentOrNumber> {
     preceded(
-        TokenType::DoubleDot,
+        (TokenType::Eol, indented((indent, TokenType::DoubleDot)))
+            .map(|_| ())
+            .or(TokenType::DoubleDot.map(|_| ())),
         preceded(arguments_list_short_circuit, ident_or_number),
     )
     .process(stream)
@@ -926,6 +1006,8 @@ mod expression {
         let (rest, expression) = expression
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
+
+        println!("{:#?}", expression);
 
         assert_eq!(
             expression,
