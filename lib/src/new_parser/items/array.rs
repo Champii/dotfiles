@@ -8,7 +8,7 @@ use super::expression;
 pub fn array(stream: Input) -> IResult<Array> {
     (
         TokenType::OpenBracket,
-        many(expression),
+        separated(expression, TokenType::Coma),
         TokenType::CloseBracket,
     )
         .map(|(_, elements, _)| Array { elements })

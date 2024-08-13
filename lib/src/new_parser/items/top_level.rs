@@ -36,3 +36,28 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
         .map(|(_, _, top_level, _)| top_level)
         .process(stream)
 }
+
+#[cfg(test)]
+mod parse_top_level {
+    use crate::{new_parser::lex_test, Config};
+
+    use super::*;
+
+    #[test]
+    fn parse_infix_operator() {
+        let input = "infix 5 |>\n";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        let (precedence, name) = match top_level.kind {
+            TopLevelKind::InfixOperator(precedence, name) => (precedence, name),
+            _ => panic!(),
+        };
+
+        assert_eq!(precedence, 5);
+        assert_eq!(name, "|>".to_string());
+        assert_eq!(rest.len(), 0);
+    }
+}

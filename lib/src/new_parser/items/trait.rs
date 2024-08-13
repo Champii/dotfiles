@@ -1,0 +1,34 @@
+use crate::new_parser::{engine::*, TraitDecl};
+
+pub fn r#trait(stream: Input) -> IResult<TraitDecl> {
+    unimplemented!()
+}
+
+#[cfg(test)]
+mod parse_trait {
+    use crate::{
+        new_parser::{lex_test, TraitDecl},
+        Config,
+    };
+
+    use super::*;
+
+    #[test]
+    fn test_parse_trait() {
+        let tokens = lex_test(
+            r#"trait Foo
+    bar = a -> a
+    baz : Int
+    @selfinject = a -> a
+"#,
+        );
+        let config = Config::default();
+
+        let (rest, trait_decl) = r#trait.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(trait_decl.name.name, "Foo");
+        assert_eq!(trait_decl.methods.len(), 2);
+        assert_eq!(trait_decl.signatures.len(), 1);
+        assert_eq!(rest.len(), 0);
+    }
+}
