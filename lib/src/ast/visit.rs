@@ -85,6 +85,7 @@ generate_visitor_trait!(
     IdentOrNumber
     Assignment
     AssignmentLHS
+    Path
     IdentifierPath
     TypePath
     Statement
@@ -135,8 +136,8 @@ pub fn walk_module_decl<'a, V: Visitor<'a>>(visitor: &mut V, module_decl: &'a Mo
 pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLevel) {
     match &top_level.kind {
         TopLevelKind::Module(m) => visitor.visit_module_decl(m),
-        TopLevelKind::Import(ident_path) => visitor.visit_identifier_path(ident_path),
-        TopLevelKind::Export(ident_path) => visitor.visit_identifier_path(ident_path),
+        TopLevelKind::Import(path) => visitor.visit_path(path),
+        TopLevelKind::Export(path) => visitor.visit_path(path),
         TopLevelKind::InfixOperator(_precedence, _name) => (),
         TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
         TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
@@ -192,6 +193,13 @@ pub fn walk_ident_or_type<'a, V: Visitor<'a>>(visitor: &mut V, ident: &'a IdentO
     match ident {
         IdentOrType::Ident(ident) => visitor.visit_ident(ident),
         IdentOrType::Type(ty) => visitor.visit_parse_type(ty),
+    }
+}
+
+pub fn walk_path<'a, V: Visitor<'a>>(visitor: &mut V, path: &'a Path) {
+    match path {
+        Path::Ident(ident) => visitor.visit_identifier_path(ident),
+        Path::Type(ty) => visitor.visit_type_path(ty),
     }
 }
 

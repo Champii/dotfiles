@@ -1,11 +1,11 @@
 use crate::{
     lexer::{Token, TokenType},
-    new_parser::{engine::*, FunctionDecl, LambdaDecl, Pattern},
+    new_parser::{engine::*, FunctionDecl, FunctionSig, LambdaDecl, Pattern},
 };
 
 use super::{
-    block, consume_tokens_until, get_span, ident, operator_token, parenthesis, pattern, seek,
-    stuck_operator_token,
+    block, consume_tokens_until, get_span, ident, operator_token, parenthesis, parse_type, pattern,
+    seek, stuck_operator_token,
 };
 
 pub fn function_decl<'a>(stream: Input<'a>) -> IResult<'a, FunctionDecl> {
@@ -165,6 +165,12 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     lambda.shorthand_tokens = Some(inner_tokens);
 
     Ok((stream, lambda))
+}
+
+pub fn function_sig(stream: Input) -> IResult<FunctionSig> {
+    (ident, TokenType::Colon, parse_type, TokenType::Eol)
+        .map(|(name, _, sig, _)| FunctionSig { name, sig })
+        .process(stream)
 }
 
 #[cfg(test)]

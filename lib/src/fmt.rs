@@ -358,6 +358,15 @@ impl Display for Impl {
     }
 }
 
+impl Display for Path {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Path::Ident(ident) => write!(f, "{}", ident),
+            Path::Type(ty) => write!(f, "{}", ty),
+        }
+    }
+}
+
 impl Display for IdentifierPath {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         for (i, ident) in self.path.iter().enumerate() {

@@ -1,6 +1,15 @@
-use crate::new_parser::{engine::*, separated1, IdentOrType, IdentifierPath, TokenType, TypePath};
+use crate::new_parser::{
+    engine::*, separated1, IdentOrType, IdentifierPath, Path, TokenType, TypePath,
+};
 
 use super::{ident, parse_type};
+
+pub fn path(stream: Input) -> IResult<Path> {
+    ident_path
+        .map(Path::Ident)
+        .or(type_path.map(Path::Type))
+        .process(stream)
+}
 
 pub fn ident_path(stream: Input) -> IResult<IdentifierPath> {
     let (stream, path) = separated1(ident_or_type, TokenType::DoubleColon)

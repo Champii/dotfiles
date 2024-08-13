@@ -1,10 +1,17 @@
-use crate::new_parser::{
-    engine::*,
-    items::{primitives::indent, utils::empty_lines},
-    Ident, TopLevel, TopLevelKind,
+use crate::{
+    lexer::TokenType,
+    new_parser::{
+        engine::*,
+        items::{primitives::indent, utils::empty_lines},
+        Ident, ModuleDecl, TopLevel, TopLevelKind,
+    },
 };
 
-use super::{enum_decl, function_decl, macro_decl, macro_invoc, struct_decl};
+use super::{
+    enum_decl, function_decl, function_sig, ident, macro_decl, macro_invoc, module, operator,
+    operator_token, parse_type, parse_type_inner, path, primitives, r#impl, r#trait, struct_decl,
+    stuck_operator_token,
+};
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
     (
@@ -30,10 +37,75 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
             .or(enum_decl.map(|enum_decl| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::EnumDecl(enum_decl),
+            }))
+            /* .or(r#trait.map(|trait_decl| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::TraitDecl(trait_decl),
+            })) */
+            /* .or(r#impl.map(|impl_decl| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::Impl(impl_decl),
+            })) */
+            .or(infix_operator_decl.map(|(precedence, name)| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::InfixOperator(precedence, name),
+            }))
+            .or(
+                preceded(TokenType::Keyword("extern".to_string()), function_sig).map(|sig| {
+                    TopLevel {
+                        ident: Ident::default(), // FIXME
+                        kind: TopLevelKind::Extern(sig),
+                    }
+                }),
+            )
+            .or(module.map(|mod_decl| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::Module(ModuleDecl(mod_decl)),
+            }))
+            .or(
+                (parse_type_inner, TokenType::Equal, parse_type).map(|(name, _, ty)| TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::NewType(name, ty),
+                }),
+            )
+            /* .or(comment.map(|comment| TopLevel {
+                ident: Ident::default(), // FIXME
+                kind: TopLevelKind::Comment(comment),
+            })) */
+            .or(
+                (TokenType::Operator(">".to_string()), path).map(|(_, path)| TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Import(path),
+                }),
+            )
+            .or(
+                (TokenType::Operator("<".to_string()), path).map(|(_, path)| TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Export(path),
+                }),
+            )
+            .or(macro_invoc.map(|macro_invoc| TopLevel {
+                ident: macro_invoc.name.clone(),
+                kind: TopLevelKind::MacroInvoc(macro_invoc),
+            }))
+            .or(function_sig.map(|function_sig| TopLevel {
+                ident: function_sig.name.clone(),
+                kind: TopLevelKind::FunctionSig(function_sig),
             })),
         empty_lines,
     )
         .map(|(_, _, top_level, _)| top_level)
+        .process(stream)
+}
+
+pub fn infix_operator_decl(stream: Input) -> IResult<(u8, String)> {
+    (
+        TokenType::Keyword("infix".to_string()).debug(),
+        primitives::int.assert(|precedence| *precedence <= 9),
+        stuck_operator_token,
+        TokenType::Eol,
+    )
+        .map(|(_, precedence, name, _)| (precedence as u8, name.value))
         .process(stream)
 }
 
@@ -49,12 +121,9 @@ mod parse_top_level {
         let tokens = lex_test(input);
         let config = Config::default();
 
-        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
-
-        let (precedence, name) = match top_level.kind {
-            TopLevelKind::InfixOperator(precedence, name) => (precedence, name),
-            _ => panic!(),
-        };
+        let (rest, (precedence, name)) = infix_operator_decl
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
 
         assert_eq!(precedence, 5);
         assert_eq!(name, "|>".to_string());

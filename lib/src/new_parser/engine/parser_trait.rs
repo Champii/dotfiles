@@ -1,4 +1,4 @@
-use super::{and::And, map::Map, opt::Opt, or::Or, Followed, IResult, Input};
+use super::{and::And, map::Map, opt::Opt, or::Or, Followed, IResult, Input, ParseError};
 
 pub trait Parser {
     type Output;
@@ -52,5 +52,21 @@ pub trait Parser {
             println!("{:#?}", output);
             output
         })
+    }
+
+    fn assert<F>(&mut self, mut f: F) -> impl FnMut(Input) -> IResult<Self::Output>
+    where
+        F: FnMut(&Self::Output) -> bool,
+        Self: Sized,
+    {
+        move |input| {
+            let (rest, output) = self.process(input)?;
+
+            if f(&output) {
+                Ok((rest, output))
+            } else {
+                Err(ParseError::AssertFailed)
+            }
+        }
     }
 }

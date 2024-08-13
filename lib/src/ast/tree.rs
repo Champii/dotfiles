@@ -46,8 +46,8 @@ pub struct TopLevel {
 #[derive(Debug, PartialEq)]
 pub enum TopLevelKind {
     Module(ModuleDecl),
-    Import(IdentifierPath),
-    Export(IdentifierPath),
+    Import(Path),
+    Export(Path),
     Extern(FunctionSig),
     InfixOperator(u8, String),
     MacroDecl(MacroDecl),
@@ -329,6 +329,12 @@ pub struct Instance {
 pub enum IdentOrType {
     Ident(Ident),
     Type(ParseType),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Path {
+    Ident(IdentifierPath),
+    Type(TypePath),
 }
 
 #[derive(Debug, Clone, PartialEq)]

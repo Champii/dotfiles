@@ -123,6 +123,12 @@ impl From<ParseError> for Diagnostic {
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
+            ParseError::AssertFailed => Diagnostic {
+                message: format!("Assert failed"),
+                labels: vec![],
+                span: Span::default(),
+                kind: DiagnosticType::Error,
+            },
             /* ParseError::InternalError(message) => Diagnostic {
                 message: format!("Internal error: {:?}", message),
                 labels: vec![],

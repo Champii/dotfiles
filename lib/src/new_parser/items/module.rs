@@ -19,10 +19,9 @@ pub fn module(stream: Input) -> IResult<Module> {
         TokenType::Keyword("mod".to_string()),
         ident,
         TokenType::Eol,
-        many(top_level),
-        TokenType::Eof,
+        indented(many(top_level)),
     )
-        .map(|(_, name, _, top_levels, _)| Module {
+        .map(|(_, name, _, top_levels)| Module {
             name: Some(name),
             top_levels,
             comment: None,
