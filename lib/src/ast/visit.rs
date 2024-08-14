@@ -532,9 +532,9 @@ pub fn walk_trait_decl<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a TraitDecl) {
 
     walk_map!(visitor, &t.methods);
 
-    for ((k, _), v) in &t.signatures {
+    for (k, v) in &t.signatures {
         visitor.visit_ident(k);
-        visitor.visit_parse_type(v);
+        visitor.visit_function_sig(v);
     }
 }
 

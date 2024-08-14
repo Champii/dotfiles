@@ -38,14 +38,14 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::EnumDecl(enum_decl),
             }))
-            /* .or(r#trait.map(|trait_decl| TopLevel {
+            .or(r#trait.map(|trait_decl| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::TraitDecl(trait_decl),
-            })) */
-            /* .or(r#impl.map(|impl_decl| TopLevel {
+            }))
+            .or(r#impl.map(|impl_decl| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::Impl(impl_decl),
-            })) */
+            }))
             .or(infix_operator_decl.map(|(precedence, name)| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::InfixOperator(precedence, name),

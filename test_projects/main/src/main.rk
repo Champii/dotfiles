@@ -1,1 +1,4 @@
-infix 5 |>
+trait Foo
+    bar = a -> a
+    baz : Int
+    @selfinject = a -> a

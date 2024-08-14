@@ -1,7 +1,51 @@
-use crate::new_parser::{engine::*, Impl};
+use std::collections::BTreeMap;
+
+use crate::{
+    lexer::TokenType,
+    new_parser::{engine::*, FunctionDecl, FunctionSig, Impl},
+};
+
+use super::{function_decl, function_sig, indent, parse_type_inner};
+
+enum FnDeclOrSig {
+    Decl(FunctionDecl),
+    Sig(FunctionSig),
+}
 
 pub fn r#impl(stream: Input) -> IResult<Impl> {
-    unimplemented!()
+    (
+        TokenType::Keyword("impl".to_string()),
+        parse_type_inner,
+        TokenType::Eol,
+        indented(many(preceded(
+            indent,
+            function_decl
+                .map(FnDeclOrSig::Decl)
+                .or(function_sig.map(FnDeclOrSig::Sig)),
+        ))),
+    )
+        .map(|(_, name, _, items)| {
+            let mut methods = BTreeMap::new();
+            let mut signatures = BTreeMap::new();
+
+            for item in items {
+                match item {
+                    FnDeclOrSig::Decl(decl) => {
+                        methods.insert(decl.name.clone(), decl);
+                    }
+                    FnDeclOrSig::Sig(sig) => {
+                        signatures.insert(sig.name.clone(), sig);
+                    }
+                }
+            }
+
+            Impl {
+                name,
+                methods,
+                signatures,
+            }
+        })
+        .process(stream)
 }
 
 #[cfg(test)]

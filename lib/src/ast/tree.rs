@@ -80,7 +80,7 @@ pub struct StructDeclField {
 pub struct TraitDecl {
     pub name: ParseTypeInner,
     pub methods: BTreeMap<Ident, FunctionDecl>,
-    pub signatures: BTreeMap<(Ident, bool), ParseType>, // bool is for inject_self
+    pub signatures: BTreeMap<Ident, FunctionSig>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -155,6 +155,7 @@ pub struct MacroInvoc {
 pub struct FunctionSig {
     pub name: Ident,
     pub sig: ParseType,
+    pub inject_self: bool,
 }
 
 #[derive(Debug, PartialEq)]

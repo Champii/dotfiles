@@ -320,12 +320,8 @@ impl Display for TraitDecl {
 
         increase_indent();
 
-        for ((name, inject_self), signature) in &self.signatures {
+        for (name, signature) in &self.signatures {
             write!(f, "{}", indent())?;
-
-            if *inject_self {
-                write!(f, "@",)?;
-            }
 
             write!(f, "{} : {}\n", name, signature)?;
         }
@@ -482,13 +478,15 @@ impl Display for ParseTypeInner {
 
 impl Display for FunctionSig {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} : {}\n", self.name, self.sig)
+        let inject_self = if self.inject_self { "@" } else { "" };
+        write!(f, "{}{} : {}\n", inject_self, self.name, self.sig)
     }
 }
 
 impl Display for FunctionDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} = {}\n", self.name, self.lambda)
+        let inject_self = if self.inject_self { "@" } else { "" };
+        write!(f, "{}{} = {}\n", inject_self, self.name, self.lambda)
     }
 }
 

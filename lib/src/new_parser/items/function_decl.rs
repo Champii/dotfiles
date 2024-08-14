@@ -168,8 +168,18 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
 }
 
 pub fn function_sig(stream: Input) -> IResult<FunctionSig> {
-    (ident, TokenType::Colon, parse_type, TokenType::Eol)
-        .map(|(name, _, sig, _)| FunctionSig { name, sig })
+    (
+        TokenType::Arobase.opt(),
+        ident,
+        TokenType::Colon,
+        parse_type,
+        TokenType::Eol,
+    )
+        .map(|(inject_self, name, _, sig, _)| FunctionSig {
+            name,
+            sig,
+            inject_self: inject_self.is_some(),
+        })
         .process(stream)
 }
 
