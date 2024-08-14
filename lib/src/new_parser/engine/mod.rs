@@ -43,6 +43,7 @@ pub struct ParseCtx<'a> {
     pub indent_step: usize,
     pub disallowed_multiline_fn_call: bool,
     pub inside_argument_list: bool,
+    pub is_inside_fn_type_decl: bool,
 }
 
 impl ParseCtx<'_> {
@@ -117,6 +118,7 @@ impl ParseCtx<'_> {
             config,
             disallowed_multiline_fn_call: false,
             inside_argument_list: false,
+            is_inside_fn_type_decl: false,
         }
     }
 

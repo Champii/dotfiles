@@ -322,8 +322,7 @@ impl Display for TraitDecl {
 
         for (name, signature) in &self.signatures {
             write!(f, "{}", indent())?;
-
-            write!(f, "{} : {}\n", name, signature)?;
+            write!(f, "{}", signature)?;
         }
 
         for (_, method) in &self.methods {
@@ -342,6 +341,11 @@ impl Display for Impl {
         write!(f, "impl {}\n", self.name)?;
 
         increase_indent();
+
+        for (name, signature) in &self.signatures {
+            write!(f, "{}", indent())?;
+            write!(f, "{}", signature)?;
+        }
 
         for (_, method) in &self.methods {
             write!(f, "{}", indent())?;

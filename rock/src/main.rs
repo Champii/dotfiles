@@ -111,6 +111,8 @@ impl<'a> Visitor<'a> for AstFormater {
             std::fs::write(path, module.to_string()).unwrap();
         }
 
+        println!("{}", module.to_string());
+
         walk_module(self, module);
     }
 }

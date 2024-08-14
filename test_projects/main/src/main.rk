@@ -1,4 +1,2 @@
-trait Foo
-    bar = a -> a
+impl Foo
     baz : Int
-    @selfinject = a -> a

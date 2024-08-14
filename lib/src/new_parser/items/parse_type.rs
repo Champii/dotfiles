@@ -4,29 +4,102 @@ use crate::new_parser::ParseType;
 use crate::new_parser::ParseTypeInner;
 
 use super::get_span;
+use super::parenthesis;
+use super::seek;
 use super::type_token;
 
 pub fn parse_type(stream: Input) -> IResult<ParseType> {
-    // parse_function_type
-    /* .or(parse_array_type)
-    .or(parse_tuple_type) */
-    // .or(parse_type_inner.map(ParseType::Type))
-    parse_type_inner.map(ParseType::Type).process(stream)
+    preceded(
+        seek(
+            type_token
+                .map(|_| ())
+                .or(TokenType::OpenParen.map(|_| ()))
+                .or(TokenType::OpenBracket.map(|_| ())),
+        ),
+        parse_function_type
+            .or(parse_array_type)
+            // parse_array_type
+            .or(parse_tuple_type)
+            .or(parse_type_inner.map(ParseType::Type)),
+    )
+    .process(stream)
 }
 
-/* fn parse_function_type(stream: Input) -> IResult<ParseType> {
-    (
-        TokenType::OpenParen,
-        parse_type,
-        TokenType::Coma,
-        parse_type,
-        TokenType::CloseParen,
-        TokenType::Arrow,
-        parse_type,
-    )
-        .map(|(_, input, _, output, _, _, _)| FunctionType { input, output })
+fn parse_function_type(stream: Input) -> IResult<ParseType> {
+    (parenthesis_if_inside_fn_type_decl(separated1(parse_type, TokenType::Arrow)))
+        .assert(|types| types.len() >= 2)
+        .map(ParseType::Function)
         .process(stream)
+}
+
+/* fn parenthesis_if_inside_fn_type_decl<P: Parser>(
+    mut parser: P,
+) -> impl FnMut(Input) -> IResult<P::Output> {
+    move |mut stream| {
+        if stream.is_inside_fn_type_decl {
+            parenthesis(parser).process(stream)
+        } else {
+            stream.is_inside_fn_type_decl = true;
+
+            match parser.process(stream) {
+                Ok((mut rest, t)) => {
+                    rest.is_inside_fn_type_decl = false;
+                    return Ok((rest, t));
+                }
+                Err(e) => {
+                    stream.is_inside_fn_type_decl = false;
+                    return Err(e);
+                }
+            }
+        }
+    }
 } */
+fn parenthesis_if_inside_fn_type_decl<P: Parser>(
+    mut parser: P,
+) -> impl FnMut(Input) -> IResult<P::Output> {
+    move |mut stream: Input| {
+        if stream.is_inside_fn_type_decl {
+            parenthesis(parser).process(stream)
+        } else {
+            stream.is_inside_fn_type_decl = true;
+
+            // Pass the stream directly instead of a mutable reference
+            let result = parser.process(stream);
+
+            match result {
+                Ok((mut rest, t)) => {
+                    rest.is_inside_fn_type_decl = false;
+                    Ok((rest, t))
+                }
+                Err(e) => {
+                    stream.is_inside_fn_type_decl = false;
+                    Err(e)
+                }
+            }
+        }
+    }
+}
+
+/* fn parenthesis2<'a, P: Parser>(parser: &'a mut P) -> impl FnMut(Input) -> IResult<P::Output> + 'a {
+    move |stream: Input| {
+        // Pass the stream directly instead of a mutable reference
+        (TokenType::OpenParen, parser, TokenType::CloseParen).process(stream)
+    }
+} */
+
+pub fn parse_array_type(stream: Input) -> IResult<ParseType> {
+    (delimited(TokenType::OpenBracket, parse_type, TokenType::CloseBracket))
+        .map(Box::new)
+        .map(ParseType::Array)
+        .process(stream)
+}
+
+pub fn parse_tuple_type(stream: Input) -> IResult<ParseType> {
+    (TokenType::OpenParen, TokenType::CloseParen)
+        .map(|_| ParseType::Tuple(vec![]))
+        .or((parenthesis(separated(parse_type, TokenType::Coma))).map(ParseType::Tuple))
+        .process(stream)
+}
 
 pub fn parse_type_inner(stream: Input) -> IResult<ParseTypeInner> {
     (
