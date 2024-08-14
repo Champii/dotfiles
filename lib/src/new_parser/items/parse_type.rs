@@ -18,7 +18,6 @@ pub fn parse_type(stream: Input) -> IResult<ParseType> {
         ),
         parse_function_type
             .or(parse_array_type)
-            // parse_array_type
             .or(parse_tuple_type)
             .or(parse_type_inner.map(ParseType::Type)),
     )
@@ -32,60 +31,26 @@ fn parse_function_type(stream: Input) -> IResult<ParseType> {
         .process(stream)
 }
 
-/* fn parenthesis_if_inside_fn_type_decl<P: Parser>(
+fn parenthesis_if_inside_fn_type_decl<P: Parser>(
     mut parser: P,
 ) -> impl FnMut(Input) -> IResult<P::Output> {
     move |mut stream| {
         if stream.is_inside_fn_type_decl {
-            parenthesis(parser).process(stream)
+            let (stream, _) = TokenType::OpenParen.process(stream)?;
+            let (stream, x) = parser.process(stream)?;
+            let (stream, _) = TokenType::CloseParen.process(stream)?;
+            Ok((stream, x))
         } else {
             stream.is_inside_fn_type_decl = true;
 
-            match parser.process(stream) {
-                Ok((mut rest, t)) => {
-                    rest.is_inside_fn_type_decl = false;
-                    return Ok((rest, t));
-                }
-                Err(e) => {
-                    stream.is_inside_fn_type_decl = false;
-                    return Err(e);
-                }
-            }
-        }
-    }
-} */
-fn parenthesis_if_inside_fn_type_decl<P: Parser>(
-    mut parser: P,
-) -> impl FnMut(Input) -> IResult<P::Output> {
-    move |mut stream: Input| {
-        if stream.is_inside_fn_type_decl {
-            parenthesis(parser).process(stream)
-        } else {
-            stream.is_inside_fn_type_decl = true;
+            let (mut stream, t) = parser.process(stream)?;
 
-            // Pass the stream directly instead of a mutable reference
-            let result = parser.process(stream);
+            stream.is_inside_fn_type_decl = false;
 
-            match result {
-                Ok((mut rest, t)) => {
-                    rest.is_inside_fn_type_decl = false;
-                    Ok((rest, t))
-                }
-                Err(e) => {
-                    stream.is_inside_fn_type_decl = false;
-                    Err(e)
-                }
-            }
+            Ok((stream, t))
         }
     }
 }
-
-/* fn parenthesis2<'a, P: Parser>(parser: &'a mut P) -> impl FnMut(Input) -> IResult<P::Output> + 'a {
-    move |stream: Input| {
-        // Pass the stream directly instead of a mutable reference
-        (TokenType::OpenParen, parser, TokenType::CloseParen).process(stream)
-    }
-} */
 
 pub fn parse_array_type(stream: Input) -> IResult<ParseType> {
     (delimited(TokenType::OpenBracket, parse_type, TokenType::CloseBracket))
