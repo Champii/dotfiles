@@ -1,14 +1,18 @@
 use crate::{
     lexer::TokenType,
-    new_parser::{engine::*, Block},
+    new_parser::{engine::*, Block, Statement},
 };
 
-use super::{indent, statement};
+use super::{empty_lines, indent, indent_token, seek, statement};
 
 pub fn block(stream: Input) -> IResult<Block> {
     preceded(
         TokenType::Eol,
-        indented(separated1(preceded(indent, statement), TokenType::Eol)),
+        indented(separated1(
+            preceded(indent, statement)
+                .or(followed(indent_token, seek(TokenType::Eol)).map(|_| Statement::EmptyLine)),
+            TokenType::Eol,
+        )),
     )
     .or(statement.map(|statement| vec![statement]))
     .map(|statements| Block { statements })

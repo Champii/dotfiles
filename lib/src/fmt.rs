@@ -57,7 +57,7 @@ impl Display for ModuleDecl {
 
 impl Display for Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if self.is_inline {
+        if !self.is_inline {
             increase_indent();
         }
 
@@ -70,7 +70,7 @@ impl Display for Module {
             }
         }
 
-        if self.is_inline {
+        if !self.is_inline {
             decrease_indent();
         }
 
@@ -497,9 +497,13 @@ impl Display for FunctionDecl {
 impl Display for LambdaDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if let Some(tokens) = &self.shorthand_tokens {
+            write!(f, "(")?;
+
             for token in tokens {
                 write!(f, "{}", token)?;
             }
+
+            write!(f, ") ")?;
 
             return Ok(());
         }
@@ -1024,7 +1028,7 @@ infix 7 |>
 
 macro my_macro
     $name:ident $($arg:ident)* =>
-        $name
+        $name = a -> a
         $($arg)*
 
 %my_macro lol

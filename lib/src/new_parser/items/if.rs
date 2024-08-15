@@ -31,7 +31,6 @@ pub fn parse_else(stream: Input) -> IResult<Else> {
             .or(block.map(Else::Block)),
     )
     .process(stream)
-    .map(debug)
 }
 
 #[cfg(test)]

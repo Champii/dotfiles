@@ -48,6 +48,13 @@ pub fn indent(stream: Input) -> IResult<()> {
     })
 }
 
+// used to get any indent level
+pub fn indent_token(stream: Input) -> IResult<u8> {
+    token!(stream, TokenType::Indent(level) => {
+        *level
+    })
+}
+
 pub fn boolean(stream: Input) -> IResult<bool> {
     TokenType::Keyword("true".to_string())
         .map(|_| true)

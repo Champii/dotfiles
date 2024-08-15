@@ -50,38 +50,49 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::InfixOperator(precedence, name),
             }))
-            .or(
-                preceded(TokenType::Keyword("extern".to_string()), function_sig).map(|sig| {
-                    TopLevel {
-                        ident: Ident::default(), // FIXME
-                        kind: TopLevelKind::Extern(sig),
-                    }
-                }),
+            .or(preceded(
+                TokenType::Keyword("extern".to_string()),
+                followed(function_sig, TokenType::Eol),
             )
+            .map(|sig| {
+                TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Extern(sig),
+                }
+            }))
             .or(module.map(|mod_decl| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::Module(ModuleDecl(mod_decl)),
             }))
-            .or(
-                (parse_type_inner, TokenType::Equal, parse_type).map(|(name, _, ty)| TopLevel {
+            .or((
+                TokenType::Keyword("type".to_string()),
+                parse_type_inner,
+                TokenType::Equal,
+                parse_type,
+                TokenType::Eol,
+            )
+                .map(|(_, name, _, ty, _)| TopLevel {
                     ident: Ident::default(), // FIXME
                     kind: TopLevelKind::NewType(name, ty),
-                }),
-            )
+                }))
             /* .or(comment.map(|comment| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::Comment(comment),
             })) */
             .or(
-                (TokenType::Operator(">".to_string()), path).map(|(_, path)| TopLevel {
-                    ident: Ident::default(), // FIXME
-                    kind: TopLevelKind::Import(path),
+                (TokenType::Operator(">".to_string()), path, TokenType::Eol).map(|(_, path, _)| {
+                    TopLevel {
+                        ident: Ident::default(), // FIXME
+                        kind: TopLevelKind::Import(path),
+                    }
                 }),
             )
             .or(
-                (TokenType::Operator("<".to_string()), path).map(|(_, path)| TopLevel {
-                    ident: Ident::default(), // FIXME
-                    kind: TopLevelKind::Export(path),
+                (TokenType::Operator("<".to_string()), path, TokenType::Eol).map(|(_, path, _)| {
+                    TopLevel {
+                        ident: Ident::default(), // FIXME
+                        kind: TopLevelKind::Export(path),
+                    }
                 }),
             )
             .or(macro_invoc.map(|macro_invoc| TopLevel {
@@ -100,9 +111,9 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
 
 pub fn infix_operator_decl(stream: Input) -> IResult<(u8, String)> {
     (
-        TokenType::Keyword("infix".to_string()).debug(),
+        TokenType::Keyword("infix".to_string()),
         primitives::int.assert(|precedence| *precedence <= 9),
-        stuck_operator_token,
+        operator,
         TokenType::Eol,
     )
         .map(|(_, precedence, name, _)| (precedence as u8, name.value))

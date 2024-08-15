@@ -104,12 +104,6 @@ impl<'a> MacroArgMatcher<'a> {
                                 thread.args =
                                     &thread.args[thread.args.len() - remaining_tokens.len()..];
 
-                                println!(
-                                    "LEN thread {} len remaining {}",
-                                    thread.args.len(),
-                                    remaining_tokens.len()
-                                );
-
                                 new_threads.push(MacroThread {
                                     args: thread.args,
                                     tokens: tokens[1..].to_vec(),

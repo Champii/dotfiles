@@ -23,8 +23,6 @@ pub fn parse(config: &Config) -> Result<Program, ParseError> {
         println!("{:#?}", tokens);
     }
 
-    // parse_ctx.deduce_indent_step(&tokens);
-
     let (_ctx, program) = program.process(ParseCtx::from(&tokens, config))?;
 
     Ok(program)
@@ -38,8 +36,6 @@ pub fn parse_string(input: &str, config: &Config) -> Result<Program, ParseError>
     if config.has_debug_print(DebugPrint::Tokens) {
         println!("{:#?}", tokens);
     }
-
-    // parse_ctx.deduce_indent_step(&tokens);
 
     let (_ctx, program) = program.process(ParseCtx::from(&tokens, config))?;
 

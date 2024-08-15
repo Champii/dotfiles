@@ -3,7 +3,7 @@ use crate::{
     new_parser::{engine::*, Assignment, AssignmentLHS, Statement},
 };
 
-use super::{expression, pattern, seek, unary_expr};
+use super::{empty_lines, expression, indent, pattern, seek, unary_expr};
 
 pub fn statement(stream: Input) -> IResult<Statement> {
     preceded(TokenType::Keyword("return".to_string()), expression.opt())
@@ -22,7 +22,7 @@ pub fn statement(stream: Input) -> IResult<Statement> {
 }
 
 pub fn assignment(stream: Input) -> IResult<Assignment> {
-    (assignment_lhs.debug(), TokenType::Equal, expression)
+    (assignment_lhs, TokenType::Equal, expression)
         .map(|(lhs, _, rhs)| Assignment { lhs, rhs })
         .process(stream)
 }

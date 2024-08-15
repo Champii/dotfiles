@@ -149,7 +149,7 @@ pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
                 preceded(
                     TokenType::Eol,
                     inside_argument_list(indented(separated1(
-                        preceded(indent, expression.map(|arg| Argument { arg }).debug()),
+                        preceded(indent, expression.map(|arg| Argument { arg })),
                         TokenType::Eol,
                     ))),
                 ),
@@ -345,8 +345,6 @@ mod expression {
         let (rest, expression) = expression
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
-
-        println!("{:#?}", expression);
 
         assert_eq!(
             expression,
@@ -1007,8 +1005,6 @@ mod expression {
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
 
-        println!("{:#?}", expression);
-
         assert_eq!(
             expression,
             Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
@@ -1226,8 +1222,6 @@ mod expression {
         let (rest, expression) = expression
             .process(ParseCtx::from(&tokens, &config))
             .unwrap();
-
-        println!("{:#?}", expression);
 
         assert_eq!(
             expression,

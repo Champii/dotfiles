@@ -49,8 +49,6 @@ mod r#match {
 
         let (rest, expression) = r#match.process(ParseCtx::from(&tokens, &config)).unwrap();
 
-        println!("EXPR: {:#?}", expression);
-
         assert_eq!(
             expression,
             Match {

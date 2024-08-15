@@ -1,4 +1,7 @@
-use crate::{lexer::Token, Config};
+use crate::{
+    lexer::{Token, TokenType},
+    Config,
+};
 
 mod and;
 mod delimited;
@@ -111,15 +114,41 @@ impl ParseCtx<'_> {
     }
 
     pub fn from<'a>(tokens: &'a [Token], config: &'a Config) -> ParseCtx<'a> {
+        let mut indent_step = Self::determine_indent_step(tokens, config);
+
+        if indent_step == 0 {
+            indent_step = 4;
+        }
+
         ParseCtx {
             tokens,
             indent_level: 0,
-            indent_step: 4,
+            indent_step,
             config,
             disallowed_multiline_fn_call: false,
             inside_argument_list: false,
             is_inside_fn_type_decl: false,
         }
+    }
+
+    fn determine_indent_step(tokens: &[Token], config: &Config) -> usize {
+        let mut indent_step = 0;
+
+        for token in tokens {
+            if let TokenType::Indent(level) = token.token_type {
+                if level > 0 {
+                    if level % 2 != 0 {
+                        panic!("Indentation level is not a multiple 2");
+                    }
+
+                    indent_step = level as usize;
+
+                    break;
+                }
+            }
+        }
+
+        indent_step
     }
 
     pub fn disallow_multiline_fn_call(&self) -> Result<Self, ParseError> {
@@ -138,25 +167,6 @@ impl ParseCtx<'_> {
 
         Err(ParseError::ShortCircuit.into())
     }
-
-    /* pub fn disallow_multiline_fn_call_short_circuit(&mut self) -> Result<(), ParseError> {
-        if !self.disallowed_multiline_fn_call {
-            return Ok(());
-        }
-
-        self.disallowed_multiline_fn_call = false;
-
-        Err(ParseError::ShortCircuit.into())
-    } */
 }
-
-/* impl<'a> From<&'a [Token]> for ParseCtx<'a> {
-    fn from(tokens: &'a [Token]) -> Self {
-        ParseCtx {
-            tokens,
-            indent_level: 0,
-        }
-    }
-} */
 
 impl Copy for ParseCtx<'_> {}

@@ -59,7 +59,7 @@ pub fn prefix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     )
         .process(stream)?;
 
-    let inner_tokens = vec![
+    let new_inner_tokens = vec![
         Token {
             token_type: TokenType::Ident("x".to_string()),
             span: span.clone(),
@@ -74,7 +74,7 @@ pub fn prefix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
         },
     ]
     .into_iter()
-    .chain(inner_tokens.into_iter().map(|token| {
+    .chain(inner_tokens.clone().into_iter().map(|token| {
         if let TokenType::StuckOperator(op) = token.token_type {
             Token {
                 token_type: TokenType::Operator(op),
@@ -87,7 +87,7 @@ pub fn prefix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     .collect::<Vec<_>>();
 
     let (other_remaining_tokens, mut lambda) =
-        lambda_decl.process(ParseCtx::from(&inner_tokens, &stream.config))?;
+        lambda_decl.process(ParseCtx::from(&new_inner_tokens, &stream.config))?;
 
     if !other_remaining_tokens.is_empty() {
         return Err(ParseError::UnexpectedToken(
@@ -121,7 +121,7 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
 
     let inner_tokens = inner_tokens[..inner_tokens.len() - 1].to_vec();
 
-    let inner_tokens = vec![
+    let new_inner_tokens = vec![
         Token {
             token_type: TokenType::Ident("x".to_string()),
             span: span.clone(),
@@ -132,7 +132,7 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
         },
     ]
     .into_iter()
-    .chain(inner_tokens.into_iter().map(|token| {
+    .chain(inner_tokens.clone().into_iter().map(|token| {
         if let TokenType::StuckOperator(op) = token.token_type {
             Token {
                 token_type: TokenType::Operator(op),
@@ -152,7 +152,7 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     .collect::<Vec<_>>();
 
     let (other_remaining_tokens, mut lambda) =
-        lambda_decl.process(ParseCtx::from(&inner_tokens, &stream.config))?;
+        lambda_decl.process(ParseCtx::from(&new_inner_tokens, &stream.config))?;
 
     if !other_remaining_tokens.is_empty() {
         return Err(ParseError::UnexpectedToken(

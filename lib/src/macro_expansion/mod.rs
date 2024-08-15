@@ -84,8 +84,6 @@ fn expand_macros_once(
         module.top_levels.extend(result?);
     }
 
-    println!("Expanded module: {:#?}", module);
-
     Ok(module)
 }
 
@@ -119,11 +117,7 @@ fn expand_top_level(
 
         let body = body.into_iter().flatten().collect::<Vec<_>>();
 
-        println!("Body: {:#?}", body);
-
         let (_, module) = module_inline.process(ParseCtx::from(&body, &Config::default()))?;
-
-        println!("Module: {:#?}", module);
 
         top_levels.extend(module.top_levels);
 
@@ -235,7 +229,6 @@ main = -> 1"#;
         let config = Config::default();
 
         let input_program = parse_string(input, &config).unwrap();
-        println!("Input program: {:#?}", input_program);
         let expanded = expand_macros(input_program).unwrap();
 
         let expected_program = parse_string(expected, &config).unwrap();
@@ -274,12 +267,9 @@ x = y -> z"#;
 
         let input_program = parse_string(input, &config).unwrap();
 
-        println!("Input program: {:#?}", input_program);
         let expanded = expand_macros(input_program).unwrap();
-        println!("Expanded program: {:#?}", expanded);
 
         let expected_program = parse_string(expected, &config).unwrap();
-        println!("Expected program: {:#?}", expected_program);
 
         assert_eq!(expanded, expected_program);
     }
