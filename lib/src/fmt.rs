@@ -66,6 +66,16 @@ impl Display for Module {
             write!(f, "{}", top_level)?;
 
             if i < self.top_levels.len() - 1 {
+                // if the top level is a functiondecl, check if the last statement of the block is
+                // an empty line and if so, don't add an extra newline
+                if let TopLevelKind::FunctionDecl(decl) = &top_level.kind {
+                    if let Some(last) = &decl.lambda.body.statements.last() {
+                        if let Statement::EmptyLine = last {
+                            continue;
+                        }
+                    }
+                }
+
                 write!(f, "\n")?;
             }
         }
@@ -503,7 +513,7 @@ impl Display for LambdaDecl {
                 write!(f, "{}", token)?;
             }
 
-            write!(f, ") ")?;
+            write!(f, ")")?;
 
             return Ok(());
         }
