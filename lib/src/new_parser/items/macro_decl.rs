@@ -223,7 +223,7 @@ mod tests {
 
     #[test]
     fn test_parse_macro_decl() {
-        let input = "macro mymacro\n    $a:ident =>\n        statement";
+        let input = "macro mymacro\n    $a:ident, $b:ty =>\n        statement";
         let tokens = lex(input);
         let tokens = &tokens[1..]; // skip the Indent(0)
         let config = Config::default();

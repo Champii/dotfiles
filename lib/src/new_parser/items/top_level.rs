@@ -50,16 +50,14 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::InfixOperator(precedence, name),
             }))
-            .or(preceded(
-                TokenType::Keyword("extern".to_string()),
-                followed(function_sig, TokenType::Eol),
+            .or(
+                preceded(TokenType::Keyword("extern".to_string()), function_sig).map(|sig| {
+                    TopLevel {
+                        ident: Ident::default(), // FIXME
+                        kind: TopLevelKind::Extern(sig),
+                    }
+                }),
             )
-            .map(|sig| {
-                TopLevel {
-                    ident: Ident::default(), // FIXME
-                    kind: TopLevelKind::Extern(sig),
-                }
-            }))
             .or(module.map(|mod_decl| TopLevel {
                 ident: Ident::default(), // FIXME
                 kind: TopLevelKind::Module(ModuleDecl(mod_decl)),
@@ -122,7 +120,10 @@ pub fn infix_operator_decl(stream: Input) -> IResult<(u8, String)> {
 
 #[cfg(test)]
 mod parse_top_level {
-    use crate::{new_parser::lex_test, Config};
+    use crate::{
+        new_parser::{lex_test, lex_test_toplevel},
+        Config,
+    };
 
     use super::*;
 
@@ -138,6 +139,17 @@ mod parse_top_level {
 
         assert_eq!(precedence, 5);
         assert_eq!(name, "|>".to_string());
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn extern_sig() {
+        let input = "extern toto : Toto -> Tata\n";
+        let tokens = lex_test_toplevel(input);
+        let config = Config::default();
+
+        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
         assert_eq!(rest.len(), 0);
     }
 }

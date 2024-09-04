@@ -33,3 +33,19 @@ pub fn lex_test(input: &str) -> Vec<Token> {
 
     tokens
 }
+
+// Same function, but keep the newline at the end to specifically test toplevel functions
+#[cfg(test)]
+pub fn lex_test_toplevel(input: &str) -> Vec<Token> {
+    use crate::lexer::Lexer;
+
+    let mut tokens = Lexer::new(std::path::PathBuf::new(), input)
+        .unwrap()
+        .collect()
+        .unwrap();
+
+    //ignore EOF
+    tokens.pop();
+
+    tokens
+}
