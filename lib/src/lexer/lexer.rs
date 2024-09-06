@@ -136,6 +136,7 @@ impl Lexer {
             '%' if self.peek(1).is_alphabetic() && self.peek(1).is_uppercase() => {
                 self.native_operator()
             }
+            '/' if self.peek(1) == '/' => self.comment(),
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
@@ -151,7 +152,6 @@ impl Lexer {
             '\'' => self.char(),
             '"' => self.string(),
             '@' => self.token(TokenType::Arobase, 1),
-            '#' => self.comment(),
             '_' => self.token(TokenType::Underscore, 1),
             c if c.is_alphabetic() => self.ident_or_keyword_or_type(),
             c if c.is_digit(10) => self.number(),
@@ -231,15 +231,18 @@ impl Lexer {
     }
 
     fn comment(&self) -> Token {
-        let start = self.position;
+        let mut start = self.position;
         let mut end = self.position;
+
+        // consume the '//'
+        end += 2;
 
         while self.peek(end - start) != '\n' {
             end += 1;
         }
 
         self.token(
-            TokenType::Comment(self.input[start + 1..end].to_string()),
+            TokenType::Comment(self.input[start + 2..end].to_string()),
             end - start,
         )
     }

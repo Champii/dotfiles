@@ -185,6 +185,7 @@ pub enum Statement {
     Continue(Option<Expression>),
     Break(Option<Expression>),
     EmptyLine, // Empty line, kept for formating
+    Comment(String),
 }
 
 #[derive(Debug, PartialEq)]

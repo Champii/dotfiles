@@ -45,7 +45,7 @@ impl Display for ModuleDecl {
             write!(f, "mod {}", name)?;
 
             if let Some(comment) = &self.0.comment {
-                write!(f, " # {}", comment)?;
+                write!(f, " //{}", comment)?;
             }
 
             write!(f, "\n")?;
@@ -66,7 +66,7 @@ impl Display for Module {
             write!(f, "{}", top_level)?;
 
             if i < self.top_levels.len() - 1 {
-                // if the top level is a functiondecl, check if the last statement of the block is
+                // if the top level is a functiondecl or a comment, check if the last statement of the block is
                 // an empty line and if so, don't add an extra newline
                 if let TopLevelKind::FunctionDecl(decl) = &top_level.kind {
                     if let Some(last) = &decl.lambda.body.statements.last() {
@@ -74,6 +74,10 @@ impl Display for Module {
                             continue;
                         }
                     }
+                }
+
+                if let TopLevelKind::Comment(_) = &top_level.kind {
+                    continue;
                 }
 
                 write!(f, "\n")?;
@@ -106,7 +110,7 @@ impl Display for TopLevel {
             TopLevelKind::TraitDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevelKind::Impl(impl_) => write!(f, "{}", impl_),
-            TopLevelKind::Comment(comment) => write!(f, "#{}\n", comment),
+            TopLevelKind::Comment(comment) => write!(f, "//{}\n", comment),
             TopLevelKind::NewType(inner, ty) => write!(f, "type {} = {}\n", inner, ty),
         }
     }
@@ -606,6 +610,7 @@ impl Display for Statement {
                 }
             }
             Statement::EmptyLine => write!(f, ""),
+            Statement::Comment(comment) => write!(f, "//{}", comment),
         }
     }
 }

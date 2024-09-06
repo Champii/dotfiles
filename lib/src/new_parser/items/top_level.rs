@@ -8,9 +8,9 @@ use crate::{
 };
 
 use super::{
-    enum_decl, function_decl, function_sig, ident, macro_decl, macro_invoc, module, operator,
-    operator_token, parse_type, parse_type_inner, path, primitives, r#impl, r#trait, struct_decl,
-    stuck_operator_token,
+    comment_token, enum_decl, function_decl, function_sig, ident, macro_decl, macro_invoc, module,
+    operator, operator_token, parse_type, parse_type_inner, path, primitives, r#impl, r#trait,
+    struct_decl, stuck_operator_token,
 };
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
@@ -73,10 +73,12 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                     ident: Ident::default(), // FIXME
                     kind: TopLevelKind::NewType(name, ty),
                 }))
-            /* .or(comment.map(|comment| TopLevel {
-                ident: Ident::default(), // FIXME
-                kind: TopLevelKind::Comment(comment),
-            })) */
+            .or(comment_token
+                .map(|comment| TopLevel {
+                    ident: Ident::default(), // FIXME
+                    kind: TopLevelKind::Comment(comment),
+                })
+                .followed_by(TokenType::Eol))
             .or(
                 (TokenType::Operator(">".to_string()), path, TokenType::Eol).map(|(_, path, _)| {
                     TopLevel {

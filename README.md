@@ -132,7 +132,7 @@ main = ->
     b = a 
     add a, b
 
-#Will detect if one is a reference and autoderef if needed
+// Will detect if one is a reference and autoderef if needed
 add = a, b -> a + b
 ```
 ## Unsafe pointer arithmetic
@@ -226,6 +226,11 @@ struct MyStruct
     - Macro nested var repetition $($($arg:ident)*)*
     - Don't ignore \n and indent for macro args parsing
     - Better error management and diagnostic details
+
+  - New parser
+    - Comments
+    - Multi-files modules
+    - Trait bound in parse_type
 
   - Parser
     - High priority

@@ -249,6 +249,7 @@ pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statem
             }
         }
         Statement::EmptyLine => {}
+        Statement::Comment(_) => {}
     }
 }
 

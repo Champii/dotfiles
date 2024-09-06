@@ -60,6 +60,9 @@ main = ->
         c + d
         b c
 
+    // test
     a = (.foo)
+
+// lol
 
 < MyTrait

@@ -55,6 +55,12 @@ pub fn indent_token(stream: Input) -> IResult<u8> {
     })
 }
 
+pub fn comment_token(stream: Input) -> IResult<String> {
+    token!(stream, TokenType::Comment(value) => {
+        value.clone()
+    })
+}
+
 pub fn boolean(stream: Input) -> IResult<bool> {
     TokenType::Keyword("true".to_string())
         .map(|_| true)
