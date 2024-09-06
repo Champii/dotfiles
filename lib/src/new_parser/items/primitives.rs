@@ -44,7 +44,7 @@ pub fn indent(stream: Input) -> IResult<()> {
             return Err(ParseError::UnexpectedIndent(*level));
         }
 
-        ()
+        
     })
 }
 

@@ -6,7 +6,7 @@ macro_rules! impl_parsable_for_tuple {
         impl<$($name: Parser<Output = $name2>, $name2),*> Parser for &mut ($($name,)*) {
             type Output = ($($name::Output,)*);
 
-            fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+            fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
                 let ($(
                     $name,
                 )*) = self;
@@ -21,7 +21,7 @@ macro_rules! impl_parsable_for_tuple {
         impl<$($name: Parser<Output = $name2>, $name2),*> Parser for ($($name,)*) {
             type Output = ($($name::Output,)*);
 
-            fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+            fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
                 let ($(
                     $name,
                 )*) = self;
@@ -36,7 +36,7 @@ macro_rules! impl_parsable_for_tuple {
         impl<$($name: Parser<Output = $name2> + Clone, $name2),*> Parser for &($($name,)*) where Self: Clone {
             type Output = ($($name::Output,)*);
 
-            fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+            fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
                 let ($(
                     mut $name,
                 )*) = self.clone();

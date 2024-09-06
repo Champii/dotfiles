@@ -10,7 +10,7 @@ where
 {
     type Output = Vec<P::Output>;
 
-    fn process<'a, 'b>(&'b mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let mut output = Vec::new();
 
         loop {
@@ -44,7 +44,7 @@ where
 {
     type Output = Vec<P::Output>;
 
-    fn process<'a, 'b>(&'b mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let mut output = Vec::new();
 
         loop {

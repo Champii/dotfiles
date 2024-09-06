@@ -13,7 +13,7 @@ where
 {
     type Output = Vec<P::Output>;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let mut remaining_tokens = tokens;
         let mut items = Vec::new();
         // let mut diagnostics = Diagnostics::default();

@@ -51,7 +51,7 @@ pub fn r#trait(stream: Input) -> IResult<TraitDecl> {
 #[cfg(test)]
 mod parse_trait {
     use crate::{
-        new_parser::{lex_test, TraitDecl},
+        new_parser::lex_test,
         Config,
     };
 

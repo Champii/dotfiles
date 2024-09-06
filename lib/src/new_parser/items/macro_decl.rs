@@ -60,13 +60,13 @@ pub fn macro_invoc(stream: Input) -> IResult<MacroInvoc> {
         .process(stream)
 }
 
-fn parse_macro_head_recursive<'a>(stream: Input<'a>) -> IResult<'a, Vec<MacroFragment>> {
+fn parse_macro_head_recursive(stream: Input<'_>) -> IResult<'_, Vec<MacroFragment>> {
     let (defs, tokens) = parse_macro_head_recursive_inner(stream.tokens, stream)?;
 
     Ok((Input { tokens, ..stream }, defs))
 }
 
-fn parse_macro_block_recursive<'a>(stream: Input<'a>) -> IResult<'a, Vec<MacroFragment>> {
+fn parse_macro_block_recursive(stream: Input<'_>) -> IResult<'_, Vec<MacroFragment>> {
     let (block, tokens) = parse_macro_block_recursive_inner(stream.tokens, stream)?;
 
     Ok((Input { tokens, ..stream }, block))
@@ -80,7 +80,7 @@ fn parse_macro_head_recursive_inner<'a>(
     let mut remaining_tokens = tokens;
 
     let mut skip_until = 0;
-    while let Some(token) = remaining_tokens.get(0) {
+    while let Some(token) = remaining_tokens.first() {
         if skip_until > 0 {
             skip_until -= 1;
             remaining_tokens = &remaining_tokens[1..];
@@ -93,8 +93,7 @@ fn parse_macro_head_recursive_inner<'a>(
                         TokenType::Colon.discriminant().to_string(),
                         remaining_tokens.get(1).unwrap().clone(),
                         // vec![TokenType::Colon],
-                    )
-                    .into());
+                    ));
                 }
 
                 if remaining_tokens.get(2).unwrap().token_type
@@ -127,8 +126,7 @@ fn parse_macro_head_recursive_inner<'a>(
                             TokenType::Ident("expr".to_string()),
                             TokenType::Ident("type".to_string()),
                         ], */
-                    )
-                    .into());
+                    ));
                 }
 
                 skip_until = 3;
@@ -165,7 +163,7 @@ fn parse_macro_block_recursive_inner<'a>(
     let mut block = Vec::new();
     let mut remaining_tokens = tokens;
 
-    while let Some(token) = remaining_tokens.get(0) {
+    while let Some(token) = remaining_tokens.first() {
         match &token.token_type {
             TokenType::MacroVar(name) => {
                 let ident = MacroFragment::Ident(Ident {
@@ -228,7 +226,7 @@ mod tests {
         let tokens = &tokens[1..]; // skip the Indent(0)
         let config = Config::default();
 
-        let (rest, macro_decl) = macro_decl(ParseCtx::from(&tokens, &config)).unwrap();
+        let (rest, macro_decl) = macro_decl(ParseCtx::from(tokens, &config)).unwrap();
 
         assert_eq!(macro_decl.name.name, "mymacro");
         assert_eq!(macro_decl.entries.len(), 1);
@@ -238,7 +236,7 @@ mod tests {
     #[test]
     fn test_parse_macro_entry() {
         let input = "$a:ident =>\n        statement";
-        let mut tokens = lex(input);
+        let tokens = lex(input);
         // let tokens = &tokens[1..]; // skip the Indent(0)
         let config = Config::default();
 
@@ -260,7 +258,7 @@ mod tests {
         let tokens = &tokens[1..]; // skip the Indent(0)
         let config = Config::default();
 
-        let (rest, macro_invoc) = macro_invoc(ParseCtx::from(&tokens, &config)).unwrap();
+        let (rest, macro_invoc) = macro_invoc(ParseCtx::from(tokens, &config)).unwrap();
 
         assert_eq!(macro_invoc.name.name, "mymacro");
         assert_eq!(macro_invoc.args.len(), 3); // FIXME, should be 2

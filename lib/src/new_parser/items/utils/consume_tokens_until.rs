@@ -7,7 +7,7 @@ pub fn consume_tokens_until(token_type: TokenType) -> impl Fn(Input) -> IResult<
         let mut tokens = Vec::new();
         let mut remaining_tokens = stream.tokens;
 
-        while let Some(token) = remaining_tokens.get(0) {
+        while let Some(token) = remaining_tokens.first() {
             if token.token_type == token_type {
                 return Ok((
                     Input {

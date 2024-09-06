@@ -21,25 +21,22 @@ pub fn expand_macros(mut program: Program) -> Result<Program, Diagnostics> {
         let mut decls = HashMap::new();
 
         for (i, top_level) in module.top_levels.iter().enumerate() {
-            match &top_level {
-                TopLevel::MacroInvoc(invocation) => {
-                    let TopLevel::MacroDecl(ref decl) =
-                        module.top_level_from_ident(&invocation.name.name).unwrap()
-                    else {
-                        // It might be defined later
-                        continue;
-                    };
+            if let TopLevel::MacroInvoc(invocation) = &top_level {
+                let TopLevel::MacroDecl(ref decl) =
+                    module.top_level_from_ident(&invocation.name.name).unwrap()
+                else {
+                    // It might be defined later
+                    continue;
+                };
 
-                    decls.insert(
-                        i,
-                        (
-                            decl.clone(),
-                            invocation.args.clone(),
-                            invocation.name.span.clone(),
-                        ),
-                    );
-                }
-                _ => (),
+                decls.insert(
+                    i,
+                    (
+                        decl.clone(),
+                        invocation.args.clone(),
+                        invocation.name.span.clone(),
+                    ),
+                );
             }
         }
         module = expand_macros_once(module, &decls)?;
@@ -135,7 +132,7 @@ fn replace_body_variables(
     correspondance_level: usize,
 ) -> Vec<Vec<Token>> {
     body.iter()
-        .map(|fragment| match &fragment {
+        .flat_map(|fragment| match &fragment {
             MacroFragment::Ident(name) | MacroFragment::Expr(name) | MacroFragment::Type(name) => {
                 if let Some(corresp) = correspondances.get(&name.name.clone(), correspondance_level)
                 {
@@ -173,8 +170,7 @@ fn replace_body_variables(
                 for (i, _ident) in nested_correspondance
                     .entries
                     .iter()
-                    .enumerate()
-                    .nth(0)
+                    .enumerate().next()
                     .unwrap()
                     .1
                      .1
@@ -188,7 +184,7 @@ fn replace_body_variables(
                         .entries
                         .iter()
                         .map(|(name, tokens)| {
-                            (name.clone(), vec![tokens.iter().nth(i).unwrap().clone()])
+                            (name.clone(), vec![tokens.get(i).unwrap().clone()])
                         })
                         .collect();
 
@@ -202,7 +198,6 @@ fn replace_body_variables(
                 repetitions.into_iter().flatten().collect::<Vec<_>>()
             }
         })
-        .flatten()
         .collect()
 }
 

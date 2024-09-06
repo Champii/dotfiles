@@ -16,7 +16,7 @@ where
 {
     type Output = Option<O>;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         if let Ok((tokens, output)) = self.parser.process(tokens) {
             Ok((tokens, Some(output)))
         } else {

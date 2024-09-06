@@ -111,7 +111,7 @@ impl<'a> Visitor<'a> for AstFormater {
             std::fs::write(path, module.to_string()).unwrap();
         }
 
-        println!("{}", module.to_string());
+        println!("{}", module);
 
         walk_module(self, module);
     }
@@ -122,10 +122,10 @@ struct ExpandedPrint;
 impl<'a> Visitor<'a> for ExpandedPrint {
     fn visit_module(&mut self, module: &'a Module) {
         if let Some(name) = &module.name {
-            println!("### {}: ###\n", name.to_string());
+            println!("### {}: ###\n", name);
         }
 
-        println!("{}", module.to_string());
+        println!("{}", module);
 
         walk_module(self, module);
     }

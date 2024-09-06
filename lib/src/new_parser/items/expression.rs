@@ -6,7 +6,7 @@ use crate::new_parser::{
 
 use super::{
     block, function_shorthand, get_span, ident, ident_path, indent, instance, int, lambda_decl,
-    operator, operator_token, parenthesis, r#loop, r#match,
+    operator, parenthesis, r#loop, r#match,
 };
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type};
@@ -224,7 +224,7 @@ pub fn disallow_multiline_fn_call<P: Parser>(
 
 pub fn not_multi_line_fn_call_short_circuit(stream: Input) -> IResult<()> {
     if stream.disallowed_multiline_fn_call {
-        Err(ParseError::ShortCircuit.into())
+        Err(ParseError::ShortCircuit)
     } else {
         Ok((stream, ()))
     }

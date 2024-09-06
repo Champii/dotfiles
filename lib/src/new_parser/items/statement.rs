@@ -3,7 +3,7 @@ use crate::{
     new_parser::{engine::*, Assignment, AssignmentLHS, Statement},
 };
 
-use super::{comment_token, empty_lines, expression, indent, pattern, seek, unary_expr};
+use super::{comment_token, expression, pattern, seek, unary_expr};
 
 pub fn statement(stream: Input) -> IResult<Statement> {
     preceded(TokenType::Keyword("return".to_string()), expression.opt())

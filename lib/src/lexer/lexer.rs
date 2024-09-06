@@ -110,17 +110,15 @@ impl Lexer {
         // Skip whitespace except when in the start of the file for indentation
         if self.prev_char() != '\n' && self.position != 0 || self.position == self.input.len() {
             self.skip_whitespace();
-        } else {
-            if let Some(token) = &self.last_token {
-                match token.token_type {
-                    TokenType::Indent(_) => (),
-                    _ => {
-                        return Ok(self.indent());
-                    }
+        } else if let Some(token) = &self.last_token {
+            match token.token_type {
+                TokenType::Indent(_) => (),
+                _ => {
+                    return Ok(self.indent());
                 }
-            } else {
-                return Ok(self.indent());
             }
+        } else {
+            return Ok(self.indent());
         }
 
         let token = match self.current_char() {
@@ -154,7 +152,7 @@ impl Lexer {
             '@' => self.token(TokenType::Arobase, 1),
             '_' => self.token(TokenType::Underscore, 1),
             c if c.is_alphabetic() => self.ident_or_keyword_or_type(),
-            c if c.is_digit(10) => self.number(),
+            c if c.is_ascii_digit() => self.number(),
             '\0' => self.token(TokenType::Eof, 1),
             c => return Err(LexerError::UnknownToken(c, self.span(1))),
         };
@@ -174,27 +172,25 @@ impl Lexer {
             }
         }
 
-        let token = if self.input[start..end] == *"=" {
+        
+
+        if self.input[start..end] == *"=" {
             self.token(TokenType::Equal, 1)
         } else if self.input.len() > 2 && self.input[0..2] == *". " {
             self.token(TokenType::Operator(self.input[0..1].to_string()), 2)
+        } else if self.input.len() > end + 1
+            && (self.input[end..end + 1] == *" " || self.input[end..end + 1] == *"\n")
+        {
+            self.token(
+                TokenType::Operator(self.input[start..end].to_string()),
+                end - start,
+            )
         } else {
-            if self.input.len() > end + 1
-                && (self.input[end..end + 1] == *" " || self.input[end..end + 1] == *"\n")
-            {
-                self.token(
-                    TokenType::Operator(self.input[start..end].to_string()),
-                    end - start,
-                )
-            } else {
-                self.token(
-                    TokenType::StuckOperator(self.input[start..end].to_string()),
-                    end - start,
-                )
-            }
-        };
-
-        token
+            self.token(
+                TokenType::StuckOperator(self.input[start..end].to_string()),
+                end - start,
+            )
+        }
     }
 
     fn ident_or_keyword_or_type(&self) -> Token {
@@ -231,7 +227,7 @@ impl Lexer {
     }
 
     fn comment(&self) -> Token {
-        let mut start = self.position;
+        let start = self.position;
         let mut end = self.position;
 
         // consume the '//'
@@ -279,7 +275,7 @@ impl Lexer {
         let start = self.position;
         let mut end = self.position;
 
-        while self.peek(end - start).is_digit(10) {
+        while self.peek(end - start).is_ascii_digit() {
             end += 1;
         }
 
@@ -287,7 +283,7 @@ impl Lexer {
             let old_end = end;
             end += 1;
 
-            while self.peek(end - start).is_digit(10) {
+            while self.peek(end - start).is_ascii_digit() {
                 end += 1;
             }
             if end > old_end + 1 {

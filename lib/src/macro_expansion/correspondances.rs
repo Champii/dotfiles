@@ -53,8 +53,7 @@ impl Correspondance {
             .chain(
                 self.nested_corresp
                     .iter()
-                    .map(|corresp| corresp.keys())
-                    .flatten(),
+                    .flat_map(|corresp| corresp.keys()),
             )
             .collect()
     }
@@ -78,7 +77,7 @@ impl Correspondance {
 
     pub fn merge(&mut self, other: &Self) {
         for (name, tokens) in other.entries.clone() {
-            let entry = self.entries.entry(name).or_insert(vec![]);
+            let entry = self.entries.entry(name).or_default();
 
             entry.extend(tokens);
         }

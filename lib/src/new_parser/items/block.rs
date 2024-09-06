@@ -3,7 +3,7 @@ use crate::{
     new_parser::{engine::*, Block, Statement},
 };
 
-use super::{empty_lines, indent, indent_token, seek, statement};
+use super::{indent, indent_token, seek, statement};
 
 pub fn block(stream: Input) -> IResult<Block> {
     preceded(

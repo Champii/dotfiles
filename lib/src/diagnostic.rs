@@ -48,16 +48,16 @@ impl From<ParseError> for Diagnostic {
                 invoc_arg,
             } => {
                 let mut labels = vec![
-                    (format!("For this macro"), macro_name.clone()),
-                    (format!("In this macro invocation"), invoc_name.clone()),
+                    ("For this macro".to_string(), macro_name.clone()),
+                    ("In this macro invocation".to_string(), invoc_name.clone()),
                 ];
 
                 if let Some(invoc_arg) = invoc_arg {
-                    labels.push((format!("With this token"), invoc_arg.clone()));
+                    labels.push(("With this token".to_string(), invoc_arg.clone()));
                 }
 
                 Diagnostic {
-                    message: format!("Macro: Nothing expected this token"),
+                    message: "Macro: Nothing expected this token".to_string(),
                     labels,
                     span: macro_name.clone(),
                     kind: DiagnosticType::Error,
@@ -82,7 +82,7 @@ impl From<ParseError> for Diagnostic {
                 kind: DiagnosticType::Error,
             }, */
             ParseError::UnexpectedEOF => Diagnostic {
-                message: format!("Unexpected end of file"),
+                message: "Unexpected end of file".to_string(),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
@@ -106,25 +106,25 @@ impl From<ParseError> for Diagnostic {
                 kind: DiagnosticType::Error,
             },
             ParseError::ExpectedOneOrMore => Diagnostic {
-                message: format!("Expected one or more"),
+                message: "Expected one or more".to_string(),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
             ParseError::Fail => Diagnostic {
-                message: format!("Fail"),
+                message: "Fail".to_string(),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
             ParseError::ShortCircuit => Diagnostic {
-                message: format!("Short circuit, should never be printed !"),
+                message: "Short circuit, should never be printed !".to_string(),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
             ParseError::AssertFailed => Diagnostic {
-                message: format!("Assert failed"),
+                message: "Assert failed".to_string(),
                 labels: vec![],
                 span: Span::default(),
                 kind: DiagnosticType::Error,
@@ -179,7 +179,7 @@ impl Diagnostic {
         // Generate & choose some colours for each of our elements
         let red = Color::Fixed(9);
 
-        let colors = vec![red, colors.next(), colors.next()];
+        let colors = [red, colors.next(), colors.next()];
 
         let file_name = self
             .span
@@ -209,7 +209,7 @@ impl Diagnostic {
             ))
             .unwrap();
 
-        println!("");
+        println!();
     }
 }
 

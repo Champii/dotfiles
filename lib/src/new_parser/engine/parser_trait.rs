@@ -3,7 +3,7 @@ use super::{and::And, map::Map, opt::Opt, or::Or, Followed, IResult, Input, Pars
 pub trait Parser {
     type Output;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output>;
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output>;
 
     fn or<Parser2>(self, parser2: Parser2) -> Or<Self, Parser2>
     where

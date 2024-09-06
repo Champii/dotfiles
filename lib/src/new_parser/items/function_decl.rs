@@ -8,7 +8,7 @@ use super::{
     seek, stuck_operator_token,
 };
 
-pub fn function_decl<'a>(stream: Input<'a>) -> IResult<'a, FunctionDecl> {
+pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
     (
         TokenType::Arobase.opt(),
         ident,
@@ -87,14 +87,13 @@ pub fn prefix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     .collect::<Vec<_>>();
 
     let (other_remaining_tokens, mut lambda) =
-        lambda_decl.process(ParseCtx::from(&new_inner_tokens, &stream.config))?;
+        lambda_decl.process(ParseCtx::from(&new_inner_tokens, stream.config))?;
 
     if !other_remaining_tokens.is_empty() {
         return Err(ParseError::UnexpectedToken(
             TokenType::CloseParen.discriminant().to_string(),
             other_remaining_tokens.tokens[0].clone(),
-        )
-        .into());
+        ));
     }
 
     lambda.shorthand_tokens = Some(inner_tokens);
@@ -115,8 +114,7 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
                 .discriminant()
                 .to_string(),
             operator.clone(),
-        )
-        .into());
+        ));
     }
 
     let inner_tokens = inner_tokens[..inner_tokens.len() - 1].to_vec();
@@ -152,14 +150,13 @@ pub fn suffix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
     .collect::<Vec<_>>();
 
     let (other_remaining_tokens, mut lambda) =
-        lambda_decl.process(ParseCtx::from(&new_inner_tokens, &stream.config))?;
+        lambda_decl.process(ParseCtx::from(&new_inner_tokens, stream.config))?;
 
     if !other_remaining_tokens.is_empty() {
         return Err(ParseError::UnexpectedToken(
             TokenType::CloseParen.discriminant().to_string(),
             other_remaining_tokens.tokens[0].clone(),
-        )
-        .into());
+        ));
     }
 
     lambda.shorthand_tokens = Some(inner_tokens);

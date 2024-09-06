@@ -6,7 +6,7 @@ where
 {
     type Output = T;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         self(tokens)
     }
 }

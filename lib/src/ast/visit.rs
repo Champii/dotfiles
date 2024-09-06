@@ -302,7 +302,7 @@ pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression
         Expression::BinopExpr(unary, operator, expr) => {
             visitor.visit_unary_expr(unary);
             visitor.visit_operator(operator);
-            visitor.visit_expression(&*expr);
+            visitor.visit_expression(expr);
         }
         Expression::UnaryExpr(unary) => visitor.visit_unary_expr(unary),
     }
@@ -319,7 +319,7 @@ pub fn walk_unary_expr<'a, V: Visitor<'a>>(visitor: &mut V, unary: &'a UnaryExpr
         UnaryExpr::PrimaryExpr(primary) => visitor.visit_primary_expr(primary),
         UnaryExpr::UnaryExpr(op, unary) => {
             visitor.visit_operator(op);
-            visitor.visit_unary_expr(&*unary);
+            visitor.visit_unary_expr(unary);
         }
     }
 }
@@ -363,7 +363,7 @@ pub fn walk_operand<'a, V: Visitor<'a>>(visitor: &mut V, operand: &'a Operand) {
         Operand::Tuple(t) => visitor.visit_tuple(t),
         Operand::If(i) => visitor.visit_if(i),
         Operand::Loop(l) => visitor.visit_loop(l),
-        Operand::Expression(e) => visitor.visit_expression(&*e),
+        Operand::Expression(e) => visitor.visit_expression(e),
         Operand::Match(m) => visitor.visit_match(m),
         Operand::Unsafe(block) => visitor.visit_block(block),
     }

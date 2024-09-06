@@ -1,7 +1,4 @@
-use crate::{
-    lexer::Span,
-    new_parser::{engine::*, Ident},
-};
+use crate::new_parser::{engine::*, Ident};
 
 use super::{ident_token, operator};
 

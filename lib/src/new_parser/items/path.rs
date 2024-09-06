@@ -24,7 +24,7 @@ pub fn ident_path(stream: Input) -> IResult<IdentifierPath> {
         }
     }
 
-    return Err(ParseError::Fail);
+    Err(ParseError::Fail)
 }
 
 // the same, but finished with a type
@@ -41,7 +41,7 @@ pub fn type_path(stream: Input) -> IResult<TypePath> {
         }
     }
 
-    return Err(ParseError::Fail);
+    Err(ParseError::Fail)
 }
 
 pub fn ident_or_type(stream: Input) -> IResult<IdentOrType> {

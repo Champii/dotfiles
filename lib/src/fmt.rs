@@ -15,7 +15,7 @@ fn indent() -> String {
     let mut s = String::new();
 
     for _ in 0..*indent {
-        s.push_str(" ");
+        s.push(' ');
     }
 
     s
@@ -48,7 +48,7 @@ impl Display for ModuleDecl {
                 write!(f, " //{}", comment)?;
             }
 
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         Ok(())
@@ -80,7 +80,7 @@ impl Display for Module {
                     continue;
                 }
 
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
 
@@ -97,12 +97,12 @@ impl Display for TopLevel {
         match &self {
             TopLevel::Module(module) => write!(f, "{}", module),
             TopLevel::InfixOperator(precedence, decl) => {
-                write!(f, "infix {} {}\n", precedence, decl)
+                writeln!(f, "infix {} {}", precedence, decl)
             }
-            TopLevel::Import(path) => write!(f, "> {}\n", path),
-            TopLevel::Export(path) => write!(f, "< {}\n", path),
+            TopLevel::Import(path) => writeln!(f, "> {}", path),
+            TopLevel::Export(path) => writeln!(f, "< {}", path),
             TopLevel::MacroDecl(decl) => write!(f, "{}", decl),
-            TopLevel::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
+            TopLevel::MacroInvoc(invoc) => writeln!(f, "{}", invoc),
             TopLevel::Extern(sig) => write!(f, "extern {}", sig),
             TopLevel::FunctionSig(sig) => write!(f, "{}", sig),
             TopLevel::FunctionDecl(decl) => write!(f, "{}", decl),
@@ -110,21 +110,21 @@ impl Display for TopLevel {
             TopLevel::TraitDecl(decl) => write!(f, "{}", decl),
             TopLevel::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevel::Impl(impl_) => write!(f, "{}", impl_),
-            TopLevel::Comment(comment) => write!(f, "//{}\n", comment),
-            TopLevel::NewType(inner, ty) => write!(f, "type {} = {}\n", inner, ty),
+            TopLevel::Comment(comment) => writeln!(f, "//{}", comment),
+            TopLevel::NewType(inner, ty) => writeln!(f, "type {} = {}", inner, ty),
         }
     }
 }
 
 impl Display for StructDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "struct {}\n", self.name)?;
+        writeln!(f, "struct {}", self.name)?;
 
         increase_indent();
 
         for field in &self.fields {
             write!(f, "{}", indent())?;
-            write!(f, "{}\n", field)?;
+            writeln!(f, "{}", field)?;
         }
 
         decrease_indent();
@@ -143,13 +143,13 @@ impl Display for StructDeclField {
 
 impl Display for EnumDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "enum {}\n", self.name)?;
+        writeln!(f, "enum {}", self.name)?;
 
         increase_indent();
 
         for variant in &self.variants {
             write!(f, "{}", indent())?;
-            write!(f, "{}\n", variant)?;
+            writeln!(f, "{}", variant)?;
         }
 
         decrease_indent();
@@ -173,13 +173,13 @@ impl Display for NamedFieldsOrTypesList {
                     return Ok(());
                 }
 
-                write!(f, "\n")?;
+                writeln!(f)?;
 
                 increase_indent();
 
                 for field in fields {
                     write!(f, "{}", indent())?;
-                    write!(f, "{}\n", field)?;
+                    writeln!(f, "{}", field)?;
                 }
 
                 decrease_indent();
@@ -203,7 +203,7 @@ impl Display for NamedFieldsOrTypesList {
 
 impl Display for MacroDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "macro {}\n", self.name)?;
+        writeln!(f, "macro {}", self.name)?;
 
         for entry in &self.entries {
             write!(f, "{}", entry)?;
@@ -223,7 +223,7 @@ impl Display for MacroEntry {
             write!(f, " ")?;
         }
 
-        write!(f, "=>\n")?;
+        writeln!(f, "=>")?;
 
         increase_indent();
         for (i, fragment) in self.body.iter().enumerate() {
@@ -330,11 +330,11 @@ impl Display for MacroInvoc {
 
 impl Display for TraitDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "trait {}\n", self.name)?;
+        writeln!(f, "trait {}", self.name)?;
 
         increase_indent();
 
-        for (name, signature) in &self.signatures {
+        for (_name, signature) in &self.signatures {
             write!(f, "{}", indent())?;
             write!(f, "{}", signature)?;
         }
@@ -352,11 +352,11 @@ impl Display for TraitDecl {
 
 impl Display for Impl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "impl {}\n", self.name)?;
+        writeln!(f, "impl {}", self.name)?;
 
         increase_indent();
 
-        for (name, signature) in &self.signatures {
+        for (_name, signature) in &self.signatures {
             write!(f, "{}", indent())?;
             write!(f, "{}", signature)?;
         }
@@ -432,7 +432,7 @@ impl Display for ParseType {
 
         match self {
             ParseType::Function(types) => {
-                if IS_INSIDE_FN_DECL.lock().unwrap().clone() {
+                if *IS_INSIDE_FN_DECL.lock().unwrap() {
                     write!(f, "(")?;
                 } else {
                     has_toggled_inside_fn_type_decl = true;
@@ -452,7 +452,7 @@ impl Display for ParseType {
                     *IS_INSIDE_FN_DECL.lock().unwrap() = false;
                 }
 
-                if IS_INSIDE_FN_DECL.lock().unwrap().clone() {
+                if *IS_INSIDE_FN_DECL.lock().unwrap() {
                     write!(f, ")")?;
                 }
 
@@ -497,14 +497,14 @@ impl Display for ParseTypeInner {
 impl Display for FunctionSig {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let inject_self = if self.inject_self { "@" } else { "" };
-        write!(f, "{}{} : {}\n", inject_self, self.name, self.sig)
+        writeln!(f, "{}{} : {}", inject_self, self.name, self.sig)
     }
 }
 
 impl Display for FunctionDecl {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let inject_self = if self.inject_self { "@" } else { "" };
-        write!(f, "{}{} = {}\n", inject_self, self.name, self.lambda)
+        writeln!(f, "{}{} = {}", inject_self, self.name, self.lambda)
     }
 }
 
@@ -549,7 +549,7 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
 
     if !mono_statement {
         increase_indent();
-        write!(f, "\n")?;
+        writeln!(f)?;
     }
 
     let mut skip_next_empty_lines = false;
@@ -572,7 +572,7 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
         write!(f, "{}", stmt)?;
 
         if !mono_statement && i < block.statements.len() - 1 {
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
     }
 
@@ -706,7 +706,7 @@ impl Display for Operand {
 
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "match {}\n", self.expr)?;
+        writeln!(f, "match {}", self.expr)?;
 
         increase_indent();
 
@@ -715,7 +715,7 @@ impl Display for Match {
             write!(f, "{}", arm)?;
 
             if i < self.arms.len() - 1 {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
 
@@ -942,7 +942,7 @@ impl Display for Instance {
         increase_indent();
 
         if !self.fields.is_empty() {
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         for (i, (field, value)) in self.fields.iter().enumerate() {
@@ -950,7 +950,7 @@ impl Display for Instance {
             write!(f, "{}: {}", field, value)?;
 
             if i < self.fields.len() - 1 {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
         }
 
@@ -962,7 +962,7 @@ impl Display for Instance {
 
 impl Display for If {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "if {}\n", self.condition)?;
+        writeln!(f, "if {}", self.condition)?;
         write!(f, "{}", indent())?;
         write!(f, "then")?;
 
@@ -973,7 +973,7 @@ impl Display for If {
         display_block(&self.then, false, f)?;
 
         if let Some(else_) = &self.else_ {
-            write!(f, "\n")?;
+            writeln!(f)?;
             write!(f, "{}", indent())?;
             write!(f, "else{}", else_)
         } else {

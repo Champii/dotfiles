@@ -10,7 +10,7 @@ pub fn program(stream: Input) -> IResult<Program> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ast::Program, new_parser::parse_string, Config};
+    use crate::{new_parser::parse_string, Config};
 
     #[test]
     fn program_with_newlines() {

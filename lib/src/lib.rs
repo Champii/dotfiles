@@ -50,7 +50,7 @@ impl Config {
 }
 
 pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
-    let ast: Program = match new_parser::parse(&config) {
+    let ast: Program = match new_parser::parse(config) {
         Ok(ast) => ast,
         Err(e) => {
             // e.report();
@@ -71,7 +71,7 @@ pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
         Ok(ast) => ast,
         Err(e) => {
             // e.report();
-            return Err(Diagnostics::from(e));
+            return Err(e);
         }
     };
 

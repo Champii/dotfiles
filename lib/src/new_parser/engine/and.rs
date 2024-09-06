@@ -18,7 +18,7 @@ where
 {
     type Output = (O, T);
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let (tokens, output1) = self.parser1.process(tokens)?;
         let (tokens, output2) = self.parser2.process(tokens)?;
         Ok((tokens, (output1, output2)))

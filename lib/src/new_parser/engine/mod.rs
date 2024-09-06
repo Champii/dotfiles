@@ -131,7 +131,7 @@ impl ParseCtx<'_> {
         }
     }
 
-    fn determine_indent_step(tokens: &[Token], config: &Config) -> usize {
+    fn determine_indent_step(tokens: &[Token], _config: &Config) -> usize {
         let mut indent_step = 0;
 
         for token in tokens {
@@ -165,7 +165,7 @@ impl ParseCtx<'_> {
 
         self.inside_argument_list = false;
 
-        Err(ParseError::ShortCircuit.into())
+        Err(ParseError::ShortCircuit)
     }
 }
 

@@ -18,7 +18,7 @@ where
 {
     type Output = Parser1::Output;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         if let Ok((tokens, output)) = self.parser1.process(tokens) {
             return Ok((tokens, output));
         }

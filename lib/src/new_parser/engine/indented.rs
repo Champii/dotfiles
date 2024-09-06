@@ -10,7 +10,7 @@ where
 {
     type Output = O;
 
-    fn process<'a, 'b>(&'b mut self, stream: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, stream: Input<'a>) -> IResult<'a, Self::Output> {
         stream.with_indent(|stream| self.parser.process(stream))
     }
 }

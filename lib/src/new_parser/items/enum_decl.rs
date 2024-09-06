@@ -47,7 +47,7 @@ pub fn enum_variant(stream: Input) -> IResult<EnumVariant> {
 
 pub fn named_fields_or_types_list(stream: Input) -> IResult<NamedFieldsOrTypesList> {
     many(struct_decl_field)
-        .map(|fields| NamedFieldsOrTypesList::NamedFields(fields))
+        .map(NamedFieldsOrTypesList::NamedFields)
         .process(stream)
 }
 

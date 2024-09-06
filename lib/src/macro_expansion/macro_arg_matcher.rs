@@ -60,7 +60,7 @@ impl<'a> MacroArgMatcher<'a> {
             let mut new_threads = vec![];
 
             for thread in &mut threads {
-                if let Some(arg) = thread.args.get(0) {
+                if let Some(arg) = thread.args.first() {
                     let tokens = &thread.tokens;
 
                     if tokens.is_empty() {
@@ -156,7 +156,7 @@ impl<'a> MacroArgMatcher<'a> {
                         MacroFragment::Repetition(repetition) => {
                             // Case no repetition
                             new_threads.push(MacroThread {
-                                args: &thread.args,
+                                args: thread.args,
                                 tokens: tokens[1..].to_vec(),
                                 correspondances: thread.correspondances.clone(),
                             });
@@ -257,11 +257,11 @@ fn has_one_solution(threads: Vec<MacroThread>, must_be_completed: bool) -> bool 
     })
 }
 
-fn get_correspondances_thread<'a>(threads: Vec<MacroThread<'a>>) -> Option<MacroThread<'a>> {
+fn get_correspondances_thread(threads: Vec<MacroThread<'_>>) -> Option<MacroThread<'_>> {
     if let Some(found) = threads.iter().find(|thread| {
         remaining_is_all_repetition_or_empty(&thread.tokens) && thread.args.is_empty()
     }) {
-        return Some(found.clone());
+        Some(found.clone())
     } else if let Some(found) = threads.iter().find(|thread| thread.args.is_empty()) {
         return Some(found.clone());
     } else if let Some(found) = threads

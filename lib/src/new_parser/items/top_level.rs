@@ -2,15 +2,14 @@ use crate::{
     lexer::TokenType,
     new_parser::{
         engine::*,
-        items::{primitives::indent, utils::empty_lines},
-        Ident, ModuleDecl, TopLevel,
+        items::{primitives::indent, utils::empty_lines}, ModuleDecl, TopLevel,
     },
 };
 
 use super::{
-    comment_token, enum_decl, function_decl, function_sig, ident, macro_decl, macro_invoc, module,
-    operator, operator_token, parse_type, parse_type_inner, path, primitives, r#impl, r#trait,
-    struct_decl, stuck_operator_token,
+    comment_token, enum_decl, function_decl, function_sig, macro_decl, macro_invoc, module,
+    operator, parse_type, parse_type_inner, path, primitives, r#impl, r#trait,
+    struct_decl,
 };
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {

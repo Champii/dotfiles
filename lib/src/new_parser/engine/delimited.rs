@@ -14,7 +14,7 @@ where
 {
     type Output = P::Output;
 
-    fn process<'a, 'b>(&'b mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
+    fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let (tokens, _) = self.delimiter1.process(tokens)?;
         let (tokens, result) = self.parser.process(tokens)?;
         let (tokens, _) = self.delimiter2.process(tokens)?;

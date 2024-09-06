@@ -6,7 +6,7 @@ use crate::{
     },
 };
 
-use super::{ident, ident_path, literal, parenthesis, seek, type_path, type_token};
+use super::{ident, literal, parenthesis, type_path};
 
 pub fn pattern(stream: Input) -> IResult<Pattern> {
     (followed(ident, TokenType::Arobase).opt(), pattern_kind)
