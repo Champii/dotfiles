@@ -123,8 +123,8 @@ mod new_parser {
 
         assert_eq!(
             top_level,
-            TopLevel {
-                ident: Ident {
+            TopLevel::FunctionDecl(FunctionDecl {
+                name: Ident {
                     name: "a".to_string(),
                     span: Span {
                         start: 0,
@@ -132,50 +132,40 @@ mod new_parser {
                         file_path: PathBuf::new(),
                     },
                 },
-                kind: TopLevelKind::FunctionDecl(FunctionDecl {
-                    name: Ident {
-                        name: "a".to_string(),
-                        span: Span {
-                            start: 0,
-                            end: 1,
-                            file_path: PathBuf::new(),
-                        },
+                lambda: LambdaDecl {
+                    parameters: vec![Pattern {
+                        binding: None,
+                        kind: PatternKind::Ident(Ident {
+                            name: "foo".to_string(),
+                            span: Span {
+                                start: 4,
+                                end: 7,
+                                file_path: PathBuf::new(),
+                            },
+                        }),
+                    },],
+                    body: Block {
+                        statements: vec![Statement::Expression(Expression::UnaryExpr(
+                            UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(IdentifierPath {
+                                    path: vec![IdentOrType::Ident(Ident {
+                                        name: "foo".to_string(),
+                                        span: Span {
+                                            start: 11,
+                                            end: 14,
+                                            file_path: PathBuf::new(),
+                                        },
+                                    })]
+                                }),
+                                secondaries: None,
+                                type_annotation: None,
+                            })
+                        ))]
                     },
-                    lambda: LambdaDecl {
-                        parameters: vec![Pattern {
-                            binding: None,
-                            kind: PatternKind::Ident(Ident {
-                                name: "foo".to_string(),
-                                span: Span {
-                                    start: 4,
-                                    end: 7,
-                                    file_path: PathBuf::new(),
-                                },
-                            }),
-                        },],
-                        body: Block {
-                            statements: vec![Statement::Expression(Expression::UnaryExpr(
-                                UnaryExpr::PrimaryExpr(PrimaryExpr {
-                                    operand: Operand::Ident(IdentifierPath {
-                                        path: vec![IdentOrType::Ident(Ident {
-                                            name: "foo".to_string(),
-                                            span: Span {
-                                                start: 11,
-                                                end: 14,
-                                                file_path: PathBuf::new(),
-                                            },
-                                        })]
-                                    }),
-                                    secondaries: None,
-                                    type_annotation: None,
-                                })
-                            ))]
-                        },
-                        shorthand_tokens: None,
-                    },
-                    inject_self: false,
-                }),
-            }
+                    shorthand_tokens: None,
+                },
+                inject_self: false,
+            }),
         );
 
         assert_eq!(tokens.len(), 0);

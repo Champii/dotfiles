@@ -21,12 +21,14 @@ pub struct Module {
 
 impl Module {
     pub fn top_level_from_ident(&self, ident: &str) -> Option<&TopLevel> {
-        self.top_levels.iter().find(|tl| tl.ident.name == ident)
+        self.top_levels
+            .iter()
+            .find(|tl| tl.get_ident().map(|i| i == ident).unwrap_or(false))
     }
 
     pub fn has_macro_invoc(&self) -> bool {
-        self.top_levels.iter().any(|tl| match &tl.kind {
-            TopLevelKind::MacroInvoc(_) => true,
+        self.top_levels.iter().any(|tl| match &tl {
+            TopLevel::MacroInvoc(_) => true,
             _ => false,
         })
     }
@@ -38,13 +40,7 @@ pub struct ModuleInner {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct TopLevel {
-    pub ident: Ident,
-    pub kind: TopLevelKind,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum TopLevelKind {
+pub enum TopLevel {
     Module(ModuleDecl),
     Import(Path),
     Export(Path),
@@ -60,6 +56,23 @@ pub enum TopLevelKind {
     Impl(Impl),
     Comment(String),
     NewType(ParseTypeInner, ParseType),
+}
+
+impl TopLevel {
+    pub fn get_ident(&self) -> Option<&String> {
+        match self {
+            TopLevel::FunctionDecl(fd) => Some(&fd.name.name),
+            TopLevel::StructDecl(sd) => Some(&sd.name.name),
+            TopLevel::TraitDecl(td) => Some(&td.name.name),
+            TopLevel::EnumDecl(ed) => Some(&ed.name.name),
+            TopLevel::Impl(i) => Some(&i.name.name),
+            TopLevel::MacroDecl(md) => Some(&md.name.name),
+            TopLevel::MacroInvoc(mi) => Some(&mi.name.name),
+            TopLevel::FunctionSig(fs) => Some(&fs.name.name),
+            TopLevel::NewType(nt, _) => Some(&nt.name),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

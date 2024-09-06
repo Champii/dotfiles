@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ast::{MacroDecl, MacroFragment, Module, Program, TopLevel, TopLevelKind},
+    ast::{MacroDecl, MacroFragment, Module, Program, TopLevel},
     diagnostic::Diagnostics,
     lexer::{Span, Token, TokenType},
     new_parser::{module_inline, ParseCtx, Parser},
@@ -21,12 +21,10 @@ pub fn expand_macros(mut program: Program) -> Result<Program, Diagnostics> {
         let mut decls = HashMap::new();
 
         for (i, top_level) in module.top_levels.iter().enumerate() {
-            match &top_level.kind {
-                TopLevelKind::MacroInvoc(invocation) => {
-                    let TopLevelKind::MacroDecl(ref decl) = module
-                        .top_level_from_ident(&invocation.name.name)
-                        .unwrap()
-                        .kind
+            match &top_level {
+                TopLevel::MacroInvoc(invocation) => {
+                    let TopLevel::MacroDecl(ref decl) =
+                        module.top_level_from_ident(&invocation.name.name).unwrap()
                     else {
                         // It might be defined later
                         continue;
@@ -66,8 +64,8 @@ fn expand_macros_once(
         .top_levels
         .into_iter()
         .enumerate()
-        .map(|(i, top_level)| match top_level.kind {
-            TopLevelKind::MacroInvoc(_) => {
+        .map(|(i, top_level)| match top_level {
+            TopLevel::MacroInvoc(_) => {
                 let Some((decl, args, invoc_span)) = decls.get(&i) else {
                     return Ok(vec![top_level]);
                 };

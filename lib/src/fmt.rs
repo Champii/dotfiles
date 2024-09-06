@@ -68,7 +68,7 @@ impl Display for Module {
             if i < self.top_levels.len() - 1 {
                 // if the top level is a functiondecl or a comment, check if the last statement of the block is
                 // an empty line and if so, don't add an extra newline
-                if let TopLevelKind::FunctionDecl(decl) = &top_level.kind {
+                if let TopLevel::FunctionDecl(decl) = &top_level {
                     if let Some(last) = &decl.lambda.body.statements.last() {
                         if let Statement::EmptyLine = last {
                             continue;
@@ -76,7 +76,7 @@ impl Display for Module {
                     }
                 }
 
-                if let TopLevelKind::Comment(_) = &top_level.kind {
+                if let TopLevel::Comment(_) = &top_level {
                     continue;
                 }
 
@@ -94,24 +94,24 @@ impl Display for Module {
 
 impl Display for TopLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match &self.kind {
-            TopLevelKind::Module(module) => write!(f, "{}", module),
-            TopLevelKind::InfixOperator(precedence, decl) => {
+        match &self {
+            TopLevel::Module(module) => write!(f, "{}", module),
+            TopLevel::InfixOperator(precedence, decl) => {
                 write!(f, "infix {} {}\n", precedence, decl)
             }
-            TopLevelKind::Import(path) => write!(f, "> {}\n", path),
-            TopLevelKind::Export(path) => write!(f, "< {}\n", path),
-            TopLevelKind::MacroDecl(decl) => write!(f, "{}", decl),
-            TopLevelKind::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
-            TopLevelKind::Extern(sig) => write!(f, "extern {}", sig),
-            TopLevelKind::FunctionSig(sig) => write!(f, "{}", sig),
-            TopLevelKind::FunctionDecl(decl) => write!(f, "{}", decl),
-            TopLevelKind::StructDecl(decl) => write!(f, "{}", decl),
-            TopLevelKind::TraitDecl(decl) => write!(f, "{}", decl),
-            TopLevelKind::EnumDecl(decl) => write!(f, "{}", decl),
-            TopLevelKind::Impl(impl_) => write!(f, "{}", impl_),
-            TopLevelKind::Comment(comment) => write!(f, "//{}\n", comment),
-            TopLevelKind::NewType(inner, ty) => write!(f, "type {} = {}\n", inner, ty),
+            TopLevel::Import(path) => write!(f, "> {}\n", path),
+            TopLevel::Export(path) => write!(f, "< {}\n", path),
+            TopLevel::MacroDecl(decl) => write!(f, "{}", decl),
+            TopLevel::MacroInvoc(invoc) => write!(f, "{}\n", invoc),
+            TopLevel::Extern(sig) => write!(f, "extern {}", sig),
+            TopLevel::FunctionSig(sig) => write!(f, "{}", sig),
+            TopLevel::FunctionDecl(decl) => write!(f, "{}", decl),
+            TopLevel::StructDecl(decl) => write!(f, "{}", decl),
+            TopLevel::TraitDecl(decl) => write!(f, "{}", decl),
+            TopLevel::EnumDecl(decl) => write!(f, "{}", decl),
+            TopLevel::Impl(impl_) => write!(f, "{}", impl_),
+            TopLevel::Comment(comment) => write!(f, "//{}\n", comment),
+            TopLevel::NewType(inner, ty) => write!(f, "type {} = {}\n", inner, ty),
         }
     }
 }

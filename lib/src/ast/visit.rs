@@ -134,22 +134,22 @@ pub fn walk_module_decl<'a, V: Visitor<'a>>(visitor: &mut V, module_decl: &'a Mo
 }
 
 pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLevel) {
-    match &top_level.kind {
-        TopLevelKind::Module(m) => visitor.visit_module_decl(m),
-        TopLevelKind::Import(path) => visitor.visit_path(path),
-        TopLevelKind::Export(path) => visitor.visit_path(path),
-        TopLevelKind::InfixOperator(_precedence, _name) => (),
-        TopLevelKind::MacroDecl(m) => visitor.visit_macro_decl(m),
-        TopLevelKind::MacroInvoc(m) => visitor.visit_macro_invoc(m),
-        TopLevelKind::Extern(sig) => visitor.visit_function_sig(sig),
-        TopLevelKind::FunctionSig(sig) => visitor.visit_function_sig(sig),
-        TopLevelKind::FunctionDecl(f) => visitor.visit_function_decl(f),
-        TopLevelKind::StructDecl(i) => visitor.visit_struct_decl(i),
-        TopLevelKind::TraitDecl(t) => visitor.visit_trait_decl(t),
-        TopLevelKind::EnumDecl(e) => visitor.visit_enum_decl(e),
-        TopLevelKind::Impl(i) => visitor.visit_impl(i),
-        TopLevelKind::Comment(_) => {}
-        TopLevelKind::NewType(inner, ty) => {
+    match &top_level {
+        TopLevel::Module(m) => visitor.visit_module_decl(m),
+        TopLevel::Import(path) => visitor.visit_path(path),
+        TopLevel::Export(path) => visitor.visit_path(path),
+        TopLevel::InfixOperator(_precedence, _name) => (),
+        TopLevel::MacroDecl(m) => visitor.visit_macro_decl(m),
+        TopLevel::MacroInvoc(m) => visitor.visit_macro_invoc(m),
+        TopLevel::Extern(sig) => visitor.visit_function_sig(sig),
+        TopLevel::FunctionSig(sig) => visitor.visit_function_sig(sig),
+        TopLevel::FunctionDecl(f) => visitor.visit_function_decl(f),
+        TopLevel::StructDecl(i) => visitor.visit_struct_decl(i),
+        TopLevel::TraitDecl(t) => visitor.visit_trait_decl(t),
+        TopLevel::EnumDecl(e) => visitor.visit_enum_decl(e),
+        TopLevel::Impl(i) => visitor.visit_impl(i),
+        TopLevel::Comment(_) => {}
+        TopLevel::NewType(inner, ty) => {
             visitor.visit_parse_type_inner(inner);
             visitor.visit_parse_type(ty);
         }
