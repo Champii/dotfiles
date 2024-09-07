@@ -128,7 +128,7 @@ enum Choice T, U
 ```haskell
 main = ->
     a = 5
-    #Here b is &Int
+    // Here b is &Int
     b = a 
     add a, b
 
@@ -228,9 +228,16 @@ struct MyStruct
     - Better error management and diagnostic details
 
   - New parser
-    - Comments
+    - Comments in EOL position
     - Multi-files modules
     - Trait bound in parse_type
+    - Pointers and references
+    - Mutability
+    - Slices
+    - Escaped chars and strings
+    - Default arguments
+    - Named arguments
+    - Remove `.` as an allowed operator
 
   - Parser
     - High priority

@@ -13,6 +13,10 @@ use crate::{Config, DebugPrint};
 pub fn parse(config: &Config) -> Result<Program, ParseError> {
     let file_path = config.entry_file.clone();
 
+    parse_module(file_path, config).map(|module| Program { module })
+}
+
+pub fn parse_module(file_path: PathBuf, config: &Config) -> Result<Module, ParseError> {
     let file = std::fs::read_to_string(file_path.clone())
         .map_err(|_e| ParseError::UnknownFile(file_path.to_str().unwrap().to_string()))?;
 
@@ -23,7 +27,7 @@ pub fn parse(config: &Config) -> Result<Program, ParseError> {
         println!("{:#?}", tokens);
     }
 
-    let (_ctx, program) = program.process(ParseCtx::from(&tokens, config))?;
+    let (_ctx, program) = module_inline.process(ParseCtx::from(&tokens, config))?;
 
     Ok(program)
 }

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::{
     lexer::{Token, TokenType},
     Config,
@@ -129,6 +131,23 @@ impl ParseCtx<'_> {
             inside_argument_list: false,
             is_inside_fn_type_decl: false,
         }
+    }
+
+    pub fn current_file_path(&self) -> PathBuf {
+        self.tokens[0].span.file_path.clone()
+    }
+
+    pub fn sibling_module_filepath(&self, name: &str) -> Result<PathBuf, ParseError> {
+        let mut path = self.current_file_path();
+
+        path.pop();
+        path.push(format!("{}.rk", name));
+
+        if path.exists() {
+            return Ok(path);
+        }
+
+        Err(ParseError::UnknownFile(path.to_str().unwrap().to_string()))
     }
 
     fn determine_indent_step(tokens: &[Token], _config: &Config) -> usize {

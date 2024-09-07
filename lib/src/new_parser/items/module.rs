@@ -21,12 +21,25 @@ pub fn module(stream: Input) -> IResult<Module> {
         TokenType::Eol,
         indented(many(top_level)),
     )
-        .map(|(_, name, _, top_levels)| Module {
-            name: Some(name),
-            top_levels,
-            comment: None,
-            is_inline: false,
-            filepath: None,
+        .map(|(_, name, _, top_levels)| {
+            if top_levels.is_empty() {
+                let module_path = stream
+                    .sibling_module_filepath(&name.name)
+                    .unwrap_or_else(|_| {
+                        panic!("Module '{}' is empty and no sibling file found", name)
+                    });
+                let mut module = parse_module(module_path, &stream.config).unwrap();
+                module.name = Some(name);
+                module
+            } else {
+                Module {
+                    name: Some(name),
+                    top_levels,
+                    comment: None,
+                    is_inline: false,
+                    filepath: None,
+                }
+            }
         })
         .process(stream)
 }
