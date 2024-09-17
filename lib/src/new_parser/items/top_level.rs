@@ -2,14 +2,14 @@ use crate::{
     lexer::TokenType,
     new_parser::{
         engine::*,
-        items::{primitives::indent, utils::empty_lines}, ModuleDecl, TopLevel,
+        items::{primitives::indent, utils::empty_lines},
+        ModuleDecl, TopLevel,
     },
 };
 
 use super::{
-    comment_token, enum_decl, function_decl, function_sig, macro_decl, macro_invoc, module,
-    operator, parse_type, parse_type_inner, path, primitives, r#impl, r#trait,
-    struct_decl,
+    enum_decl, function_decl, function_sig, macro_decl, macro_invoc, module, operator, parse_type,
+    parse_type_inner, path, primitives, r#impl, r#trait, struct_decl,
 };
 
 pub fn top_level(stream: Input) -> IResult<TopLevel> {
@@ -39,9 +39,6 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
                 TokenType::Eol,
             )
                 .map(|(_, name, _, ty, _)| TopLevel::NewType(name, ty)))
-            .or(comment_token
-                .followed_by(TokenType::Eol)
-                .map(TopLevel::Comment))
             .or(preceded(
                 TokenType::Operator(">".to_string()),
                 followed(path, TokenType::Eol),
@@ -101,7 +98,7 @@ mod parse_top_level {
         let tokens = lex_test_toplevel(input);
         let config = Config::default();
 
-        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+        let (rest, _top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
 
         assert_eq!(rest.len(), 0);
     }

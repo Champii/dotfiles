@@ -57,7 +57,7 @@ pub fn field_pattern_or_arguments_pattern(
 ) -> IResult<FieldsPatternOrArgumentsPattern> {
     separated1(field_pattern, TokenType::Coma)
         .map(FieldsPatternOrArgumentsPattern::Fields)
-        .or(separated1(pattern, TokenType::Coma).map(FieldsPatternOrArgumentsPattern::Arguments))
+        .or(separated(pattern, TokenType::Coma).map(FieldsPatternOrArgumentsPattern::Arguments))
         .process(stream)
 }
 

@@ -1,4 +1,4 @@
-# read write a file
+// read write a file
 
 > std::fs::File
 

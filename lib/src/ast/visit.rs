@@ -148,7 +148,6 @@ pub fn walk_top_level<'a, V: Visitor<'a>>(visitor: &mut V, top_level: &'a TopLev
         TopLevel::TraitDecl(t) => visitor.visit_trait_decl(t),
         TopLevel::EnumDecl(e) => visitor.visit_enum_decl(e),
         TopLevel::Impl(i) => visitor.visit_impl(i),
-        TopLevel::Comment(_) => {}
         TopLevel::NewType(inner, ty) => {
             visitor.visit_parse_type_inner(inner);
             visitor.visit_parse_type(ty);
@@ -248,8 +247,6 @@ pub fn walk_statement<'a, V: Visitor<'a>>(visitor: &mut V, statement: &'a Statem
                 visitor.visit_expression(expr);
             }
         }
-        Statement::EmptyLine => {}
-        Statement::Comment(_) => {}
     }
 }
 

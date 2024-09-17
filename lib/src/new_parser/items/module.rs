@@ -7,7 +7,6 @@ pub fn module_inline(stream: Input) -> IResult<Module> {
         .map(|(top_levels, _)| Module {
             name: None,
             top_levels,
-            comment: None,
             is_inline: true,
             filepath: None,
         })
@@ -35,7 +34,6 @@ pub fn module(stream: Input) -> IResult<Module> {
                 Module {
                     name: Some(name),
                     top_levels,
-                    comment: None,
                     is_inline: false,
                     filepath: None,
                 }

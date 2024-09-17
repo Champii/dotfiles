@@ -14,7 +14,7 @@ run = ->
   server = TcpListener::bind?
 
   server.on_connect socket ->
-    socket.write "Hello, World!"
+    socket.write display_html!
     socket.close!
 
   server.listen!

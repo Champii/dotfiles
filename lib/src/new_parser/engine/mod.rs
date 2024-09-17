@@ -138,16 +138,32 @@ impl ParseCtx<'_> {
     }
 
     pub fn sibling_module_filepath(&self, name: &str) -> Result<PathBuf, ParseError> {
-        let mut path = self.current_file_path();
+        let mut base_path = self.current_file_path();
+        base_path.pop(); // Remove the current file name to get the directory
 
-        path.pop();
+        // First, check for "{}/{}.rk"
+        let mut path = base_path.clone();
         path.push(format!("{}.rk", name));
 
         if path.exists() {
             return Ok(path);
         }
 
-        Err(ParseError::UnknownFile(path.to_str().unwrap().to_string()))
+        // If not found, check for "{}/mod.rk" inside the "name" directory
+        path = base_path.clone();
+        path.push(name);
+        path.push("mod.rk");
+
+        if path.exists() {
+            return Ok(path);
+        }
+
+        // If neither path exists, return an error
+        Err(ParseError::UnknownFile(format!(
+            "Neither '{}' nor '{}' exists",
+            base_path.join(format!("{}.rk", name)).display(),
+            base_path.join(name).join("mod.rk").display()
+        )))
     }
 
     fn determine_indent_step(tokens: &[Token], _config: &Config) -> usize {

@@ -1,4 +1,6 @@
-mod mdr
-    dede = -> a
-lol = -> mdr 3
+main = -> [
+    1,
+    2,
+    3,
+]
 

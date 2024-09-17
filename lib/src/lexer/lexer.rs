@@ -48,6 +48,10 @@ impl Lexer {
 
         self.last_token = Some(token.clone());
 
+        if let TokenType::Comment(_) = token.token_type {
+            return self.next();
+        }
+
         Ok(token)
     }
 
@@ -134,7 +138,8 @@ impl Lexer {
             '%' if self.peek(1).is_alphabetic() && self.peek(1).is_uppercase() => {
                 self.native_operator()
             }
-            '/' if self.peek(1) == '/' => self.comment(),
+            '/' if self.peek(1) == '/' => self.comment_eol(),
+            '/' if self.peek(1) == '*' => self.comment(),
             c if OPERATORS_CHARS.contains(&c) => self.operator(),
             '(' => self.token(TokenType::OpenParen, 1),
             ')' => self.token(TokenType::CloseParen, 1),
@@ -171,8 +176,6 @@ impl Lexer {
                 end += 1;
             }
         }
-
-        
 
         if self.input[start..end] == *"=" {
             self.token(TokenType::Equal, 1)
@@ -226,7 +229,7 @@ impl Lexer {
         )
     }
 
-    fn comment(&self) -> Token {
+    fn comment_eol(&self) -> Token {
         let start = self.position;
         let mut end = self.position;
 
@@ -237,10 +240,24 @@ impl Lexer {
             end += 1;
         }
 
-        self.token(
-            TokenType::Comment(self.input[start + 2..end].to_string()),
-            end - start,
-        )
+        self.token(TokenType::Comment(String::new()), end - start)
+    }
+
+    fn comment(&self) -> Token {
+        let start = self.position;
+        let mut end = self.position;
+
+        // consume the '/*'
+        end += 2;
+
+        while self.peek(end - start) != '*' && self.peek(end - start + 1) != '/' {
+            end += 1;
+        }
+
+        // consume the '*/'
+        end += 2;
+
+        self.token(TokenType::Comment(String::new()), end - start)
     }
 
     fn macro_invoc(&self) -> Token {

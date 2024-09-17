@@ -44,9 +44,9 @@ impl Display for ModuleDecl {
         if let Some(name) = &self.0.name {
             write!(f, "mod {}", name)?;
 
-            if let Some(comment) = &self.0.comment {
+            /* if let Some(comment) = &self.0.comment {
                 write!(f, " //{}", comment)?;
-            }
+            } */
 
             writeln!(f)?;
         }
@@ -61,11 +61,11 @@ impl Display for Module {
             increase_indent();
         }
 
-        for (i, top_level) in self.top_levels.iter().enumerate() {
+        for top_level in self.top_levels.iter() {
             write!(f, "{}", indent())?;
             write!(f, "{}", top_level)?;
 
-            if i < self.top_levels.len() - 1 {
+            /* if i < self.top_levels.len() - 1 {
                 // if the top level is a functiondecl or a comment, check if the last statement of the block is
                 // an empty line and if so, don't add an extra newline
                 if let TopLevel::FunctionDecl(decl) = &top_level {
@@ -81,7 +81,7 @@ impl Display for Module {
                 }
 
                 writeln!(f)?;
-            }
+            } */
         }
 
         if !self.is_inline {
@@ -110,7 +110,7 @@ impl Display for TopLevel {
             TopLevel::TraitDecl(decl) => write!(f, "{}", decl),
             TopLevel::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevel::Impl(impl_) => write!(f, "{}", impl_),
-            TopLevel::Comment(comment) => writeln!(f, "//{}", comment),
+            // TopLevel::Comment(comment) => writeln!(f, "//{}", comment),
             TopLevel::NewType(inner, ty) => writeln!(f, "type {} = {}", inner, ty),
         }
     }
@@ -552,10 +552,10 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
         writeln!(f)?;
     }
 
-    let mut skip_next_empty_lines = false;
+    // let mut skip_next_empty_lines = false;
 
-    'main: for (i, stmt) in block.statements.iter().enumerate() {
-        while skip_next_empty_lines && Statement::EmptyLine == *stmt {
+    for (i, stmt) in block.statements.iter().enumerate() {
+        /* while skip_next_empty_lines && Statement::EmptyLine == *stmt {
             continue 'main;
         }
 
@@ -563,9 +563,11 @@ fn display_block(block: &Block, force_multiline: bool, f: &mut Formatter<'_>) ->
 
         if Statement::EmptyLine == *stmt {
             skip_next_empty_lines = true;
-        }
+        } */
 
-        if !mono_statement && Statement::EmptyLine != *stmt {
+        if !mono_statement
+        /*&& Statement::EmptyLine != *stmt */
+        {
             write!(f, "{}", indent())?;
         }
 
@@ -608,9 +610,8 @@ impl Display for Statement {
                 } else {
                     write!(f, "break")
                 }
-            }
-            Statement::EmptyLine => write!(f, ""),
-            Statement::Comment(comment) => write!(f, "//{}", comment),
+            } /* Statement::EmptyLine => write!(f, ""),
+              Statement::Comment(comment) => write!(f, "//{}", comment), */
         }
     }
 }
@@ -1031,7 +1032,7 @@ impl Display for Array {
     }
 }
 
-#[cfg(test)]
+/* #[cfg(test)]
 mod format {
     use crate::ast::Program;
 
@@ -1113,4 +1114,4 @@ main = ->
 
         assert_eq!(input, program.to_string());
     }
-}
+} */

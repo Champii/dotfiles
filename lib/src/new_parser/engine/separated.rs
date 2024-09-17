@@ -4,6 +4,7 @@ pub struct Separated<P, D> {
     parser: P,
     delimiter: D,
     at_least_one_result: bool,
+    trailing_delimiter: bool,
 }
 
 impl<P, D> Parser for Separated<P, D>
@@ -22,14 +23,18 @@ where
 
         loop {
             if remaining_tokens.is_empty() {
-                remaining_tokens = remaining_tokens_with_delim;
+                if !self.trailing_delimiter {
+                    remaining_tokens = remaining_tokens_with_delim;
+                }
                 break;
             }
 
             let (new_remaining_tokens, item) = match self.parser.process(remaining_tokens) {
                 Ok((new_remaining_tokens, item)) => (new_remaining_tokens, item),
                 Err(_) => {
-                    remaining_tokens = remaining_tokens_with_delim;
+                    if !self.trailing_delimiter {
+                        remaining_tokens = remaining_tokens_with_delim;
+                    }
                     // diagnostics = e;
                     break;
                 }
@@ -62,6 +67,7 @@ pub fn separated<P, D>(parser: P, delimiter: D) -> Separated<P, D> {
         parser,
         delimiter,
         at_least_one_result: false,
+        trailing_delimiter: false,
     }
 }
 
@@ -70,5 +76,24 @@ pub fn separated1<P, D>(parser: P, delimiter: D) -> Separated<P, D> {
         parser,
         delimiter,
         at_least_one_result: true,
+        trailing_delimiter: false,
+    }
+}
+
+pub fn separated_trailing<P, D>(parser: P, delimiter: D) -> Separated<P, D> {
+    Separated {
+        parser,
+        delimiter,
+        at_least_one_result: false,
+        trailing_delimiter: true,
+    }
+}
+
+pub fn separated1_trailing<P, D>(parser: P, delimiter: D) -> Separated<P, D> {
+    Separated {
+        parser,
+        delimiter,
+        at_least_one_result: true,
+        trailing_delimiter: true,
     }
 }

@@ -44,7 +44,7 @@ pub fn indent(stream: Input) -> IResult<()> {
             return Err(ParseError::UnexpectedIndent(*level));
         }
 
-        
+
     })
 }
 
@@ -55,11 +55,11 @@ pub fn indent_token(stream: Input) -> IResult<u8> {
     })
 }
 
-pub fn comment_token(stream: Input) -> IResult<String> {
+/* pub fn comment_token(stream: Input) -> IResult<String> {
     token!(stream, TokenType::Comment(value) => {
         value.clone()
     })
-}
+} */
 
 pub fn boolean(stream: Input) -> IResult<bool> {
     TokenType::Keyword("true".to_string())

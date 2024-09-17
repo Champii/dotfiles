@@ -1,16 +1,16 @@
 use crate::{
     lexer::TokenType,
-    new_parser::{engine::*, Block, Statement},
+    new_parser::{engine::*, Block},
 };
 
-use super::{indent, indent_token, seek, statement};
+use super::{indent, statement};
 
 pub fn block(stream: Input) -> IResult<Block> {
     preceded(
         TokenType::Eol,
         indented(separated1(
-            preceded(indent, statement)
-                .or(followed(indent_token, seek(TokenType::Eol)).map(|_| Statement::EmptyLine)),
+            preceded(indent, statement),
+            // .or(followed(indent_token, seek(TokenType::Eol)).map(|_| Statement::EmptyLine)),
             TokenType::Eol,
         )),
     )

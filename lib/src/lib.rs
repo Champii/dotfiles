@@ -53,9 +53,10 @@ pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
     let ast: Program = match new_parser::parse(config) {
         Ok(ast) => ast,
         Err(e) => {
-            // e.report();
-            // eprintln!("{:?}", e);
-            return Err(Diagnostics::from(e));
+            let diags = Diagnostics::from(e);
+            diags.report();
+
+            return Err(diags);
         }
     };
 
@@ -70,7 +71,8 @@ pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
     let ast = match macro_expansion::expand_macros(ast) {
         Ok(ast) => ast,
         Err(e) => {
-            // e.report();
+            e.report();
+
             return Err(e);
         }
     };

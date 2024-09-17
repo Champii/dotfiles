@@ -16,7 +16,6 @@ pub struct Module {
     pub top_levels: Vec<TopLevel>,
     pub is_inline: bool,
     pub filepath: Option<PathBuf>,
-    pub comment: Option<String>,
 }
 
 impl Module {
@@ -54,7 +53,7 @@ pub enum TopLevel {
     TraitDecl(TraitDecl),
     EnumDecl(EnumDecl),
     Impl(Impl),
-    Comment(String),
+    // Comment(String),
     NewType(ParseTypeInner, ParseType),
 }
 
@@ -197,8 +196,8 @@ pub enum Statement {
     Return(Option<Expression>),
     Continue(Option<Expression>),
     Break(Option<Expression>),
-    EmptyLine, // Empty line, kept for formating
-    Comment(String),
+    // EmptyLine, // Empty line, kept for formating
+    // Comment(String),
 }
 
 #[derive(Debug, PartialEq)]
