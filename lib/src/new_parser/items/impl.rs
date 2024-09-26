@@ -5,7 +5,7 @@ use crate::{
     new_parser::{engine::*, FunctionDecl, FunctionSig, Impl},
 };
 
-use super::{function_decl, function_sig, indent, parse_type_inner};
+use super::{empty_lines, function_decl, function_sig, indent, parse_type_inner};
 
 enum FnDeclOrSig {
     Decl(FunctionDecl),
@@ -16,13 +16,16 @@ pub fn r#impl(stream: Input) -> IResult<Impl> {
     (
         TokenType::Keyword("impl".to_string()),
         parse_type_inner,
-        TokenType::Eol,
-        indented(many(preceded(
-            indent,
-            function_decl
-                .map(FnDeclOrSig::Decl)
-                .or(function_sig.map(FnDeclOrSig::Sig)),
-        ))),
+        TokenType::Eol.followed_by(empty_lines),
+        indented(many(
+            preceded(
+                indent,
+                function_decl
+                    .map(FnDeclOrSig::Decl)
+                    .or(function_sig.map(FnDeclOrSig::Sig)),
+            )
+            .followed_by(empty_lines),
+        )),
     )
         .map(|(_, name, _, items)| {
             let mut methods = BTreeMap::new();
@@ -90,6 +93,19 @@ mod parse_impl {
                 .name,
             "new"
         );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_impl_with_empty_lines() {
+        let input = "impl Test\n\n    new = -> lol\n\n    @add = -> a\n";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, r#impl) = r#impl.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(r#impl.name.to_string(), "Test");
+        assert_eq!(r#impl.methods.len(), 2);
         assert_eq!(rest.len(), 0);
     }
 }

@@ -4,10 +4,10 @@ pub fn instance(stream: Input) -> IResult<Instance> {
     (
         type_path,
         preceded(
-            TokenType::Eol,
+            TokenType::Eol.followed_by(empty_lines),
             indented(separated1(
                 preceded(indent, (followed(ident, TokenType::Colon), expression)),
-                TokenType::Eol,
+                TokenType::Eol.followed_by(empty_lines),
             )),
         )
         .or(separated1(
@@ -74,6 +74,19 @@ mod instance {
 
         assert_eq!(struct_instance.name.to_string(), "Test");
         assert_eq!(struct_instance.fields.len(), 0);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_instance_empty_lines() {
+        let input = "Test\n\n    a: 1\n\n    b: 2\n\n    c: a + 4";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, struct_instance) = instance.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(struct_instance.name.to_string(), "Test");
+        assert_eq!(struct_instance.fields.len(), 3);
         assert_eq!(rest.len(), 0);
     }
 }

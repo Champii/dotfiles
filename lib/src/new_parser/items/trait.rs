@@ -5,7 +5,7 @@ use crate::{
     new_parser::{engine::*, FunctionDecl, FunctionSig, TraitDecl},
 };
 
-use super::{function_decl, function_sig, indent, parse_type_inner};
+use super::{empty_lines, function_decl, function_sig, indent, parse_type_inner};
 
 enum FnDeclOrSig {
     Decl(FunctionDecl),
@@ -16,13 +16,16 @@ pub fn r#trait(stream: Input) -> IResult<TraitDecl> {
     (
         TokenType::Keyword("trait".to_string()),
         parse_type_inner,
-        TokenType::Eol,
-        indented(many(preceded(
-            indent,
-            function_decl
-                .map(FnDeclOrSig::Decl)
-                .or(function_sig.map(FnDeclOrSig::Sig)),
-        ))),
+        TokenType::Eol.followed_by(empty_lines),
+        indented(many(
+            preceded(
+                indent,
+                function_decl
+                    .map(FnDeclOrSig::Decl)
+                    .or(function_sig.map(FnDeclOrSig::Sig)),
+            )
+            .followed_by(empty_lines),
+        )),
     )
         .map(|(_, name, _, items)| {
             let mut methods = BTreeMap::new();
@@ -50,10 +53,7 @@ pub fn r#trait(stream: Input) -> IResult<TraitDecl> {
 
 #[cfg(test)]
 mod parse_trait {
-    use crate::{
-        new_parser::lex_test,
-        Config,
-    };
+    use crate::{new_parser::lex_test, Config};
 
     use super::*;
 
@@ -63,6 +63,28 @@ mod parse_trait {
             r#"trait Foo
     bar = a -> a
     baz : Int
+    @selfinject = a -> a
+"#,
+        );
+        let config = Config::default();
+
+        let (rest, trait_decl) = r#trait.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(trait_decl.name.name, "Foo");
+        assert_eq!(trait_decl.methods.len(), 2);
+        assert_eq!(trait_decl.signatures.len(), 1);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_trait_empty_lines() {
+        let tokens = lex_test(
+            r#"trait Foo
+
+    bar = a -> a
+
+    baz : Int
+
     @selfinject = a -> a
 "#,
         );

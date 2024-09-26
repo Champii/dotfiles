@@ -3,14 +3,17 @@ use crate::{
     new_parser::{engine::*, Match, MatchArm},
 };
 
-use super::{block, disallow_multiline_fn_call, expression, indent, pattern};
+use super::{block, disallow_multiline_fn_call, empty_lines, expression, indent, pattern};
 
 pub fn r#match(stream: Input) -> IResult<Match> {
     (
         TokenType::Keyword("match".to_string()),
         disallow_multiline_fn_call(expression),
-        TokenType::Eol,
-        indented(separated1(match_arm, TokenType::Eol)),
+        TokenType::Eol.followed_by(empty_lines),
+        indented(separated1(
+            match_arm,
+            TokenType::Eol.followed_by(empty_lines),
+        )),
     )
         .map(|(_, expr, _, arms)| Match { expr, arms })
         .process(stream)
@@ -233,6 +236,21 @@ mod r#match {
                 }]
             }
         );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_match_empty_lines() {
+        let input = r#"match a
+
+    a => 2
+
+    b => 3"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, _expression) = r#match.process(ParseCtx::from(&tokens, &config)).unwrap();
 
         assert_eq!(rest.len(), 0);
     }

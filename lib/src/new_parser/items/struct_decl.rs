@@ -1,13 +1,13 @@
 use crate::new_parser::{engine::*, StructDecl, StructDeclField, TokenType};
 
-use super::{expression, ident, indent, parse_type, parse_type_inner};
+use super::{empty_lines, expression, ident, indent, parse_type, parse_type_inner};
 
 pub fn struct_decl(stream: Input) -> IResult<StructDecl> {
     (
         TokenType::Keyword("struct".to_string()),
         parse_type_inner,
-        TokenType::Eol,
-        indented(many(struct_decl_field)),
+        TokenType::Eol.followed_by(empty_lines),
+        indented(many(struct_decl_field.followed_by(empty_lines))),
     )
         .map(|(_, name, _, fields)| StructDecl { name, fields })
         .process(stream)
@@ -106,6 +106,23 @@ mod parse_struct {
                 .to_string(),
             "Type2"
         );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_struct_with_fields_empty_lines() {
+        let input = "struct Test\n\n    field: Type\n\n    field2: Type2\n";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, struct_decl) = struct_decl
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        let ty = struct_decl.name;
+
+        assert_eq!(ty.name, "Test");
+        assert_eq!(struct_decl.fields.len(), 2);
         assert_eq!(rest.len(), 0);
     }
 }
