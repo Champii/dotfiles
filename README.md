@@ -9,24 +9,16 @@ write_file = ->
        ..close!
 ```
 
-## Named arguments and default value
-
-```haskell
-listen = addr, port = 8000 -> #some code here
-main = ->
-    if something
-    then listen "localhost"
-    else listen port: 8080, addr: "localhost"
-```
-
 ## If and loops as expressions
 
 ```haskell
 do_something = x ->
     value = if x > 42 then 42 else x
+
     list =
         while value > 0
             value++
+
     new_list =
         for item in list
             item + 2
@@ -36,7 +28,9 @@ do_something = x ->
 
 ```haskell
 call = f, x -> f x
+
 return_fn = -> x -> x + 2
+
 main = -> call return_fn!, 5
 ```
 
@@ -51,7 +45,9 @@ add = x, y -> x + y
 
 ```haskell
 add = x, y -> x + y
+
 add4 = add 4
+
 main = -> add4 2
 ```
 
@@ -59,6 +55,7 @@ main = -> add4 2
 
 ```haskell
 plus2 = (+2)
+
 main = -> plus2 2
 ```
 
@@ -66,7 +63,9 @@ main = -> plus2 2
 
 ```haskell
 add = x -> x + 2
+
 mul = x -> x * 2
+
 add_mul = mul . add
 ```
 
@@ -121,6 +120,7 @@ impl Hello
 
 main = ->
     hello = Hello::new "World"
+
     hello.display!
 ```
 
@@ -140,8 +140,10 @@ enum Choice T, U
 ```haskell
 main = ->
     a = 5
+
     // Here b is &Int
     b = a 
+
     add a, b
 
 // Will detect if one is a reference and autoderef if needed
@@ -153,7 +155,8 @@ add = a, b -> a + b
 main = ->
     unsafe
         p: *Int8 = 0
-        # very unsafe
+
+        // very unsafe
         *p
 ```
 
@@ -162,6 +165,7 @@ main = ->
 ```haskell
 main = ->
     a = (10, "hello")
+
     match a
         (0, "world")            => "something"
         foo @ (a, str) if a > 5 => str
@@ -172,6 +176,7 @@ main = ->
 
 ```haskell
 fn_return_tuple = -> (10, "a string")
+
 main = ->
     (num, str) = fn_return_tuple!
 ```
@@ -240,12 +245,10 @@ struct MyStruct
 
   - New parser
     - Trait bound in parse_type
-    - Pointers and references
     - Mutability
+    - Mut reference type
     - Slices
     - Escaped chars and strings
-    - Default arguments
-    - Named arguments
     - Remove `.` as an allowed operator
     - Allow trailing delimiters everywhere
     - Destructuring in if/loop condition

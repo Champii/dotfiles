@@ -1,2 +1,2 @@
 mdr : A -> &B
-
+mdr = a -> b
