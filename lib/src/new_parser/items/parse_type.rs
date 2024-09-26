@@ -14,14 +14,33 @@ pub fn parse_type(stream: Input) -> IResult<ParseType> {
             type_token
                 .map(|_| ())
                 .or(TokenType::OpenParen.map(|_| ()))
-                .or(TokenType::OpenBracket.map(|_| ())),
+                .or(TokenType::OpenBracket.map(|_| ()))
+                .or(TokenType::StuckOperator("*".to_string()).map(|_| ()))
+                .or(TokenType::StuckOperator("&".to_string()).map(|_| ())),
         ),
         parse_function_type
             .or(parse_array_type)
             .or(parse_tuple_type)
+            .or(parse_reference_type)
+            .or(parse_pointer_type)
             .or(parse_type_inner.map(ParseType::Type)),
     )
     .process(stream)
+}
+
+fn parse_reference_type(stream: Input) -> IResult<ParseType> {
+    (TokenType::StuckOperator("&".to_string()), parse_type)
+        .map(|(_, t)| ParseType::Reference {
+            is_mut: false,
+            pointee: Box::new(t),
+        })
+        .process(stream)
+}
+
+fn parse_pointer_type(stream: Input) -> IResult<ParseType> {
+    (TokenType::StuckOperator("*".to_string()), parse_type)
+        .map(|(_, t)| ParseType::Pointer(Box::new(t)))
+        .process(stream)
 }
 
 fn parse_function_type(stream: Input) -> IResult<ParseType> {
@@ -193,6 +212,34 @@ mod parse_type {
             .unwrap();
 
         assert_eq!(parse_type.to_string(), "[A]");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_reference_type() {
+        let input = "&A";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, parse_type) = parse_type
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(parse_type.to_string(), "&A");
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_pointer_type() {
+        let input = "*A";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, parse_type) = parse_type
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(parse_type.to_string(), "*A");
         assert_eq!(rest.len(), 0);
     }
 }

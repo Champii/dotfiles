@@ -7,7 +7,7 @@ pub const KEYWORDS: [&str; 23] = [
     "true", "false", "return", "continue", "break", "infix", "mod", "extern", "match", "unsafe",
     "type",
 ];
-pub const OPERATORS_CHARS: [char; 10] = ['+', '-', '*', '/', '=', '!', '<', '>', '$', '|'];
+pub const OPERATORS_CHARS: [char; 11] = ['+', '-', '*', '/', '=', '!', '<', '>', '$', '|', '&'];
 
 #[derive(Debug)]
 pub enum LexerError {

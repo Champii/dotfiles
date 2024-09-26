@@ -125,6 +125,11 @@ pub enum ParseType {
     Type(ParseTypeInner),
     Array(Box<ParseType>),
     Tuple(Vec<ParseType>),
+    Reference {
+        is_mut: bool,
+        pointee: Box<ParseType>,
+    },
+    Pointer(Box<ParseType>),
     Unit,
 }
 

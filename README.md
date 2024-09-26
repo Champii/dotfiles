@@ -73,12 +73,22 @@ add_mul = mul . add
 ## Custom operators
 
 ```haskell
+// The pipe operator
 infix 1 |>
 |> = x, f -> f x
+
+// The not operator
+unary !
+! = x ->
+    match x
+        true => false
+        false => true
 
 main = ->
     [1, 2, 3]
         |> map (+2)
+
+    inverse = !true
 ```
 
 ## Trait
@@ -240,6 +250,8 @@ struct MyStruct
     - Allow trailing delimiters everywhere
     - Destructuring in if/loop condition
     - Destructuring in for in
+    - No return function like `foo = !-> something()`
+    - Allow for custom unary operators
 
   - Parser
     - High priority

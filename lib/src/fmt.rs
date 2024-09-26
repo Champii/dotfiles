@@ -472,6 +472,16 @@ impl Display for ParseType {
                 write!(f, ")")
             }
             ParseType::Type(inner) => write!(f, "{}", inner),
+            ParseType::Reference { is_mut, pointee } => {
+                if *is_mut {
+                    write!(f, "&mut ")?;
+                } else {
+                    write!(f, "&")?;
+                }
+
+                write!(f, "{}", pointee)
+            }
+            ParseType::Pointer(pointee) => write!(f, "*{}", pointee),
             ParseType::Unit => write!(f, "()"),
         }
     }
