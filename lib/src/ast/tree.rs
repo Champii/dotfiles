@@ -53,7 +53,6 @@ pub enum TopLevel {
     TraitDecl(TraitDecl),
     EnumDecl(EnumDecl),
     Impl(Impl),
-    // Comment(String),
     NewType(ParseTypeInner, ParseType),
 }
 
@@ -196,8 +195,6 @@ pub enum Statement {
     Return(Option<Expression>),
     Continue(Option<Expression>),
     Break(Option<Expression>),
-    // EmptyLine, // Empty line, kept for formating
-    // Comment(String),
 }
 
 #[derive(Debug, PartialEq)]
@@ -310,14 +307,20 @@ pub struct Tuple {
 #[derive(Debug, PartialEq)]
 pub struct NativeOperator {
     pub name: String,
-    pub args: Vec<Expression>,
+    pub span: Span,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct If {
-    pub condition: Expression,
+    pub condition: Condition,
     pub then: Block,
     pub else_: Option<Else>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Condition {
+    pub pattern: Option<Pattern>,
+    pub expression: Expression,
 }
 
 #[derive(Debug, PartialEq)]
@@ -328,8 +331,8 @@ pub enum Else {
 
 #[derive(Debug, PartialEq)]
 pub enum Loop {
-    While(Expression, Block),
-    For(Ident, Expression, Block),
+    While(Condition, Block),
+    For(Pattern, Expression, Block),
     Loop(Block),
 }
 

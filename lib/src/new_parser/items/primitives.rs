@@ -55,12 +55,6 @@ pub fn indent_token(stream: Input) -> IResult<u8> {
     })
 }
 
-/* pub fn comment_token(stream: Input) -> IResult<String> {
-    token!(stream, TokenType::Comment(value) => {
-        value.clone()
-    })
-} */
-
 pub fn boolean(stream: Input) -> IResult<bool> {
     TokenType::Keyword("true".to_string())
         .map(|_| true)
@@ -123,5 +117,14 @@ pub fn operator(stream: Input) -> IResult<Operator> {
 pub fn type_token(stream: Input) -> IResult<String> {
     token!(stream, TokenType::Type(name) => {
         name.clone()
+    })
+}
+
+pub fn native_operator(stream: Input) -> IResult<NativeOperator> {
+    token_with_span!(stream, span, TokenType::NativeOperator(name) => {
+        NativeOperator {
+            name: name.clone(),
+            span,
+        }
     })
 }

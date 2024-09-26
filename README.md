@@ -76,7 +76,9 @@ add_mul = mul . add
 infix 1 |>
 |> = x, f -> f x
 
-main = -> [1, 2, 3] |> map (+2)
+main = ->
+    [1, 2, 3]
+        |> map (+2)
 ```
 
 ## Trait
@@ -92,7 +94,7 @@ impl ToString Int
 ## Dynamic trait
 
 ```haskell
-some_func : ToString T -> String
+some_func : [T: ToString] T -> String
 some_fumc = x -> x.to_string!
 ```
 
@@ -140,7 +142,6 @@ add = a, b -> a + b
 ```haskell
 main = ->
     unsafe
-        a = 42
         p: *Int8 = 0
         # very unsafe
         *p
@@ -228,8 +229,6 @@ struct MyStruct
     - Better error management and diagnostic details
 
   - New parser
-    - Comments in EOL position
-    - Multi-files modules
     - Trait bound in parse_type
     - Pointers and references
     - Mutability
@@ -238,6 +237,9 @@ struct MyStruct
     - Default arguments
     - Named arguments
     - Remove `.` as an allowed operator
+    - Allow trailing delimiters everywhere
+    - Destructuring in if/loop condition
+    - Destructuring in for in
 
   - Parser
     - High priority

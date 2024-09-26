@@ -6,7 +6,7 @@ use crate::new_parser::{
 
 use super::{
     block, function_shorthand, get_span, ident, ident_path, indent, instance, int, lambda_decl,
-    operator, parenthesis, r#loop, r#match,
+    native_operator, operator, parenthesis, r#loop, r#match,
 };
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type};
@@ -77,16 +77,10 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         // TODO: disallow function calls after literal
         .or(literal.map(Operand::Literal))
         .or(lambda_decl.map(Operand::LambdaDecl))
-        // .or(native_operator.map(Operand::NativeOperator))
+        .or(native_operator.map(Operand::NativeOperator))
         .or(preceded(not(operator), ident_path.map(Operand::Ident)))
         .process(stream)
 }
-
-/* pub fn native_operator(stream: Input) -> IResult<Operand> {
-    preceded(TokenType::Operator(".".to_string()), ident)
-        .map(Operand::NativeOperator)
-        .process(stream)
-} */
 
 pub fn tuple(stream: Input) -> IResult<Tuple> {
     parenthesis(separated1(expression, TokenType::Coma))
@@ -119,15 +113,12 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
-    // preceded(
-    // not(operator_token),
     indice
         .map(SecondaryExpr::Indice)
         .or(dot.map(SecondaryExpr::Dot))
         .or(double_dot.map(SecondaryExpr::DoubleDot))
         .or(arguments.map(SecondaryExpr::Arguments))
         .or(TokenType::Interogation.map(|_| SecondaryExpr::Interogation))
-        // )
         .process(stream)
 }
 
@@ -1424,6 +1415,30 @@ mod expression {
                     })))
                 ))
             )
+        );
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn native_operator() {
+        let input = "~IAdd";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        assert_eq!(
+            expression,
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::NativeOperator(NativeOperator {
+                    name: "IAdd".to_string(),
+                    span: Span::default(),
+                }),
+                secondaries: None,
+                type_annotation: None,
+            })),
         );
         assert_eq!(rest.len(), 0);
     }

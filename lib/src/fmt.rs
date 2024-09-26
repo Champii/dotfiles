@@ -110,7 +110,6 @@ impl Display for TopLevel {
             TopLevel::TraitDecl(decl) => write!(f, "{}", decl),
             TopLevel::EnumDecl(decl) => write!(f, "{}", decl),
             TopLevel::Impl(impl_) => write!(f, "{}", impl_),
-            // TopLevel::Comment(comment) => writeln!(f, "//{}", comment),
             TopLevel::NewType(inner, ty) => writeln!(f, "type {} = {}", inner, ty),
         }
     }
@@ -858,15 +857,7 @@ impl Display for Tuple {
 
 impl Display for NativeOperator {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "%{}", self.name)?;
-
-        for (i, arg) in self.args.iter().enumerate() {
-            write!(f, " {}", arg)?;
-
-            if i < self.args.len() - 1 {
-                write!(f, ",")?;
-            }
-        }
+        write!(f, "~{}", self.name)?;
 
         Ok(())
     }
@@ -958,6 +949,16 @@ impl Display for Instance {
         decrease_indent();
 
         Ok(())
+    }
+}
+
+impl Display for Condition {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(pattern) = &self.pattern {
+            write!(f, "{} = ", pattern)?;
+        }
+
+        write!(f, "{}", self.expression)
     }
 }
 

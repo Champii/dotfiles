@@ -91,6 +91,7 @@ generate_visitor_trait!(
     Statement
     Loop
     Expression
+    Condition
     If
     Else
     Match
@@ -262,23 +263,8 @@ pub fn walk_assignment_l_h_s<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a As
     }
 }
 
-pub fn walk_for<'a, V: Visitor<'a>>(visitor: &mut V, for_loop: &'a Loop) {
-    match for_loop {
-        Loop::For(ident, condition, block) => {
-            visitor.visit_ident(ident);
-            visitor.visit_expression(condition);
-            visitor.visit_block(block);
-        }
-        Loop::While(expr, block) => {
-            visitor.visit_expression(expr);
-            visitor.visit_block(block);
-        }
-        Loop::Loop(loop_) => visitor.visit_block(loop_),
-    }
-}
-
 pub fn walk_if<'a, V: Visitor<'a>>(visitor: &mut V, r#if: &'a If) {
-    visitor.visit_expression(&r#if.condition);
+    visitor.visit_condition(&r#if.condition);
 
     visitor.visit_block(&r#if.then);
 
@@ -303,6 +289,14 @@ pub fn walk_expression<'a, V: Visitor<'a>>(visitor: &mut V, expr: &'a Expression
         }
         Expression::UnaryExpr(unary) => visitor.visit_unary_expr(unary),
     }
+}
+
+pub fn walk_condition<'a, V: Visitor<'a>>(visitor: &mut V, condition: &'a Condition) {
+    if let Some(pattern) = &condition.pattern {
+        visitor.visit_pattern(pattern);
+    }
+
+    visitor.visit_expression(&condition.expression);
 }
 
 pub fn walk_instance<'a, V: Visitor<'a>>(visitor: &mut V, s: &'a Instance) {
@@ -434,8 +428,6 @@ pub fn walk_tuple<'a, V: Visitor<'a>>(visitor: &mut V, t: &'a Tuple) {
 
 pub fn walk_native_operator<'a, V: Visitor<'a>>(visitor: &mut V, n: &'a NativeOperator) {
     visitor.visit_name(&n.name);
-
-    walk_list!(visitor, visit_expression, &n.args);
 }
 
 pub fn walk_argument<'a, V: Visitor<'a>>(visitor: &mut V, argument: &'a Argument) {
@@ -483,13 +475,13 @@ pub fn walk_parse_type_inner<'a, V: Visitor<'a>>(visitor: &mut V, ty: &'a ParseT
 
 pub fn walk_loop<'a, V: Visitor<'a>>(visitor: &mut V, loop_: &'a Loop) {
     match loop_ {
-        Loop::For(ident, condition, block) => {
-            visitor.visit_ident(ident);
+        Loop::For(pattern, condition, block) => {
+            visitor.visit_pattern(pattern);
             visitor.visit_expression(condition);
             visitor.visit_block(block);
         }
-        Loop::While(expr, block) => {
-            visitor.visit_expression(expr);
+        Loop::While(condition, block) => {
+            visitor.visit_condition(condition);
             visitor.visit_block(block);
         }
         Loop::Loop(block) => visitor.visit_block(block),

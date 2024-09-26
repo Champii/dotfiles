@@ -135,7 +135,7 @@ impl Lexer {
             '%' if self.peek(1).is_alphabetic() && self.peek(1).is_lowercase() => {
                 self.macro_invoc()
             }
-            '%' if self.peek(1).is_alphabetic() && self.peek(1).is_uppercase() => {
+            '~' if self.peek(1).is_alphabetic() && self.peek(1).is_uppercase() => {
                 self.native_operator()
             }
             '/' if self.peek(1) == '/' => self.comment_eol(),

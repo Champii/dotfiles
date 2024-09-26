@@ -3,7 +3,7 @@ use crate::{
     new_parser::{engine::*, Loop},
 };
 
-use super::{block, disallow_multiline_fn_call, expression, ident};
+use super::{block, disallow_multiline_fn_call, expression, parse_condition, pattern};
 
 pub fn r#loop(stream: Input) -> IResult<Loop> {
     raw_loop.or(r#for).or(r#while).process(stream)
@@ -18,7 +18,7 @@ pub fn raw_loop(stream: Input) -> IResult<Loop> {
 pub fn r#while(stream: Input) -> IResult<Loop> {
     (
         TokenType::Keyword("while".to_string()),
-        disallow_multiline_fn_call(expression),
+        parse_condition,
         block,
     )
         .map(|(_, condition, body)| Loop::While(condition, body))
@@ -28,7 +28,7 @@ pub fn r#while(stream: Input) -> IResult<Loop> {
 pub fn r#for(stream: Input) -> IResult<Loop> {
     (
         TokenType::Keyword("for".to_string()),
-        ident,
+        pattern,
         TokenType::Keyword("in".to_string()),
         disallow_multiline_fn_call(expression),
         block,
@@ -45,7 +45,7 @@ mod parse_loop {
             Block, Expression, Ident, IdentOrType, IdentifierPath, Literal, LiteralKind, Loop,
             Operand, PrimaryExpr, Statement, UnaryExpr,
         },
-        new_parser::lex_test,
+        new_parser::{lex_test, Condition, Pattern, PatternKind},
         Config,
     };
 
@@ -60,9 +60,12 @@ mod parse_loop {
         assert_eq!(
             loop_,
             Loop::For(
-                Ident {
-                    name: "x".to_string(),
-                    span: tokens[1].span.clone()
+                Pattern {
+                    binding: None,
+                    kind: PatternKind::Ident(Ident {
+                        name: "x".to_string(),
+                        span: tokens[1].span.clone()
+                    }),
                 },
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Ident(IdentifierPath {
@@ -102,16 +105,19 @@ mod parse_loop {
         assert_eq!(
             loop_,
             Loop::While(
-                Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
-                    operand: Operand::Ident(IdentifierPath {
-                        path: vec![IdentOrType::Ident(Ident {
-                            name: "x".to_string(),
-                            span: tokens[1].span.clone()
-                        })]
-                    }),
-                    secondaries: None,
-                    type_annotation: None,
-                })),
+                Condition {
+                    pattern: None,
+                    expression: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                        operand: Operand::Ident(IdentifierPath {
+                            path: vec![IdentOrType::Ident(Ident {
+                                name: "x".to_string(),
+                                span: tokens[1].span.clone()
+                            })]
+                        }),
+                        secondaries: None,
+                        type_annotation: None,
+                    }))
+                },
                 Block {
                     statements: vec![Statement::Expression(Expression::UnaryExpr(
                         UnaryExpr::PrimaryExpr(PrimaryExpr {

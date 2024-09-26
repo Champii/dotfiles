@@ -1,4 +1,4 @@
-# start a tcp server
+// start a tcp server
 
 > std::net::TcpListener
 > std::env::args
@@ -11,7 +11,7 @@ main = ->
 
 run : () -> Result TcpServer, Error
 run = ->
-  server = TcpListener::bind?
+  server = TcpListener::bind?!
 
   server.on_connect socket ->
     socket.write display_html!

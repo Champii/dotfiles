@@ -3,15 +3,14 @@ use crate::{
     new_parser::{engine::*, Block},
 };
 
-use super::{indent, statement};
+use super::{empty_lines, indent, statement};
 
 pub fn block(stream: Input) -> IResult<Block> {
     preceded(
         TokenType::Eol,
         indented(separated1(
             preceded(indent, statement),
-            // .or(followed(indent_token, seek(TokenType::Eol)).map(|_| Statement::EmptyLine)),
-            TokenType::Eol,
+            TokenType::Eol.followed_by(empty_lines),
         )),
     )
     .or(statement.map(|statement| vec![statement]))
@@ -46,6 +45,18 @@ mod tests {
         let (rest, block) = block.process(ParseCtx::from(&tokens, &config)).unwrap();
 
         assert_eq!(block.statements.len(), 2);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_block_with_empty_line() {
+        let input = "\n    statement\n\n    statement\n    \n    statement";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, block) = block.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(block.statements.len(), 3);
         assert_eq!(rest.len(), 0);
     }
 }
