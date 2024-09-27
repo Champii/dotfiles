@@ -86,7 +86,7 @@ main = ->
 trait ToString
     @to_string : String
 
-impl ToString Int
+impl ToString for Int16
     @to_string = -> @show!
 ```
 
@@ -164,7 +164,7 @@ enum Error
     SomeErrorWithContext String
     SomeErrorWithMoreContext String, Int
 
-impl Show Error
+impl Show for Error
     @show = ->
         match @
             Self::SomeError => "SomeError"
@@ -219,7 +219,7 @@ struct MyStruct
     - Better error management and diagnostic details
 
   - New parser
-    - Trait bound in parse_type
+    - Trait bound for parse_type in function signature
     - Slices
     - Escaped chars and strings
     - UTF-8

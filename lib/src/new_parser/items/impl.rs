@@ -16,6 +16,7 @@ pub fn r#impl(stream: Input) -> IResult<Impl> {
     (
         TokenType::Keyword("impl".to_string()),
         parse_type_inner,
+        preceded(TokenType::Keyword("for".to_string()), parse_type_inner).opt(),
         TokenType::Eol.followed_by(empty_lines),
         indented(many(
             preceded(
@@ -27,7 +28,7 @@ pub fn r#impl(stream: Input) -> IResult<Impl> {
             .followed_by(empty_lines),
         )),
     )
-        .map(|(_, name, _, items)| {
+        .map(|(_, name, for_, _, items)| {
             let mut methods = BTreeMap::new();
             let mut signatures = BTreeMap::new();
 
@@ -44,6 +45,7 @@ pub fn r#impl(stream: Input) -> IResult<Impl> {
 
             Impl {
                 name,
+                for_,
                 methods,
                 signatures,
             }
@@ -106,6 +108,19 @@ mod parse_impl {
 
         assert_eq!(r#impl.name.to_string(), "Test");
         assert_eq!(r#impl.methods.len(), 2);
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_impl_for() {
+        let input = "impl Test for Test2\n";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, r#impl) = r#impl.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(r#impl.name.to_string(), "Test");
+        assert_eq!(r#impl.for_.unwrap().to_string(), "Test2");
         assert_eq!(rest.len(), 0);
     }
 }

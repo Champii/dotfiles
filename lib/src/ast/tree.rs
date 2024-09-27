@@ -115,6 +115,7 @@ pub enum NamedFieldsOrTypesList {
 #[derive(Debug, PartialEq)]
 pub struct Impl {
     pub name: ParseTypeInner,
+    pub for_: Option<ParseTypeInner>,
     pub methods: BTreeMap<Ident, FunctionDecl>,
     pub signatures: BTreeMap<Ident, FunctionSig>,
 }
