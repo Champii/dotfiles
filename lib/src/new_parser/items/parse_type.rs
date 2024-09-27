@@ -29,9 +29,13 @@ pub fn parse_type(stream: Input) -> IResult<ParseType> {
 }
 
 fn parse_reference_type(stream: Input) -> IResult<ParseType> {
-    (TokenType::StuckOperator("&".to_string()), parse_type)
-        .map(|(_, t)| ParseType::Reference {
-            is_mut: false,
+    (
+        TokenType::StuckOperator("&".to_string()),
+        TokenType::Keyword("mut".to_string()).opt(),
+        parse_type,
+    )
+        .map(|(_, mut_, t)| ParseType::Reference {
+            is_mut: mut_.is_some(),
             pointee: Box::new(t),
         })
         .process(stream)

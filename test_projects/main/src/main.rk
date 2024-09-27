@@ -1,10 +1,7 @@
-mdr : A -> &B
-mdr = a -> b
+> my_dep::SomeType
+> my_mod::SomeOtherType
 
-write_file = ->
-    mut a = lol
+struct MyStruct
+    my_field: &mut SomeType
 
-    File::open "test.txt"?
-        .write "Hello, World!"
-        ..close!
-
+< MyStruct

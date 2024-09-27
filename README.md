@@ -220,15 +220,14 @@ struct MyStruct
 
   - New parser
     - Trait bound in parse_type
-    - Mutability
-    - Mut reference type
     - Slices
     - Escaped chars and strings
-    - Remove `.` as an allowed operator
+    - UTF-8
     - Allow trailing delimiters everywhere
     - No return function like `foo = !-> something()`
     - Allow for custom unary operators
     - Struct default field value ?
+    - Better error management
 
   - Parser
     - High priority
