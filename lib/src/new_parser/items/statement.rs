@@ -43,7 +43,7 @@ mod tests {
             PrimaryExpr, SecondaryExpr, UnaryExpr,
         },
         lexer::Span,
-        new_parser::{lex_test, Assignment, AssignmentLHS, Expression, Pattern},
+        new_parser::{lex_test, Assignment, AssignmentLHS, Expression, IdentPattern, Pattern},
         Config,
     };
 
@@ -83,9 +83,12 @@ mod tests {
             Statement::Assignment(Assignment {
                 lhs: AssignmentLHS::Pattern(Pattern {
                     binding: None,
-                    kind: PatternKind::Ident(Ident {
-                        name: "a".to_string(),
-                        span: Span::default(),
+                    kind: PatternKind::Ident(IdentPattern {
+                        name: Ident {
+                            name: "a".to_string(),
+                            span: Span::default(),
+                        },
+                        mut_: false,
                     })
                 }),
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {

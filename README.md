@@ -5,7 +5,7 @@
 ```haskell
 write_file = ->
     File::open "test.txt"?
-       ..write "Hello, World!"?
+       .write "Hello, World!"?
        ..close!
 ```
 
@@ -59,16 +59,6 @@ plus2 = (+2)
 main = -> plus2 2
 ```
 
-## Function composition
-
-```haskell
-add = x -> x + 2
-
-mul = x -> x * 2
-
-add_mul = mul . add
-```
-
 ## Custom operators
 
 ```haskell
@@ -103,7 +93,7 @@ impl ToString Int
 ## Dynamic trait
 
 ```haskell
-some_func : [T: ToString] T -> String
+some_func : <T: ToString> T -> String
 some_fumc = x -> x.to_string!
 ```
 
@@ -120,7 +110,6 @@ impl Hello
 
 main = ->
     hello = Hello::new "World"
-
     hello.display!
 ```
 
@@ -135,20 +124,6 @@ enum Choice T, U
     Right U
 ```
 
-## Automatic Reference/Dereference
-
-```haskell
-main = ->
-    a = 5
-
-    // Here b is &Int
-    b = a 
-
-    add a, b
-
-// Will detect if one is a reference and autoderef if needed
-add = a, b -> a + b
-```
 ## Unsafe pointer arithmetic
 
 ```haskell
@@ -251,10 +226,9 @@ struct MyStruct
     - Escaped chars and strings
     - Remove `.` as an allowed operator
     - Allow trailing delimiters everywhere
-    - Destructuring in if/loop condition
-    - Destructuring in for in
     - No return function like `foo = !-> something()`
     - Allow for custom unary operators
+    - Struct default field value ?
 
   - Parser
     - High priority

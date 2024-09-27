@@ -228,6 +228,7 @@ ast_printer!(
     NativeOperator
     Tuple
     Array
+    IdentPattern
     // ParseType
     // ParseTypeInner
     // IdentOrType

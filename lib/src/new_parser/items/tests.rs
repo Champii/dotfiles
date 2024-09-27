@@ -68,13 +68,16 @@ mod new_parser {
                 lambda: LambdaDecl {
                     parameters: vec![Pattern {
                         binding: None,
-                        kind: PatternKind::Ident(Ident {
-                            name: "foo".to_string(),
-                            span: Span {
-                                start: 4,
-                                end: 7,
-                                file_path: PathBuf::new(),
+                        kind: PatternKind::Ident(IdentPattern {
+                            name: Ident {
+                                name: "foo".to_string(),
+                                span: Span {
+                                    start: 4,
+                                    end: 7,
+                                    file_path: PathBuf::new(),
+                                },
                             },
+                            mut_: false,
                         }),
                     },],
                     body: Block {
@@ -135,13 +138,16 @@ mod new_parser {
                 lambda: LambdaDecl {
                     parameters: vec![Pattern {
                         binding: None,
-                        kind: PatternKind::Ident(Ident {
-                            name: "foo".to_string(),
-                            span: Span {
-                                start: 4,
-                                end: 7,
-                                file_path: PathBuf::new(),
+                        kind: PatternKind::Ident(IdentPattern {
+                            name: Ident {
+                                name: "foo".to_string(),
+                                span: Span {
+                                    start: 4,
+                                    end: 7,
+                                    file_path: PathBuf::new(),
+                                },
                             },
+                            mut_: false,
                         }),
                     },],
                     body: Block {

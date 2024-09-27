@@ -45,7 +45,7 @@ mod parse_loop {
             Block, Expression, Ident, IdentOrType, IdentifierPath, Literal, LiteralKind, Loop,
             Operand, PrimaryExpr, Statement, UnaryExpr,
         },
-        new_parser::{lex_test, Condition, Pattern, PatternKind},
+        new_parser::{lex_test, Condition, IdentPattern, Pattern, PatternKind},
         Config,
     };
 
@@ -62,9 +62,12 @@ mod parse_loop {
             Loop::For(
                 Pattern {
                     binding: None,
-                    kind: PatternKind::Ident(Ident {
-                        name: "x".to_string(),
-                        span: tokens[1].span.clone()
+                    kind: PatternKind::Ident(IdentPattern {
+                        name: Ident {
+                            name: "x".to_string(),
+                            span: tokens[1].span.clone()
+                        },
+                        mut_: false,
                     }),
                 },
                 Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {

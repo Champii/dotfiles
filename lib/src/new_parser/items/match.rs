@@ -73,14 +73,17 @@ mod r#match {
                     MatchArm {
                         pattern: Pattern {
                             binding: None,
-                            kind: PatternKind::Ident(Ident {
-                                name: "a".to_string(),
-                                span: Span {
-                                    start: 12,
-                                    end: 13,
-                                    file_path: PathBuf::default(),
-                                }
-                            })
+                            kind: PatternKind::Ident(IdentPattern {
+                                name: Ident {
+                                    name: "a".to_string(),
+                                    span: Span {
+                                        start: 12,
+                                        end: 13,
+                                        file_path: PathBuf::default(),
+                                    }
+                                },
+                                mut_: false,
+                            }),
                         },
                         condition: None,
                         body: Block {
@@ -106,25 +109,31 @@ mod r#match {
                             kind: PatternKind::Tuple(vec![
                                 Pattern {
                                     binding: None,
-                                    kind: PatternKind::Ident(Ident {
-                                        name: "a".to_string(),
-                                        span: Span {
-                                            start: 24,
-                                            end: 25,
-                                            file_path: PathBuf::default(),
-                                        }
-                                    })
+                                    kind: PatternKind::Ident(IdentPattern {
+                                        name: Ident {
+                                            name: "a".to_string(),
+                                            span: Span {
+                                                start: 24,
+                                                end: 25,
+                                                file_path: PathBuf::default(),
+                                            },
+                                        },
+                                        mut_: false,
+                                    }),
                                 },
                                 Pattern {
                                     binding: None,
-                                    kind: PatternKind::Ident(Ident {
-                                        name: "b".to_string(),
-                                        span: Span {
-                                            start: 27,
-                                            end: 28,
-                                            file_path: PathBuf::default(),
-                                        }
-                                    })
+                                    kind: PatternKind::Ident(IdentPattern {
+                                        name: Ident {
+                                            name: "b".to_string(),
+                                            span: Span {
+                                                start: 27,
+                                                end: 28,
+                                                file_path: PathBuf::default(),
+                                            }
+                                        },
+                                        mut_: false,
+                                    }),
                                 }
                             ])
                         },
@@ -195,16 +204,22 @@ mod r#match {
                         kind: PatternKind::Tuple(vec![
                             Pattern {
                                 binding: None,
-                                kind: PatternKind::Ident(Ident {
-                                    name: "a".to_string(),
-                                    span: Span::default(),
+                                kind: PatternKind::Ident(IdentPattern {
+                                    name: Ident {
+                                        name: "a".to_string(),
+                                        span: Span::default(),
+                                    },
+                                    mut_: false,
                                 })
                             },
                             Pattern {
                                 binding: None,
-                                kind: PatternKind::Ident(Ident {
-                                    name: "b".to_string(),
-                                    span: Span::default(),
+                                kind: PatternKind::Ident(IdentPattern {
+                                    name: Ident {
+                                        name: "b".to_string(),
+                                        span: Span::default(),
+                                    },
+                                    mut_: false,
                                 })
                             }
                         ])

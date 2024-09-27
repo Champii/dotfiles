@@ -271,7 +271,7 @@ pub struct Pattern {
 
 #[derive(Debug, PartialEq)]
 pub enum PatternKind {
-    Ident(Ident),
+    Ident(IdentPattern),
     Literal(Literal),
     Tuple(Vec<Pattern>),
     Array(Vec<ArrayPattern>),
@@ -283,7 +283,13 @@ pub enum PatternKind {
 #[derive(Debug, PartialEq)]
 pub enum ArrayPattern {
     Pattern(Pattern),
-    Rest(Ident),
+    Rest(IdentPattern),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct IdentPattern {
+    pub name: Ident,
+    pub mut_: bool,
 }
 
 #[derive(Debug, PartialEq)]

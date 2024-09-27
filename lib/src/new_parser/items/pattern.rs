@@ -1,8 +1,8 @@
 use crate::{
     lexer::TokenType,
     new_parser::{
-        engine::*, ArrayPattern, FieldPattern, FieldsPatternOrArgumentsPattern, InstancePattern,
-        Pattern, PatternKind,
+        engine::*, ArrayPattern, FieldPattern, FieldsPatternOrArgumentsPattern, IdentPattern,
+        InstancePattern, Pattern, PatternKind,
     },
 };
 
@@ -29,17 +29,26 @@ pub fn pattern_kind(stream: Input) -> IResult<PatternKind> {
     )
     .map(PatternKind::Array))
     .or(instance_pattern.map(PatternKind::Instance))
-    .or(ident.map(PatternKind::Ident))
+    .or(ident_pattern.map(PatternKind::Ident))
     .or(TokenType::Underscore.map(|_| PatternKind::Wildcard))
     .or(literal.map(PatternKind::Literal))
     .process(stream)
+}
+
+pub fn ident_pattern(stream: Input) -> IResult<IdentPattern> {
+    (TokenType::Keyword("mut".to_string()).opt(), ident)
+        .map(|(mut_, name)| IdentPattern {
+            name,
+            mut_: mut_.is_some(),
+        })
+        .process(stream)
 }
 
 pub fn array_pattern(stream: Input) -> IResult<ArrayPattern> {
     (
         TokenType::Dot.or(TokenType::SpacedDot),
         TokenType::Dot,
-        ident,
+        ident_pattern,
     )
         .map(|(_, _, ident)| ArrayPattern::Rest(ident))
         .or(pattern.map(ArrayPattern::Pattern))
@@ -157,9 +166,12 @@ mod pattern {
                             },
                             pattern: Pattern {
                                 binding: None,
-                                kind: PatternKind::Ident(Ident {
-                                    name: "toto".to_string(),
-                                    span: Span::default(),
+                                kind: PatternKind::Ident(IdentPattern {
+                                    name: Ident {
+                                        name: "toto".to_string(),
+                                        span: Span::default(),
+                                    },
+                                    mut_: false,
                                 })
                             }
                         }
@@ -220,12 +232,40 @@ mod pattern {
                         },
                         Pattern {
                             binding: None,
-                            kind: PatternKind::Ident(Ident {
-                                name: "toto".to_string(),
-                                span: Span::default(),
+                            kind: PatternKind::Ident(IdentPattern {
+                                name: Ident {
+                                    name: "toto".to_string(),
+                                    span: Span::default(),
+                                },
+                                mut_: false,
                             })
                         }
                     ])
+                })
+            }
+        );
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn mut_ident_pattern() {
+        let input = "mut a";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(
+            pattern,
+            Pattern {
+                binding: None,
+                kind: PatternKind::Ident(IdentPattern {
+                    name: Ident {
+                        name: "a".to_string(),
+                        span: Span::default()
+                    },
+                    mut_: true,
                 })
             }
         );

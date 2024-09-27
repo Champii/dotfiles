@@ -83,6 +83,7 @@ generate_visitor_trait!(
     StructDeclField
     Ident
     IdentOrNumber
+    IdentPattern
     Assignment
     AssignmentLHS
     Path
@@ -381,7 +382,7 @@ pub fn walk_pattern<'a, V: Visitor<'a>>(visitor: &mut V, p: &'a Pattern) {
 
 pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind) {
     match m {
-        PatternKind::Ident(ident) => visitor.visit_ident(ident),
+        PatternKind::Ident(ident) => visitor.visit_ident_pattern(ident),
         PatternKind::Literal(l) => visitor.visit_literal(l),
         PatternKind::Tuple(patterns) => walk_list!(visitor, visit_match_pattern, patterns),
         PatternKind::Array(patterns) => walk_list!(visitor, visit_array_pattern, patterns),
@@ -389,6 +390,10 @@ pub fn walk_pattern_kind<'a, V: Visitor<'a>>(visitor: &mut V, m: &'a PatternKind
         PatternKind::Nested(p) => visitor.visit_pattern(p),
         PatternKind::Wildcard => {}
     }
+}
+
+pub fn walk_ident_pattern<'a, V: Visitor<'a>>(visitor: &mut V, i: &'a IdentPattern) {
+    visitor.visit_ident(&i.name);
 }
 
 pub fn walk_instance_pattern<'a, V: Visitor<'a>>(visitor: &mut V, e: &'a InstancePattern) {
@@ -418,7 +423,7 @@ pub fn walk_field_pattern<'a, V: Visitor<'a>>(visitor: &mut V, f: &'a FieldPatte
 pub fn walk_array_pattern<'a, V: Visitor<'a>>(visitor: &mut V, a: &'a ArrayPattern) {
     match a {
         ArrayPattern::Pattern(p) => visitor.visit_pattern(p),
-        ArrayPattern::Rest(ident) => visitor.visit_ident(ident),
+        ArrayPattern::Rest(ident) => visitor.visit_ident_pattern(ident),
     }
 }
 

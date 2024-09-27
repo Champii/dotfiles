@@ -1,2 +1,10 @@
 mdr : A -> &B
 mdr = a -> b
+
+write_file = ->
+    mut a = lol
+
+    File::open "test.txt"?
+        .write "Hello, World!"
+        ..close!
+

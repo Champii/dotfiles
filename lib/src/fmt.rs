@@ -790,6 +790,16 @@ impl Display for PatternKind {
     }
 }
 
+impl Display for IdentPattern {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.mut_ {
+            write!(f, "mut ")?;
+        }
+
+        write!(f, "{}", self.name)
+    }
+}
+
 impl Display for ArrayPattern {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
