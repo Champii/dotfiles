@@ -635,7 +635,18 @@ impl Display for AssignmentLHS {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             AssignmentLHS::Expression(expr) => write!(f, "{}", expr),
-            AssignmentLHS::Pattern(pattern) => write!(f, "{}", pattern),
+            AssignmentLHS::Pattern {
+                pattern,
+                type_annotation,
+            } => {
+                write!(f, "{}", pattern)?;
+
+                if let Some(type_annotation) = type_annotation {
+                    write!(f, ": {}", type_annotation)?;
+                }
+
+                Ok(())
+            }
         }
     }
 }

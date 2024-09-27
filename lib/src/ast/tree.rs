@@ -205,7 +205,10 @@ pub enum Statement {
 #[derive(Debug, PartialEq)]
 pub enum AssignmentLHS {
     Expression(UnaryExpr),
-    Pattern(Pattern),
+    Pattern {
+        pattern: Pattern,
+        type_annotation: Option<ParseType>,
+    },
 }
 
 #[derive(Debug, PartialEq)]

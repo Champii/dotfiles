@@ -260,7 +260,16 @@ pub fn walk_assignment<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a Assignme
 pub fn walk_assignment_l_h_s<'a, V: Visitor<'a>>(visitor: &mut V, assign: &'a AssignmentLHS) {
     match assign {
         AssignmentLHS::Expression(expr) => visitor.visit_unary_expr(expr),
-        AssignmentLHS::Pattern(pattern) => visitor.visit_pattern(pattern),
+        AssignmentLHS::Pattern {
+            pattern,
+            type_annotation,
+        } => {
+            visitor.visit_pattern(pattern);
+
+            if let Some(type_annotation) = type_annotation {
+                visitor.visit_parse_type(type_annotation);
+            }
+        }
     }
 }
 

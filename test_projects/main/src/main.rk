@@ -1,7 +1,2 @@
-> my_dep::SomeType
-> my_mod::SomeOtherType
-
-struct MyStruct
-    my_field: &mut SomeType
-
-< MyStruct
+main = ->
+    [a]: Lol = 2

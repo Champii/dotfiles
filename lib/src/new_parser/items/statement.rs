@@ -3,7 +3,7 @@ use crate::{
     new_parser::{engine::*, Assignment, AssignmentLHS, Statement},
 };
 
-use super::{expression, pattern, seek, unary_expr};
+use super::{expression, parse_type, pattern, seek, unary_expr};
 
 pub fn statement(stream: Input) -> IResult<Statement> {
     preceded(TokenType::Keyword("return".to_string()), expression.opt())
@@ -28,10 +28,16 @@ pub fn assignment(stream: Input) -> IResult<Assignment> {
 }
 
 pub fn assignment_lhs(stream: Input) -> IResult<AssignmentLHS> {
-    followed(pattern, seek(TokenType::Equal))
-        .map(AssignmentLHS::Pattern)
-        .or(followed(unary_expr, seek(TokenType::Equal)).map(AssignmentLHS::Expression))
-        .process(stream)
+    followed(
+        (pattern, preceded(TokenType::Colon, parse_type).opt()),
+        seek(TokenType::Equal),
+    )
+    .map(|(pattern, type_annotation)| AssignmentLHS::Pattern {
+        pattern,
+        type_annotation,
+    })
+    .or(followed(unary_expr, seek(TokenType::Equal)).map(AssignmentLHS::Expression))
+    .process(stream)
 }
 
 #[cfg(test)]
@@ -81,16 +87,19 @@ mod tests {
         assert_eq!(
             statement,
             Statement::Assignment(Assignment {
-                lhs: AssignmentLHS::Pattern(Pattern {
-                    binding: None,
-                    kind: PatternKind::Ident(IdentPattern {
-                        name: Ident {
-                            name: "a".to_string(),
-                            span: Span::default(),
-                        },
-                        mut_: false,
-                    })
-                }),
+                lhs: AssignmentLHS::Pattern {
+                    pattern: Pattern {
+                        binding: None,
+                        kind: PatternKind::Ident(IdentPattern {
+                            name: Ident {
+                                name: "a".to_string(),
+                                span: Span::default(),
+                            },
+                            mut_: false,
+                        })
+                    },
+                    type_annotation: None,
+                },
                 rhs: Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
                     operand: Operand::Literal(Literal {
                         kind: crate::ast::LiteralKind::Number(1),
