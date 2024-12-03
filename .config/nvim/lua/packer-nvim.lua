@@ -51,7 +51,7 @@ local plugins = {
     'folke/which-key.nvim',
     'hrsh7th/nvim-cmp',
     -- # 'glepnir/copilot-lua',
-    'github/copilot.vim',
+    -- 'github/copilot.vim',
     'hrsh7th/cmp-buffer',
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-nvim-lua',
@@ -248,6 +248,12 @@ local plugins = {
                 -- config
                 theme = 'hyper',
                 config = {
+                    header = {
+                    },
+                    footer = {
+                        "",
+                        "Remember to stay hydrated !",
+                    },
                     week_header = {
                         enable = false,
                     },
@@ -330,7 +336,12 @@ local plugins = {
                 },
             })
         end,
-    }
+    },
+    "https://github.com/ron-rs/ron.vim",
+    {
+        'Exafunction/codeium.vim',
+        event = 'BufEnter'
+    },
 }
 
 require("lazy").setup(plugins)

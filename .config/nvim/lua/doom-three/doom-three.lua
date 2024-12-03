@@ -45,6 +45,7 @@ local bg_light                           = '#202020'
 local bg_lighter                         = '#232323'
 local grey                               = '#6d6d6d'
 local grey_dark                          = '#606060'
+local grey_darker                        = '#505050'
 local grey_light                         = '#858585'
 local grey_lighter                       = '#abb2bf'
 local red                                = '#d34444'
@@ -99,7 +100,7 @@ local editor_syntax = {
     IncSearch                = { bg = yellow, fg = bg },
     Substitute               = { bg = blue, fg = bg },
     LineNr                   = { fg = grey_light },
-    LspInlayHint             = { fg = grey, bg = bg },
+    LspInlayHint             = { fg = grey_darker, bg = bg },
     CursorLineNr             = { fg = grey_lighter },
     MatchParen               = { bold = true, undercurl = true },
     Normal                   = { fg = beige, bg = bg },
