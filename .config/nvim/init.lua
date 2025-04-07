@@ -15,3 +15,5 @@ vim.o.cmdheight = 0
 vim.g.dashboard_default_executive = 'fzf'
 
 require 'pii'
+
+-- vim.g.augment_workspace_folders = ['~/prog/rust/new_lang/']

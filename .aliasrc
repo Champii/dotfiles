@@ -20,6 +20,9 @@ alias howdoi="hors -c -a -e google"
 alias cp="xcp"
 alias du="dust"
 
+alias t="go-task"
+alias task="go-task"
+
 # Yay
 # alias yi="yay -S"
 # alias yu="yay -Syu"
@@ -138,3 +141,9 @@ fco() {
         --ansi --preview="git --no-pager log -150 --pretty=format:%s '..{2}'") || return
   git checkout $(awk '{print $2}' <<<"$target" )
 }
+
+# AI
+alias ask-deep="~/.bin/r1_32b.sh"
+alias ask-slow="~/.bin/r1_14b.sh"
+alias ask="~/.bin/r1_7b.sh"
+alias ask-fast="~/.bin/r1_1_5b.sh"
