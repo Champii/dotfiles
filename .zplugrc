@@ -75,7 +75,7 @@ zplug "olets/zsh-abbr"
 # fi
 
 # Then, source plugins and add commands to $PATH
-zplug load 
+# zplug load 
 
 # CONFIG
 bindkey '\eOA' history-substring-search-up
