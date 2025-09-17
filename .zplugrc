@@ -8,7 +8,7 @@ zplug "lukechilds/zsh-nvm"
 
 zplug "hlissner/zsh-autopair", defer:2
 
-# zplug "mafredri/zsh-async", from:"github", use:"async.zsh", defer:3
+zplug "mafredri/zsh-async", from:"github", use:"async.zsh", defer:3
 
 #zplug "nocttuam/autodotenv", from:"github"
 
@@ -36,7 +36,7 @@ zplug 'wfxr/forgit'
 
 zplug "Tarrasch/zsh-functional"
 
-zplug "seletskiy/zsh-fuzzy-search-and-edit"
+# zplug "seletskiy/zsh-fuzzy-search-and-edit"
 
 zplug 'ytet5uy4/fzf-widgets'
 
@@ -75,7 +75,7 @@ zplug "olets/zsh-abbr"
 # fi
 
 # Then, source plugins and add commands to $PATH
-# zplug load 
+zplug load 
 
 # CONFIG
 bindkey '\eOA' history-substring-search-up

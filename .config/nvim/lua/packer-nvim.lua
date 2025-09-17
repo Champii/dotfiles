@@ -16,8 +16,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-    'wbthomason/packer.nvim',
-    -- 'glepnir/dashboard-nvim',
+    -- 'wbthomason/packer.nvim',
+    -- -- 'glepnir/dashboard-nvim',
+    'augmentcode/augment.vim',
     'j-hui/fidget.nvim',
     'ibhagwan/fzf-lua',
     'junegunn/fzf.vim',
@@ -134,7 +135,7 @@ local plugins = {
                                 procMacro = {
                                     enable = true,
                                 },
-
+    
                             },
                         },
                     }
@@ -214,7 +215,7 @@ local plugins = {
         "OXY2DEV/markview.nvim",
         lazy = false,      -- Recommended
         -- ft = "markdown" -- If you decide to lazy-load anyway
-
+    
         dependencies = {
             -- You will not need this if you installed the
             -- parsers manually
@@ -282,7 +283,7 @@ local plugins = {
                     },
                     project = { enable = true, limit = 8, icon = 'your icon', label = '', action = 'FzfLua files cwd=' },
                 },
-               
+    
             }
         end,
         dependencies = { {'nvim-tree/nvim-web-devicons'}}

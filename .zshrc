@@ -70,11 +70,11 @@ export FZF_MARKER_CONF_DIR=~/.marker/tldr
 
 # [[ -s "./.zshplugins/zsh-interactive-cd.plugin.zsh" ]] && source "./.zshplugins/zsh-interactive-cd.plugin.zsh"
 
-source <(cod init $$ zsh)
+# source <(cod init $$ zsh)
 
-eval "$(navi widget zsh)"
+# eval "$(navi widget zsh)"
 
-eval "$(fasd --init auto zsh-hook zsh-ccomp-install zsh-ccomp zsh-wcomp-install zsh-wcomp)"
+# eval "$(fasd --init auto zsh-hook zsh-ccomp-install zsh-ccomp zsh-wcomp-install zsh-wcomp)"
 
 eval "$(starship init zsh)"
 

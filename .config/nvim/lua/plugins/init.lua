@@ -58,3 +58,4 @@ require("nvim-treesitter").define_modules({
         },
     },
 }) ]]
+vim.g.augment_workspace_folders = {'/home/champii/prog/rust/abstract_trader/'}
