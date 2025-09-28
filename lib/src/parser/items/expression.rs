@@ -1468,4 +1468,88 @@ mod expression {
         );
         assert_eq!(rest.len(), 0);
     }
+
+    #[test]
+    fn multiline_method_chain_with_argument() {
+        // This reproduces the expression-problem test case
+        let input = r#"a
+    .lol
+    .mdr toto.tata
+    .haha"#;
+        let tokens = lex_test(input);
+        let (expression, rest) =
+            Expression::parse(&tokens, &mut ParseCtx::new(&Config::default())).unwrap();
+
+        // Should parse as: a.lol.mdr(toto.tata).haha
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(ident_path),
+                secondaries: Some(secondaries),
+                ..
+            })) => {
+                // Should be identifier 'a'
+                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                    name: "a".to_string(),
+                    span: Span::default(),
+                }));
+
+                // Should have 4 secondaries: .lol, .mdr, arguments(toto.tata), .haha
+                assert_eq!(secondaries.len(), 4, "Expected exactly 4 secondaries: .lol, .mdr, arguments, .haha");
+
+                // Verify the structure: .lol, .mdr, arguments(toto.tata), .haha
+                match &secondaries[0] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "lol");
+                    }
+                    _ => panic!("Expected .lol as first secondary"),
+                }
+
+                match &secondaries[1] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "mdr");
+                    }
+                    _ => panic!("Expected .mdr as second secondary"),
+                }
+
+                match &secondaries[2] {
+                    SecondaryExpr::Arguments(args) => {
+                        assert_eq!(args.len(), 1, "Expected exactly one argument");
+                        // Verify the argument is toto.tata
+                        match &args[0].arg {
+                            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(ident_path),
+                                secondaries: Some(arg_secondaries),
+                                ..
+                            })) => {
+                                // Should be toto.tata
+                                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                                    name: "toto".to_string(),
+                                    span: Span::default(),
+                                }));
+                                assert_eq!(arg_secondaries.len(), 1, "Expected exactly one secondary in argument (just .tata)");
+                                match &arg_secondaries[0] {
+                                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                                        assert_eq!(ident.name, "tata");
+                                    }
+                                    _ => panic!("Expected .tata in argument"),
+                                }
+                            }
+                            _ => panic!("Expected toto.tata as argument"),
+                        }
+                    }
+                    _ => panic!("Expected arguments as third secondary"),
+                }
+
+                match &secondaries[3] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "haha");
+                    }
+                    _ => panic!("Expected .haha as fourth secondary"),
+                }
+            }
+            _ => panic!("Expected unary expression with primary expression, got: {:?}", expression),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
 }
