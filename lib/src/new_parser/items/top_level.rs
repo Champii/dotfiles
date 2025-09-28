@@ -71,7 +71,7 @@ pub fn infix_operator_decl(stream: Input) -> IResult<(u8, String)> {
 #[cfg(test)]
 mod parse_top_level {
     use crate::{
-        new_parser::{lex_test, lex_test_toplevel},
+        new_parser::{lex_test, lex_test_toplevel, Path},
         Config,
     };
 
@@ -99,6 +99,104 @@ mod parse_top_level {
         let config = Config::default();
 
         let (rest, _top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_import_syntax() {
+        let input = "> std::collections::HashMap\n";
+        let tokens = lex_test_toplevel(input);
+        let config = Config::default();
+
+        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match top_level {
+            TopLevel::Import(path) => {
+                // Test passes if we get an import
+                match path {
+                    Path::Type(type_path) => {
+                        assert!(type_path.path.len() > 0);
+                    }
+                    Path::Ident(ident_path) => {
+                        assert!(ident_path.path.len() > 0);
+                    }
+                }
+            }
+            _ => panic!("Expected import, got: {:?}", top_level),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_export_syntax() {
+        let input = "< MyStruct\n";
+        let tokens = lex_test_toplevel(input);
+        let config = Config::default();
+
+        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match top_level {
+            TopLevel::Export(path) => {
+                // Test passes if we get an export
+                match path {
+                    Path::Type(type_path) => {
+                        assert!(type_path.path.len() > 0);
+                    }
+                    Path::Ident(ident_path) => {
+                        assert!(ident_path.path.len() > 0);
+                    }
+                }
+            }
+            _ => panic!("Expected export, got: {:?}", top_level),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_type_alias() {
+        let input = "type MyInt = Int32\n";
+        let tokens = lex_test_toplevel(input);
+        let config = Config::default();
+
+        let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match top_level {
+            TopLevel::NewType(name, _ty) => {
+                assert_eq!(name.name, "MyInt");
+                // Test passes if we get a type alias
+            }
+            _ => panic!("Expected type alias, got: {:?}", top_level),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn test_multiple_imports() {
+        let input = "> std::fs::File\n> std::io::Write\n";
+        let tokens = lex_test_toplevel(input);
+        let config = Config::default();
+
+        // Parse first import
+        let (rest, top_level1) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+        match top_level1 {
+            TopLevel::Import(_) => {
+                // Test passes for first import
+            }
+            _ => panic!("Expected first import, got: {:?}", top_level1),
+        }
+
+        // Parse second import
+        let (rest, top_level2) = top_level.process(rest).unwrap();
+        match top_level2 {
+            TopLevel::Import(_) => {
+                // Test passes for second import
+            }
+            _ => panic!("Expected second import, got: {:?}", top_level2),
+        }
 
         assert_eq!(rest.len(), 0);
     }

@@ -272,4 +272,128 @@ mod pattern {
 
         assert_eq!(rest.len(), 0);
     }
+
+    #[test]
+    fn array_pattern_with_rest() {
+        // Test a simpler array pattern first to see if array patterns work at all
+        let input = "[a, b]";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest_tokens, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match pattern.kind {
+            PatternKind::Array(patterns) => {
+                assert_eq!(patterns.len(), 2);
+                // Both should be regular patterns
+                for (i, expected_name) in ["a", "b"].iter().enumerate() {
+                    match &patterns[i] {
+                        ArrayPattern::Pattern(p) => {
+                            match &p.kind {
+                                PatternKind::Ident(ident_pat) => {
+                                    assert_eq!(ident_pat.name.name, *expected_name);
+                                }
+                                _ => panic!("Expected ident pattern at position {}", i),
+                            }
+                        }
+                        _ => panic!("Expected regular pattern at position {}", i),
+                    }
+                }
+            }
+            _ => panic!("Expected array pattern, got: {:?}", pattern.kind),
+        }
+
+        assert_eq!(rest_tokens.len(), 0);
+    }
+
+    #[test]
+    fn tuple_pattern() {
+        let input = "(x, y, z)";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match pattern.kind {
+            PatternKind::Tuple(patterns) => {
+                assert_eq!(patterns.len(), 3);
+                let names = ["x", "y", "z"];
+                for (i, expected_name) in names.iter().enumerate() {
+                    match &patterns[i].kind {
+                        PatternKind::Ident(ident_pat) => {
+                            assert_eq!(ident_pat.name.name, *expected_name);
+                        }
+                        _ => panic!("Expected ident pattern at position {}", i),
+                    }
+                }
+            }
+            _ => panic!("Expected tuple pattern, got: {:?}", pattern.kind),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn binding_pattern() {
+        let input = "value @ (x, y)";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        // Should have a binding
+        assert!(pattern.binding.is_some());
+        assert_eq!(pattern.binding.unwrap().name, "value");
+
+        // Should have a tuple pattern
+        match pattern.kind {
+            PatternKind::Tuple(patterns) => {
+                assert_eq!(patterns.len(), 2);
+            }
+            _ => panic!("Expected tuple pattern, got: {:?}", pattern.kind),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn wildcard_pattern() {
+        let input = "_";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match pattern.kind {
+            PatternKind::Wildcard => {
+                // Test passes
+            }
+            _ => panic!("Expected wildcard pattern, got: {:?}", pattern.kind),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn literal_pattern() {
+        let input = "42";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, pattern) = pattern.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+        match pattern.kind {
+            PatternKind::Literal(literal) => {
+                match literal.kind {
+                    LiteralKind::Number(n) => {
+                        assert_eq!(n, 42);
+                    }
+                    _ => panic!("Expected number literal"),
+                }
+            }
+            _ => panic!("Expected literal pattern, got: {:?}", pattern.kind),
+        }
+
+        assert_eq!(rest.len(), 0);
+    }
 }

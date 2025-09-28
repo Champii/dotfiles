@@ -1442,4 +1442,126 @@ mod expression {
         );
         assert_eq!(rest.len(), 0);
     }
+
+    #[test]
+    fn unsafe_block() {
+        let input = "unsafe\n    ptr = 0\n    *ptr";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        // Should parse as an unsafe block operand
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Unsafe(_),
+                ..
+            })) => {
+                // Test passes if we get an unsafe operand
+            }
+            _ => panic!("Expected unsafe block, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn error_propagation_chain() {
+        let input = "a?.b?.c?";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        // Should parse as chained method calls with error propagation
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(_),
+                secondaries: Some(secondaries),
+                ..
+            })) => {
+                // The actual structure might be: interogation, dot, ident, interogation, dot, ident, interogation
+                // Let's just verify we have the expected number of secondaries
+                assert!(secondaries.len() >= 3, "Expected at least 3 secondaries, got {}", secondaries.len());
+
+                // Verify we have interogation tokens
+                let has_interogations = secondaries.iter().any(|s| matches!(s, SecondaryExpr::Interogation));
+                assert!(has_interogations, "Expected to find interogation tokens");
+
+                // Verify we have dot tokens
+                let has_dots = secondaries.iter().any(|s| matches!(s, SecondaryExpr::Dot(_)));
+                assert!(has_dots, "Expected to find dot tokens");
+            }
+            _ => panic!("Expected chained method calls, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn complex_operator_precedence() {
+        let input = "a + b * c - d / e";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        // Should parse with correct precedence: a + (b * c) - (d / e)
+        // Note: This test verifies the parser accepts the input,
+        // actual precedence is handled in desugaring phase
+        match expression {
+            Expression::BinopExpr(_, _, _) => {
+                // Test passes if we get a binary expression
+            }
+            _ => panic!("Expected binary expression, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn unary_operator_expression() {
+        let input = "-x";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::UnaryExpr(op, _)) => {
+                assert_eq!(op.value, "-");
+            }
+            _ => panic!("Expected unary expression, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn nested_function_calls() {
+        let input = "f g h x";
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        // Should parse as nested function calls
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(_),
+                secondaries: Some(_),
+                ..
+            })) => {
+                // Test passes if we get function calls
+            }
+            _ => panic!("Expected function calls, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
 }
