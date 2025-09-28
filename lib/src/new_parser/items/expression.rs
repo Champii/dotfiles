@@ -9,7 +9,7 @@ use super::{
     native_operator, operator, parenthesis, r#loop, r#match,
 };
 use super::{literal, stuck_operator_token};
-use super::{parse_if, parse_type};
+use super::{parse_if, parse_type, indent_token};
 
 pub fn expression(stream: Input) -> IResult<Expression> {
     (
@@ -113,6 +113,14 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
+    // Check for argument list short circuit on multiline dots
+    if stream.inside_argument_list {
+        if let Ok((_, _)) = (TokenType::Eol, indent_token, TokenType::Dot).process(stream) {
+            // This is a multiline dot that should close the argument list
+            return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+        }
+    }
+
     indice
         .map(SecondaryExpr::Indice)
         .or(dot.map(SecondaryExpr::Dot))
@@ -229,11 +237,20 @@ pub fn arguments_list_short_circuit(mut stream: Input) -> IResult<()> {
 
 pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
     preceded(
-        (TokenType::Eol, indented((indent, TokenType::Dot)))
+        // First try: Eol + Indent + arguments_list_short_circuit + Dot (for closing argument lists)
+        (TokenType::Eol, preceded(arguments_list_short_circuit, (indent_token, TokenType::Dot)))
             .map(|_| ())
-            .or(TokenType::Dot
-                .or(preceded(arguments_list_short_circuit, TokenType::SpacedDot))
-                .map(|_| ())),
+            .or(
+                // Second try: Eol + Indent + Dot (normal multiline dot)
+                (TokenType::Eol, indented((indent, TokenType::Dot)))
+                    .map(|_| ())
+            )
+            .or(
+                // Third try: inline dots
+                TokenType::Dot
+                    .or(preceded(arguments_list_short_circuit, TokenType::SpacedDot))
+                    .map(|_| ())
+            ),
         ident_or_number,
     )
     .process(stream)
@@ -1561,6 +1578,92 @@ mod expression {
                 // Test passes if we get function calls
             }
             _ => panic!("Expected function calls, got: {:?}", expression),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_method_chain_with_argument() {
+        // This reproduces the expression-problem test case
+        let input = r#"a
+    .lol
+    .mdr toto.tata
+    .haha"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        // Should parse as: a.lol.mdr(toto.tata).haha
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(ident_path),
+                secondaries: Some(secondaries),
+                ..
+            })) => {
+                // Should be identifier 'a'
+                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                    name: "a".to_string(),
+                    span: Span::default(),
+                }));
+
+                // Should have 4 secondaries: .lol, .mdr, arguments(toto.tata), .haha
+                assert_eq!(secondaries.len(), 4, "Expected exactly 4 secondaries: .lol, .mdr, arguments, .haha");
+
+                // Verify the structure: .lol, .mdr, arguments(toto.tata), .haha
+                match &secondaries[0] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "lol");
+                    }
+                    _ => panic!("Expected .lol as first secondary"),
+                }
+
+                match &secondaries[1] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "mdr");
+                    }
+                    _ => panic!("Expected .mdr as second secondary"),
+                }
+
+                match &secondaries[2] {
+                    SecondaryExpr::Arguments(args) => {
+                        assert_eq!(args.len(), 1, "Expected exactly one argument");
+                        // Verify the argument is toto.tata (not toto.tata.haha)
+                        match &args[0].arg {
+                            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(ident_path),
+                                secondaries: Some(arg_secondaries),
+                                ..
+                            })) => {
+                                // Should be toto.tata
+                                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                                    name: "toto".to_string(),
+                                    span: Span::default(),
+                                }));
+                                assert_eq!(arg_secondaries.len(), 1, "Expected exactly one secondary in argument (just .tata)");
+                                match &arg_secondaries[0] {
+                                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                                        assert_eq!(ident.name, "tata");
+                                    }
+                                    _ => panic!("Expected .tata in argument"),
+                                }
+                            }
+                            _ => panic!("Expected toto.tata as argument"),
+                        }
+                    }
+                    _ => panic!("Expected arguments as third secondary"),
+                }
+
+                match &secondaries[3] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "haha");
+                    }
+                    _ => panic!("Expected .haha as fourth secondary"),
+                }
+            }
+            _ => panic!("Expected method chain, got: {:?}", expression),
         }
         assert_eq!(rest.len(), 0);
     }
