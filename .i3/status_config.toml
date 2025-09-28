@@ -20,15 +20,15 @@ block = "focused_window"
 # max_width = 100
 # show_marks = "all"
 
-[[block]]
-block = "pacman"
-interval = 600
-format = " $icon $pacman updates available "
-format_singular = " $icon $pacman update available "
-format_up_to_date = " $icon up to date "
-critical_updates_regex = "(linux |linux-lts|linux-zen)"
-# aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
-aur_command = "pikaur -Qua"
+# [[block]]
+# block = "pacman"
+# interval = 600
+# format = " $icon $pacman updates available "
+# format_singular = " $icon $pacman update available "
+# format_up_to_date = " $icon up to date "
+# critical_updates_regex = "(linux |linux-lts|linux-zen)"
+# # aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
+# aur_command = "pikaur -Qua"
 
 [[block]]
 block = "net"
@@ -101,22 +101,22 @@ interval = 1
 # warning = 20
 format = " $icon $barchart $utilization $frequency "
 
-[[block]]
-block = "temperature"
-# collapsed = false
-interval = 10
-# format = " $min min, $max max, $average avg "
-# chip = "coretemp-isa-0000"
-idle = 40
-good = 60
-info = 80
-warning = 90
+# [[block]]
+# block = "temperature"
+# # collapsed = false
+# interval = 10
+# # format = " $min min, $max max, $average avg "
+# # chip = "coretemp-isa-0000"
+# idle = 40
+# good = 60
+# info = 80
+# warning = 90
 
-[[block]]
-block = "sound"
+# [[block]]
+# block = "sound"
 
-[[block]]
-block = "backlight"
+# [[block]]
+# block = "backlight"
 
 # [[block]]
 # block = "speedtest"
@@ -129,7 +129,7 @@ block = "time"
 interval = 60
 format = " $icon $timestamp.datetime(f:'%a %d/%m %R', l:fr_FR) "
 
-[[block]]
-block = "battery"
-interval = 10
-format = " $icon $percentage $time "
+# [[block]]
+# block = "battery"
+# interval = 10
+# format = " $icon $percentage $time "
