@@ -114,10 +114,22 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
     // Check for argument list short circuit on multiline dots
+    // Only close the argument list if the dot is at the method chain level or less,
+    // not if it's deeper (which would be part of an argument expression)
     if stream.inside_argument_list {
-        if let Ok((_, _)) = (TokenType::Eol, indent_token, TokenType::Dot).process(stream) {
-            // This is a multiline dot that should close the argument list
-            return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+        if let Ok((_, (_, indent_level, _))) = (TokenType::Eol, indent_token, TokenType::Dot).process(stream) {
+            // Calculate the method chain indent level
+            // Arguments are at stream.indent_level, method chains would be at indent_level - indent_step
+            let method_chain_level = if stream.indent_level >= stream.indent_step {
+                stream.indent_level - stream.indent_step
+            } else {
+                0
+            };
+
+            // Only close if the dot is at or below the method chain level
+            if (indent_level as usize) <= method_chain_level + stream.indent_step {
+                return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+            }
         }
     }
 
@@ -1807,6 +1819,111 @@ mod expression {
                     _ => panic!("Expected arguments"),
                 }
 
+                match &secondaries[2] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "baz");
+                    }
+                    _ => panic!("Expected .baz"),
+                }
+            }
+            _ => panic!("Unexpected expression type"),
+        }
+        assert_eq!(rest.len(), 0);
+    }
+
+    #[test]
+    fn multiline_arguments_with_nested_multiline_dots() {
+        // Test complex case: multiline arguments where arguments themselves have multiline dots
+        // Should parse as: foo.bar(arg1.method1.method2, arg2).baz
+        let input = r#"foo
+    .bar
+        arg1
+            .method1
+            .method2
+        arg2
+    .baz"#;
+        let tokens = lex_test(input);
+        let config = Config::default();
+
+        let (rest, expression) = expression
+            .process(ParseCtx::from(&tokens, &config))
+            .unwrap();
+
+        match expression {
+            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                operand: Operand::Ident(ident_path),
+                secondaries: Some(secondaries),
+                ..
+            })) => {
+                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                    name: "foo".to_string(),
+                    span: Span::default(),
+                }));
+
+                // Should have 3 secondaries: .bar, arguments, .baz
+                assert_eq!(secondaries.len(), 3);
+
+                // Check .bar
+                match &secondaries[0] {
+                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                        assert_eq!(ident.name, "bar");
+                    }
+                    _ => panic!("Expected .bar"),
+                }
+
+                // Check arguments
+                match &secondaries[1] {
+                    SecondaryExpr::Arguments(args) => {
+                        assert_eq!(args.len(), 2, "Expected 2 arguments");
+
+                        // First argument: arg1.method1.method2
+                        match &args[0].arg {
+                            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(ident_path),
+                                secondaries: Some(arg_secondaries),
+                                ..
+                            })) => {
+                                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                                    name: "arg1".to_string(),
+                                    span: Span::default(),
+                                }));
+                                // Should have .method1 and .method2
+                                assert_eq!(arg_secondaries.len(), 2);
+                                match &arg_secondaries[0] {
+                                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                                        assert_eq!(ident.name, "method1");
+                                    }
+                                    _ => panic!("Expected .method1"),
+                                }
+                                match &arg_secondaries[1] {
+                                    SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
+                                        assert_eq!(ident.name, "method2");
+                                    }
+                                    _ => panic!("Expected .method2"),
+                                }
+                            }
+                            _ => panic!("Expected arg1.method1.method2"),
+                        }
+
+                        // Second argument: arg2
+                        match &args[1].arg {
+                            Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+                                operand: Operand::Ident(ident_path),
+                                secondaries: None,
+                                ..
+                            })) => {
+                                assert_eq!(ident_path.path[0], IdentOrType::Ident(Ident {
+                                    name: "arg2".to_string(),
+                                    span: Span::default(),
+                                }));
+                            }
+                            _ => panic!("Expected arg2"),
+                        }
+                    }
+                    _ => panic!("Expected arguments"),
+                }
+
+                // Check .baz
                 match &secondaries[2] {
                     SecondaryExpr::Dot(IdentOrNumber::Ident(ident)) => {
                         assert_eq!(ident.name, "baz");

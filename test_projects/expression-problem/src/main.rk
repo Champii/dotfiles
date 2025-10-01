@@ -1,41 +1,39 @@
-// Test 1: Original case - inline dot in argument
+// Test 1: Multiline arguments with multiline dots inside
+// Should parse as: foo.bar(arg1.method1.method2, arg2).baz
 test1 = ->
-    a
-        .lol
-        .mdr toto.tata
-        .haha
-
-// Test 2: Multiline arguments in method chain
-test2 = ->
     foo
         .bar
             arg1
+                .method1
+                .method2
             arg2
         .baz
 
-// Test 3: Inline arguments with dots
-test3 = ->
-    foo
-        .bar arg1.field1, arg2.field2
-        .baz
-
-// Test 4: Nested method chains in arguments
-test4 = ->
-    foo
-        .bar arg1.method1.method2
-        .baz
-
-// Test 5: Complex multiline with nested dots
-test5 = ->
+// Test 2: Even more complex nesting
+// Should parse as: obj.process(data.transform.validate, config.get.value).finalize
+test2 = ->
     obj
         .process
-            data.field1.field2
-            config.setting
+            data
+                .transform
+                .validate
+            config
+                .get
+                .value
         .finalize
+
+// Test 3: Multiple arguments with different nesting levels
+test3 = ->
+    foo
+        .bar
+            simple
+            complex
+                .method1
+                .method2
+            another.inline.chain
+        .baz
 
 main = ->
     test1
     test2
     test3
-    test4
-    test5
