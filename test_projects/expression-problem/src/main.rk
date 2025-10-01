@@ -1,9 +1,35 @@
-// Test: Deeply nested - multiline arguments containing function calls with multiline arguments with multiline dots
+// Test 1: Deeply nested - multiline arguments with nested calls with multiline dots
 // Should parse as: foo(argnested(argnested2.method1.method2), arg2)
-main = ->
+test1 = ->
     foo
         argnested
             argnested2
                 .method1
                 .method2
         arg2
+
+// Test 2: Multiple levels of nesting
+// Should parse as: process(transform(data.get.value), validate(config.check))
+test2 = ->
+    process
+        transform
+            data
+                .get
+                .value
+        validate
+            config
+                .check
+
+// Test 3: Mixed inline and multiline at different levels
+test3 = ->
+    foo
+        bar simple.inline
+        baz
+            complex
+                .method1
+                .method2
+
+main = ->
+    test1
+    test2
+    test3

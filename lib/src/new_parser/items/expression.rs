@@ -189,16 +189,12 @@ pub fn multiline_arguments_context_aware(stream: Input) -> IResult<Vec<Argument>
     }
 
     // Prevent ambiguous cases where arguments could be confused with method chains
-    // When at base level (indent 0) with indent_step 4:
-    // - Arguments at indent 4 are ambiguous (could be method chain)
-    // - Arguments at indent 8+ are clearly arguments (too indented for method chain at level 4)
-    // When inside a function body (indent 4) with indent_step 4:
-    // - Arguments at indent 8 are ambiguous (could be method chain)
-    // - Arguments at indent 12+ are clearly arguments
-    if stream.indent_step == 4 {
-        if (stream.indent_level == 0 && arg_indent_level == 4) ||
-           (stream.indent_level == 4 && arg_indent_level == 8) {
-            // Ambiguous - reject
+    // This only applies at the base level (indent 0) where multiline dots create ambiguity
+    // Inside function bodies or other nested contexts, there's no ambiguity
+    if stream.indent_step == 4 && stream.indent_level == 0 {
+        if arg_indent_level == 4 {
+            // At base level, arguments at indent 4 are ambiguous (could be method chain)
+            // Arguments at indent 8+ are clearly arguments
             return Err(ParseError::UnexpectedIndent(arg_indent_level as u8));
         }
     }
