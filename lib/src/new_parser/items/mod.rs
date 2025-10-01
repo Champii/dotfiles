@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod tests;
-
 mod array;
 mod block;
 mod enum_decl;

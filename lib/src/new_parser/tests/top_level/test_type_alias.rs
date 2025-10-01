@@ -1,0 +1,26 @@
+use crate::ast::*;
+use crate::lexer::Span;
+use crate::new_parser::items::*;
+use crate::new_parser::tests::common::*;
+use crate::new_parser::*;
+use crate::Config;
+use std::path::PathBuf;
+
+#[test]
+fn test_type_alias() {
+    let input = "type MyInt = Int32\n";
+    let tokens = lex_test_toplevel(input);
+    let config = Config::default();
+
+    let (rest, top_level) = top_level.process(ParseCtx::from(&tokens, &config)).unwrap();
+
+    match top_level {
+        TopLevel::NewType(name, _ty) => {
+            assert_eq!(name.name, "MyInt");
+            // Test passes if we get a type alias
+        }
+        _ => panic!("Expected type alias, got: {:?}", top_level),
+    }
+
+    assert_eq!(rest.len(), 0);
+}

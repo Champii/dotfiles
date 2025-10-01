@@ -1,0 +1,30 @@
+use crate::ast::*;
+use crate::lexer::Span;
+use crate::new_parser::items::*;
+use crate::new_parser::tests::common::*;
+use crate::new_parser::*;
+use crate::Config;
+use std::path::PathBuf;
+
+#[test]
+fn unsafe_block() {
+    let input = "unsafe\n    ptr = 0\n    *ptr";
+    let tokens = lex_test(input);
+    let config = Config::default();
+
+    let (rest, expression) = expression
+        .process(ParseCtx::from(&tokens, &config))
+        .unwrap();
+
+    // Should parse as an unsafe block operand
+    match expression {
+        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+            operand: Operand::Unsafe(_),
+            ..
+        })) => {
+            // Test passes if we get an unsafe operand
+        }
+        _ => panic!("Expected unsafe block, got: {:?}", expression),
+    }
+    assert_eq!(rest.len(), 0);
+}
