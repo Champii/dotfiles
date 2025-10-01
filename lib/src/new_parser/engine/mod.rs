@@ -23,6 +23,9 @@ mod separated;
 mod token_type;
 mod tuples;
 
+#[cfg(test)]
+pub mod tests;
+
 pub use and::*;
 pub use delimited::*;
 pub use followed::*;
