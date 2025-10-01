@@ -1,39 +1,9 @@
-// Test 1: Multiline arguments with multiline dots inside
-// Should parse as: foo.bar(arg1.method1.method2, arg2).baz
-test1 = ->
-    foo
-        .bar
-            arg1
-                .method1
-                .method2
-            arg2
-        .baz
-
-// Test 2: Even more complex nesting
-// Should parse as: obj.process(data.transform.validate, config.get.value).finalize
-test2 = ->
-    obj
-        .process
-            data
-                .transform
-                .validate
-            config
-                .get
-                .value
-        .finalize
-
-// Test 3: Multiple arguments with different nesting levels
-test3 = ->
-    foo
-        .bar
-            simple
-            complex
-                .method1
-                .method2
-            another.inline.chain
-        .baz
-
+// Test: Deeply nested - multiline arguments containing function calls with multiline arguments with multiline dots
+// Should parse as: foo(argnested(argnested2.method1.method2), arg2)
 main = ->
-    test1
-    test2
-    test3
+    foo
+        argnested
+            argnested2
+                .method1
+                .method2
+        arg2
