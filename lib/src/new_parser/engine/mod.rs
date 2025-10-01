@@ -48,6 +48,8 @@ pub struct ParseCtx<'a> {
     pub indent_step: usize,
     pub disallowed_multiline_fn_call: bool,
     pub inside_argument_list: bool,
+    pub inside_inline_argument_list: bool, // For comma-separated args, not multiline
+    pub after_closing_paren: bool, // Set after parsing a closing paren in an argument context
     pub is_inside_fn_type_decl: bool,
 }
 
@@ -129,6 +131,8 @@ impl ParseCtx<'_> {
             config,
             disallowed_multiline_fn_call: false,
             inside_argument_list: false,
+            inside_inline_argument_list: false,
+            after_closing_paren: false,
             is_inside_fn_type_decl: false,
         }
     }

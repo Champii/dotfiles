@@ -1,35 +1,25 @@
-// Test 1: Deeply nested - multiline arguments with nested calls with multiline dots
-// Should parse as: foo(argnested(argnested2.method1.method2), arg2)
-test1 = ->
-    foo
-        argnested
-            argnested2
-                .method1
-                .method2
-        arg2
+// ============================================================================
+// EXPRESSION AND STATEMENT PRECEDENCE TESTS
+// ============================================================================
+// Testing the parsing order and precedence of different expression types:
+// - Function calls
+// - Method chains (dot notation)
+// - Parentheses
+// - If expressions
+// - Match expressions
+// - Lambda expressions
+// - Tuples
+// - Array indexing
+// ============================================================================
 
-// Test 2: Multiple levels of nesting
-// Should parse as: process(transform(data.get.value), validate(config.check))
-test2 = ->
-    process
-        transform
-            data
-                .get
-                .value
-        validate
-            config
-                .check
-
-// Test 3: Mixed inline and multiline at different levels
-test3 = ->
-    foo
-        bar simple.inline
-        baz
-            complex
-                .method1
-                .method2
+// Test 13: Multiline call with nested multiline call
+// Expected: foo(bar(x, y))
+test13_nested_multiline = ->
+    result = foo
+        bar
+            x
+            y
+    result
 
 main = ->
-    test1
-    test2
-    test3
+    test13_nested_multiline
