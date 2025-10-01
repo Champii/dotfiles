@@ -1,0 +1,35 @@
+use crate::ast::*;
+use crate::lexer::Span;
+use crate::new_parser::items::*;
+use crate::new_parser::items::tests::common::*;
+use crate::new_parser::*;
+use crate::Config;
+use std::path::PathBuf;
+
+#[test]
+fn dot_expression_with_literal() {
+    let input = "4.test";
+    let tokens = lex_test(input);
+    let config = Config::default();
+
+    let (rest, expression) = expression
+        .process(ParseCtx::from(&tokens, &config))
+        .unwrap();
+
+    assert_eq!(
+        expression,
+        Expression::UnaryExpr(UnaryExpr::PrimaryExpr(PrimaryExpr {
+            operand: Operand::Literal(Literal {
+                kind: crate::ast::LiteralKind::Number(4),
+                span: Span::default(),
+            }),
+            secondaries: Some(vec![SecondaryExpr::Dot(IdentOrNumber::Ident(Ident {
+                name: "test".to_string(),
+                span: Span::default(),
+            }))]),
+            type_annotation: None,
+        })),
+    );
+
+    assert_eq!(rest.len(), 0);
+}

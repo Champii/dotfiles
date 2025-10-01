@@ -1,9 +1,6 @@
 pub mod engine;
 mod items;
 
-#[cfg(test)]
-mod tests;
-
 use std::path::PathBuf;
 
 pub use engine::*;

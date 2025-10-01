@@ -23,6 +23,9 @@ mod top_level;
 mod r#trait;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 pub use array::*;
 pub use block::*;
 pub use enum_decl::*;
