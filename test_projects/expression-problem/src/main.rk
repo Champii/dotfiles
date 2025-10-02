@@ -1,6 +1,6 @@
-// Comprehensive test of all AST expression types with deep nesting
 
-// Test struct for instances
+
+
 struct Point
     x: Int
     y: Int
@@ -14,7 +14,7 @@ enum Result T, E
     Ok T
     Err E
 
-// Test trait
+
 trait Display
     display: () -> String
 
@@ -59,17 +59,12 @@ main = ->
     times_two = (*2)
 
     nested_if = if true
-        then
-            if false
-            then
-                if true then 1 else 2
-            else
-                if false then 3 else 4
-        else
-            if true
+        then if false
+            then if true then 1 else 2
+            else if false then 3 else 4
+        else if true
             then 5
-            else
-                if false then 6 else 7
+            else if false then 6 else 7
 
     result_val: Result Int, String = Result::Ok 42
     if_let_test = if Ok x = result_val
@@ -101,9 +96,7 @@ main = ->
         y: 20
         z: 30
 
-    chained = point
-        .display!
-        ..to_string!
+    chained = point.display!.to_string!
 
     x_coord = point.x
     tuple_access = tuple_val.0
@@ -129,17 +122,15 @@ main = ->
         ptr: *Int = 0
         *ptr
 
-    // 25. Pattern matching in assignments
+    
     (a, b, c) = (1, 2, 3)
     [first, second, ..rest] = [1, 2, 3, 4, 5]
     Point x: px, y: py = point
 
-    // 26. Deeply nested combination of everything
-    ultimate_nested = match if true
-        then
-            loop
-                if false then break (1, 2, 3)
-                continue
+    
+    ultimate_nested = match if true then loop
+            if false then break (1, 2, 3)
+            continue
         else (0, 0, 0)
         (x, y, z) if x > 0 =>
             [
@@ -169,12 +160,12 @@ main = ->
             ][0] + [1, [2, [3, [4, 5]]]][1][1][1][0]
         _ => 0
 
-    // 27. Question mark operator (error propagation)
+    
     file_op = File::open? "test.txt"
         ..write? "data"
         ..close!
 
-    // 28. Complex method chain with multiline arguments
+    
     complex_chain = some_obj
         .method1 arg1, arg2, arg3
         ..method2
@@ -186,7 +177,7 @@ main = ->
         [0]
         .another_method!
 
-    // 29. Return, break, continue with values
+    
     early_return = ->
         if true then return 42
         return 0
@@ -194,13 +185,13 @@ main = ->
     break_with_val = loop
         break 123
 
-    // 30. Multiple operators and precedence
+    
     precedence_test = 1 + 2 * 3 - 4 / 5 + 6 * 7 - 8 + 9
 
-    // Final result
+    
     ultimate_nested
 
-// Helper function
+
 some_func = a, b, c -> a + b + c
 
 

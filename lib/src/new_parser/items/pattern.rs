@@ -45,12 +45,8 @@ pub fn ident_pattern(stream: Input) -> IResult<IdentPattern> {
 }
 
 pub fn array_pattern(stream: Input) -> IResult<ArrayPattern> {
-    (
-        TokenType::Dot.or(TokenType::SpacedDot),
-        TokenType::Dot,
-        ident_pattern,
-    )
-        .map(|(_, _, ident)| ArrayPattern::Rest(ident))
+    (TokenType::DoubleDot, ident_pattern)
+        .map(|(_, ident)| ArrayPattern::Rest(ident))
         .or(pattern.map(ArrayPattern::Pattern))
         .process(stream)
 }
