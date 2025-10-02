@@ -25,7 +25,20 @@ pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
 }
 
 fn lambda_block(stream: Input) -> IResult<Block> {
-    reset_inside_argument_list(block).process(stream)
+    // Save the current indent level before parsing the lambda body
+    let saved_indent = stream.indent_level;
+
+    // Parse the block with reset argument list flags
+    let result = reset_inside_argument_list(block).process(stream);
+
+    // Restore the indent level after parsing
+    match result {
+        Ok((mut stream, block)) => {
+            stream.indent_level = saved_indent;
+            Ok((stream, block))
+        }
+        Err(e) => Err(e),
+    }
 }
 
 pub fn lambda_decl(stream: Input) -> IResult<LambdaDecl> {

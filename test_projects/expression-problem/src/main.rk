@@ -2,4 +2,6 @@ main = ->
     foo
         .bar lol ->
             mdr
+                .haha lol
+                    .tata
         .lol
