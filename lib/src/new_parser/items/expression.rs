@@ -403,6 +403,13 @@ pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
         .process(stream);
 
     if let Ok((stream, (_, dot_indent_level, _))) = result {
+        // If the dot's indent level is less than the current indent level,
+        // it belongs to an outer scope and should not be consumed here
+        // This prevents lambda bodies from consuming dots that belong to the outer expression
+        if (dot_indent_level as usize) < stream.indent_level {
+            return Err(ParseError::Fail);
+        }
+
         // Parse the identifier after the dot
         let (stream, ident) = ident_or_number.process(stream)?;
 
@@ -432,6 +439,12 @@ pub fn double_dot(stream: Input) -> IResult<IdentOrNumber> {
         .process(stream);
 
     if let Ok((stream, (_, double_dot_indent_level, _))) = result {
+        // If the double dot's indent level is less than the current indent level,
+        // it belongs to an outer scope and should not be consumed here
+        if (double_dot_indent_level as usize) < stream.indent_level {
+            return Err(ParseError::Fail);
+        }
+
         // Parse the identifier after the double dot
         let (stream, ident) = ident_or_number.process(stream)?;
 
