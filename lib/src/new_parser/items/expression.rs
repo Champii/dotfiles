@@ -115,14 +115,20 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
     // Check for argument list short circuit on multiline dots and double dots
-    // For inline argument lists (e.g., .method1 a), multiline dots should always close the argument list
+    // For inline argument lists (e.g., .method1 a), multiline dots should close the argument list
+    // UNLESS the dot is more indented than the current level (meaning it's part of the argument)
     // For multiline argument lists, only close if the dot is at the method chain level
     if stream.inside_argument_list {
         // Check for multiline dot
         if let Ok((_, (_, indent_level, _))) = (TokenType::Eol, indent_token, TokenType::Dot).process(stream) {
-            // If we're in an inline argument list, any multiline dot should close it
+            // If we're in an inline argument list, multiline dots should close it
+            // UNLESS the dot is more indented (meaning it's part of the argument expression)
             if stream.inside_inline_argument_list {
-                return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+                // Only short-circuit if the dot is at or below the current indent level
+                // Dots that are more indented are part of the argument expression
+                if (indent_level as usize) <= stream.indent_level {
+                    return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+                }
             }
 
             // For multiline argument lists, calculate the method chain indent level
@@ -141,9 +147,13 @@ pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
 
         // Check for multiline double dot
         if let Ok((_, (_, indent_level, _))) = (TokenType::Eol, indent_token, TokenType::DoubleDot).process(stream) {
-            // If we're in an inline argument list, any multiline double dot should close it
+            // If we're in an inline argument list, multiline double dots should close it
+            // UNLESS the double dot is more indented (meaning it's part of the argument expression)
             if stream.inside_inline_argument_list {
-                return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+                // Only short-circuit if the double dot is at or below the current indent level
+                if (indent_level as usize) <= stream.indent_level {
+                    return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+                }
             }
 
             // For multiline argument lists, calculate the method chain indent level
