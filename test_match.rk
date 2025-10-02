@@ -1,0 +1,9 @@
+main = ->
+    match_test = match (1, "test", [1, 2, 3])
+        (0, _, _) => "zero"
+        (1, str, arr) if str == "test" => "matched with guard"
+        foo @ (x, y, z) if x > 0 => "bound pattern"
+        (a, b, [first, ..rest]) => "array destructure"
+        _ => "default"
+    match_test
+

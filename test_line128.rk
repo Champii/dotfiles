@@ -1,0 +1,15 @@
+struct Point
+    x: Int
+    y: Int
+
+main = ->
+    point = Point x: 10, y: 20
+    
+    (a, b, c) = (1, 2, 3)
+    [first, second, ..rest] = [1, 2, 3, 4, 5]
+    Point x: px, y: py = point
+    
+    ultimate_nested = 42
+    
+    ultimate_nested
+

@@ -44,6 +44,7 @@ pub fn expression(stream: Input) -> IResult<Expression> {
             }
         })
         .process(stream)
+        .map_err(|e| e.with_context("expression"))
 }
 
 pub fn unary_expr(stream: Input) -> IResult<UnaryExpr> {
@@ -51,6 +52,7 @@ pub fn unary_expr(stream: Input) -> IResult<UnaryExpr> {
         .map(|(op, unary)| UnaryExpr::UnaryExpr(op, Box::new(unary)))
         .or(primary_expr.map(UnaryExpr::PrimaryExpr))
         .process(stream)
+        .map_err(|e| e.with_context("unary expression"))
 }
 
 pub fn primary_expr(stream: Input) -> IResult<PrimaryExpr> {
@@ -69,6 +71,7 @@ pub fn primary_expr(stream: Input) -> IResult<PrimaryExpr> {
             type_annotation,
         })
         .process(stream)
+        .map_err(|e| e.with_context("primary expression"))
 }
 
 pub fn operand(stream: Input) -> IResult<Operand> {
@@ -92,6 +95,7 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         .or(native_operator.map(Operand::NativeOperator))
         .or(preceded(not(operator), ident_path.map(Operand::Ident)))
         .process(stream)
+        .map_err(|e| e.with_context("operand"))
 }
 
 pub fn multiline_tuple(stream: Input) -> IResult<Vec<Expression>> {

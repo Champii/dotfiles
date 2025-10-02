@@ -19,12 +19,14 @@ pub fn statement(stream: Input) -> IResult<Statement> {
         .or(assignment.map(Statement::Assignment))
         .or(expression.map(Statement::Expression))
         .process(stream)
+        .map_err(|e| e.with_context("statement"))
 }
 
 pub fn assignment(stream: Input) -> IResult<Assignment> {
     (assignment_lhs, TokenType::Equal, expression)
         .map(|(lhs, _, rhs)| Assignment { lhs, rhs })
         .process(stream)
+        .map_err(|e| e.with_context("assignment"))
 }
 
 pub fn assignment_lhs(stream: Input) -> IResult<AssignmentLHS> {

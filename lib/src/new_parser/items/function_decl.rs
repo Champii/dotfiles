@@ -22,6 +22,7 @@ pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
             inject_self: inject_self.is_some(),
         })
         .process(stream)
+        .map_err(|e| e.with_context("function declaration"))
 }
 
 fn lambda_block(stream: Input) -> IResult<Block> {
@@ -51,6 +52,7 @@ pub fn lambda_decl(stream: Input) -> IResult<LambdaDecl> {
             }),
         )
         .process(stream)
+        .map_err(|e| e.with_context("lambda declaration"))
 }
 
 fn parameters(stream: Input) -> IResult<Vec<Pattern>> {

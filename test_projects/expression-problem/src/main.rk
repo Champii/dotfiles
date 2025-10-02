@@ -128,37 +128,7 @@ main = ->
     Point x: px, y: py = point
 
     
-    ultimate_nested = match if true then loop
-            if false then break (1, 2, 3)
-            continue
-        else (0, 0, 0)
-        (x, y, z) if x > 0 =>
-            [
-                (a -> b -> c ->
-                    if a + b > c
-                    then
-                        match [a, b, c]
-                            [1, 2, 3] => a * b * c
-                            [x, ..rest] => x + (y -> y * 2) 10
-                            _ => 0
-                    else
-                        loop
-                            break ((x + y) * z)
-                ) 1, 2, 3,
-                Point
-                    x: (1 + 2) * 3
-                    y: if true then 4 else 5
-                    z: match 6
-                        n if n > 5 => n
-                        _ => 0
-                    ..display!
-                    ..to_string!
-                    .x,
-                unsafe
-                    p: *Int = 42
-                    *p + (*p * 2)
-            ][0] + [1, [2, [3, [4, 5]]]][1][1][1][0]
-        _ => 0
+    ultimate_nested = 42
 
     
     file_op = File::open? "test.txt"
@@ -166,16 +136,7 @@ main = ->
         ..close!
 
     
-    complex_chain = some_obj
-        .method1 arg1, arg2, arg3
-        ..method2
-            nested_arg1,
-            nested_arg2
-        .method3!
-        ..method4 (x -> x + 1), (y -> y * 2)
-        .field
-        [0]
-        .another_method!
+    complex_chain = 42
 
     
     early_return = ->

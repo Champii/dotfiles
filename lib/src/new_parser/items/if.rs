@@ -43,6 +43,7 @@ pub fn parse_if(stream: Input) -> IResult<If> {
             else_,
         })
         .process(stream)
+        .map_err(|e| e.with_context("if expression"))
 }
 
 pub fn parse_else(stream: Input) -> IResult<Else> {

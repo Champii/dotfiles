@@ -1,0 +1,6 @@
+main = ->
+    x = (a -> if a > 0 then 1 else loop
+        break 2
+    ) 5
+    x
+

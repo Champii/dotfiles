@@ -1,0 +1,11 @@
+enum Result T, E
+    Ok T
+    Err E
+
+main = ->
+    result_val: Result Int, String = Result::Ok 42
+    if_let_test = if Ok x = result_val
+        then x * 2
+        else 0
+    if_let_test
+

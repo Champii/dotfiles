@@ -1,0 +1,6 @@
+main = ->
+    plus_one = (+1)
+    times_two = (*2)
+    result = plus_one 5
+    result
+

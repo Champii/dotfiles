@@ -1,0 +1,6 @@
+main = ->
+    loop_result = loop
+        if true then break 42
+        continue
+    loop_result
+

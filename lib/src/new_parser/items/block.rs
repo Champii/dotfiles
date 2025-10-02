@@ -16,4 +16,5 @@ pub fn block(stream: Input) -> IResult<Block> {
     .or(statement.map(|statement| vec![statement]))
     .map(|statements| Block { statements })
     .process(stream)
+    .map_err(|e| e.with_context("block"))
 }

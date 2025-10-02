@@ -1,0 +1,17 @@
+struct Point
+    x: Int
+    y: Int
+    z: Int
+
+main = ->
+    x = Point
+        x: 1
+        y: 2
+        z: match 6
+            n if n > 5 => n
+            _ => 0
+        ..display!
+        ..to_string!
+        .x
+    x
+

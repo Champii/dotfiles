@@ -140,6 +140,80 @@ impl From<ParseError> for Diagnostic {
                 span: Span::default(),
                 kind: DiagnosticType::Error,
             },
+            ParseError::WithContext { context, error } => {
+                // Build the full context chain by collecting all contexts
+                // and find the innermost non-context error
+                let mut context_chain = vec![context.clone()];
+                let mut current_error = error.as_ref();
+
+                // Unwrap all nested WithContext layers
+                loop {
+                    match current_error {
+                        ParseError::WithContext { context: inner_context, error: inner_error } => {
+                            context_chain.push(inner_context.clone());
+                            current_error = inner_error.as_ref();
+                        }
+                        _ => break,
+                    }
+                }
+
+                // Now current_error is the innermost non-context error
+                // Get its base message and span
+                let (base_message, span) = match current_error {
+                    ParseError::UnexpectedToken(expected_desc, got_token) => {
+                        let got_display = if got_token.token_type.to_string().is_empty() {
+                            format!("end of file")
+                        } else {
+                            format!("'{}'", got_token.token_type.to_string())
+                        };
+                        (
+                            format!("Unexpected token: {}", got_display),
+                            got_token.span.clone(),
+                        )
+                    },
+                    ParseError::UnexpectedEOF => {
+                        ("Unexpected end of file".to_string(), Span::default())
+                    },
+                    ParseError::UnexpectedIndent(level) => {
+                        (format!("Unexpected indent level: {}", level), Span::default())
+                    },
+                    _ => ("Parse error".to_string(), Span::default()),
+                };
+
+                // Create diagnostic with context
+                let message = format!(
+                    "{}\n\nParsing context (innermost first):\n{}",
+                    base_message,
+                    context_chain.iter()
+                        .enumerate()
+                        .map(|(i, ctx)| format!("  {}. {}", i + 1, ctx))
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                );
+
+                // Get the label from the innermost error
+                let labels = match current_error {
+                    ParseError::UnexpectedToken(expected_desc, got_token) => {
+                        let got_display = if got_token.token_type.to_string().is_empty() {
+                            format!("end of file")
+                        } else {
+                            format!("'{}'", got_token.token_type.to_string())
+                        };
+                        vec![(
+                            format!("Expected {}, but got {}", expected_desc, got_display),
+                            got_token.span.clone()
+                        )]
+                    },
+                    _ => vec![],
+                };
+
+                Diagnostic {
+                    message,
+                    labels,
+                    span,
+                    kind: DiagnosticType::Error,
+                }
+            },
             /* ParseError::InternalError(message) => Diagnostic {
                 message: format!("Internal error: {:?}", message),
                 labels: vec![],

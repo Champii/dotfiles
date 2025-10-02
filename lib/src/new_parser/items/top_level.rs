@@ -55,6 +55,7 @@ pub fn top_level(stream: Input) -> IResult<TopLevel> {
     )
         .map(|(_, _, top_level, _)| top_level)
         .process(stream)
+        .map_err(|e| e.with_context("top-level declaration"))
 }
 
 pub fn infix_operator_decl(stream: Input) -> IResult<(u8, String)> {

@@ -36,4 +36,5 @@ pub fn array(stream: Input) -> IResult<Array> {
     )
     .map(|elements| Array { elements })
     .process(stream)
+    .map_err(|e| e.with_context("array"))
 }

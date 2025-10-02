@@ -1,0 +1,9 @@
+main = ->
+    x = match true
+        (a, b, c) if a > 0 =>
+            [
+                (x -> y -> if x > y then x else y) 1, 2
+            ]
+        _ => [0]
+    x
+

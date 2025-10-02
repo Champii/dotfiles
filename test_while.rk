@@ -1,0 +1,8 @@
+main = ->
+    counter = 0
+    while counter < 10
+        counter = counter + 1
+        if counter == 5 then continue
+        if counter == 8 then break
+    counter
+

@@ -1,0 +1,12 @@
+main = ->
+    match true
+        (x, y, z) if x > 0 =>
+            [
+                (a -> b -> c ->
+                    if a + b > c
+                    then a * b * c
+                    else 0
+                ) 1, 2, 3
+            ]
+        _ => [0]
+
