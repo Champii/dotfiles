@@ -5,8 +5,8 @@ use crate::new_parser::{
 };
 
 use super::{
-    block, function_shorthand, get_span, ident, ident_path, indent, instance, int, lambda_decl,
-    native_operator, operator, parenthesis, r#loop, r#match,
+    block, empty_lines, function_shorthand, get_span, ident, ident_path, indent, instance, int,
+    lambda_decl, native_operator, operator, parenthesis, r#loop, r#match,
 };
 use super::{literal, stuck_operator_token};
 use super::{parse_if, parse_type, indent_token};
@@ -14,11 +14,22 @@ use super::{parse_if, parse_type, indent_token};
 pub fn expression(stream: Input) -> IResult<Expression> {
     (
         unary_expr,
-        (operator, expression)
+        (
+            operator,
+            // Allow expression continuation on the same line
+            expression
+                // Or on the next line with indentation
+                .or(preceded(
+                    TokenType::Eol,
+                    preceded(empty_lines, preceded(indent_token, expression)),
+                ))
+        )
+            // Or operator at the beginning of the next line (indented)
             .or(preceded(
                 TokenType::Eol,
                 indented(preceded(indent, (operator, expression))),
             ))
+            // Or operator at the beginning of the next line (not indented)
             .or(preceded(
                 TokenType::Eol,
                 preceded(indent, (operator, expression)),
@@ -83,8 +94,34 @@ pub fn operand(stream: Input) -> IResult<Operand> {
         .process(stream)
 }
 
+pub fn multiline_tuple(stream: Input) -> IResult<Vec<Expression>> {
+    // For multiline tuples inside parentheses, we don't use indented() because
+    // the parentheses themselves provide the grouping. We just need to handle
+    // newlines and optional indentation.
+    preceded(
+        TokenType::Eol,
+        preceded(
+            empty_lines,
+            separated_trailing(
+                preceded(indent_token, separated1(expression, TokenType::Coma)),
+                (
+                    TokenType::Coma.opt(),
+                    TokenType::Eol.followed_by(empty_lines),
+                ),
+            ),
+        )
+        .map(|elements| elements.into_iter().flatten().collect::<Vec<_>>()),
+    )
+    .followed_by(indent_token)
+    .process(stream)
+}
+
+pub fn monoline_tuple(stream: Input) -> IResult<Vec<Expression>> {
+    separated1(expression, TokenType::Coma).process(stream)
+}
+
 pub fn tuple(stream: Input) -> IResult<Tuple> {
-    parenthesis(separated1(expression, TokenType::Coma))
+    parenthesis(multiline_tuple.or(monoline_tuple))
         .map(|elements| Tuple { elements })
         .process(stream)
         .map(|(stream, tuple)| {
