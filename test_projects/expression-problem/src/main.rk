@@ -1,25 +1,5 @@
-// ============================================================================
-// EXPRESSION AND STATEMENT PRECEDENCE TESTS
-// ============================================================================
-// Testing the parsing order and precedence of different expression types:
-// - Function calls
-// - Method chains (dot notation)
-// - Parentheses
-// - If expressions
-// - Match expressions
-// - Lambda expressions
-// - Tuples
-// - Array indexing
-// ============================================================================
-
-// Test 13: Multiline call with nested multiline call
-// Expected: foo(bar(x, y))
-test13_nested_multiline = ->
-    result = foo
-        bar
-            x
-            y
-    result
-
 main = ->
-    test13_nested_multiline
+    foo
+        .bar lol ->
+            mdr
+        .lol

@@ -1,11 +1,11 @@
 use crate::{
     lexer::{Token, TokenType},
-    new_parser::{engine::*, FunctionDecl, FunctionSig, LambdaDecl, Pattern},
+    new_parser::{engine::*, Block, FunctionDecl, FunctionSig, LambdaDecl, Pattern},
 };
 
 use super::{
     block, consume_tokens_until, get_span, ident, operator_token, parenthesis, parse_type, pattern,
-    seek, stuck_operator_token,
+    reset_inside_argument_list, seek, stuck_operator_token,
 };
 
 pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
@@ -24,10 +24,14 @@ pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
         .process(stream)
 }
 
+fn lambda_block(stream: Input) -> IResult<Block> {
+    reset_inside_argument_list(block).process(stream)
+}
+
 pub fn lambda_decl(stream: Input) -> IResult<LambdaDecl> {
     function_shorthand
         .or(
-            (parameters, TokenType::Arrow, block).map(|(parameters, _, body)| LambdaDecl {
+            (parameters, TokenType::Arrow, lambda_block).map(|(parameters, _, body)| LambdaDecl {
                 parameters,
                 body,
                 shorthand_tokens: None,

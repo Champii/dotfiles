@@ -16,6 +16,7 @@ mod interogation;
 mod multiline_arguments_in_method_chain;
 mod multiline_arguments_with_nested_multiline_dots;
 mod multiline_dot;
+mod multiline_dot_with_lambda_argument;
 mod multiline_fn_call;
 mod multiline_method_chain_with_argument;
 mod multiline_operator;

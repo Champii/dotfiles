@@ -76,6 +76,7 @@ pub fn operand(stream: Input) -> IResult<Operand> {
             .map(Operand::Expression))
         // TODO: disallow function calls after literal
         .or(literal.map(Operand::Literal))
+        // Try lambda_decl before ident_path so that "param ->" is parsed as a lambda, not as an ident
         .or(lambda_decl.map(Operand::LambdaDecl))
         .or(native_operator.map(Operand::NativeOperator))
         .or(preceded(not(operator), ident_path.map(Operand::Ident)))
@@ -113,10 +114,11 @@ pub fn self_ident(stream: Input) -> IResult<Operand> {
 }
 
 pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
-    // Check for argument list short circuit on multiline dots
+    // Check for argument list short circuit on multiline dots and double dots
     // For inline argument lists (e.g., .method1 a), multiline dots should always close the argument list
     // For multiline argument lists, only close if the dot is at the method chain level
     if stream.inside_argument_list {
+        // Check for multiline dot
         if let Ok((_, (_, indent_level, _))) = (TokenType::Eol, indent_token, TokenType::Dot).process(stream) {
             // If we're in an inline argument list, any multiline dot should close it
             if stream.inside_inline_argument_list {
@@ -132,6 +134,26 @@ pub fn secondary(stream: Input) -> IResult<SecondaryExpr> {
             };
 
             // Only close if the dot is at or below the method chain level
+            if (indent_level as usize) <= method_chain_level + stream.indent_step {
+                return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+            }
+        }
+
+        // Check for multiline double dot
+        if let Ok((_, (_, indent_level, _))) = (TokenType::Eol, indent_token, TokenType::DoubleDot).process(stream) {
+            // If we're in an inline argument list, any multiline double dot should close it
+            if stream.inside_inline_argument_list {
+                return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
+            }
+
+            // For multiline argument lists, calculate the method chain indent level
+            let method_chain_level = if stream.indent_level >= stream.indent_step {
+                stream.indent_level - stream.indent_step
+            } else {
+                0
+            };
+
+            // Only close if the double dot is at or below the method chain level
             if (indent_level as usize) <= method_chain_level + stream.indent_step {
                 return arguments_list_short_circuit(stream).and_then(|_| Err(ParseError::ShortCircuit));
             }
@@ -180,6 +202,29 @@ pub fn arguments(stream: Input) -> IResult<Vec<Argument>> {
         .process(stream)
 }
 
+// Wrapper parser that restores indent level after parsing an expression
+// Used for multiline arguments to prevent nested multiline dots from affecting subsequent arguments
+struct ExpressionWithIndentRestore {
+    target_indent: usize,
+}
+
+impl Parser for ExpressionWithIndentRestore {
+    type Output = Argument;
+
+    fn process<'a>(&mut self, mut stream: Input<'a>) -> IResult<'a, Self::Output> {
+        // Restore the indent level before checking indent
+        // This ensures that nested multiline dots from the previous argument don't affect this one
+        stream.indent_level = self.target_indent;
+
+        let (stream, _) = indent.process(stream)?;
+        let (mut stream, expr) = expression.process(stream)?;
+
+        // Restore again after parsing the expression
+        stream.indent_level = self.target_indent;
+        Ok((stream, Argument { arg: expr }))
+    }
+}
+
 pub fn multiline_arguments_context_aware(stream: Input) -> IResult<Vec<Argument>> {
     // Smart argument parsing that prevents ambiguous syntax
     // Arguments must be indented MORE than the current context to avoid ambiguity
@@ -219,7 +264,7 @@ pub fn multiline_arguments_context_aware(stream: Input) -> IResult<Vec<Argument>
     arg_stream.indent_level = arg_indent_level;
 
     let result = inside_argument_list(separated1(
-        preceded(indent, expression.map(|arg| Argument { arg })),
+        ExpressionWithIndentRestore { target_indent: arg_indent_level },
         TokenType::Eol,
     )).process(arg_stream);
 
@@ -268,9 +313,8 @@ pub fn inside_inline_argument_list<P: Parser>(mut parser: P) -> impl FnMut(Input
                 Ok((stream, t))
             }
             Err(e) => {
-                stream.inside_argument_list = old_value;
-                stream.inside_inline_argument_list = old_inline_value;
-
+                // Don't modify the stream on error - it's not returned anyway
+                // Just propagate the error
                 Err(e)
             }
         }
@@ -333,10 +377,14 @@ pub fn not_multi_line_fn_call_short_circuit(stream: Input) -> IResult<()> {
     }
 }
 
-pub fn arguments_list_short_circuit(mut stream: Input) -> IResult<()> {
-    stream.argument_list_short_circuit()?;
+pub fn arguments_list_short_circuit(stream: Input) -> IResult<()> {
+    // Don't modify the stream here - just return the error
+    // The wrapper functions will handle restoring the flags
+    if !stream.inside_argument_list {
+        return Ok((stream, ()));
+    }
 
-    Ok((stream, ()))
+    Err(ParseError::ShortCircuit)
 }
 
 pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
@@ -348,31 +396,57 @@ pub fn dot(stream: Input) -> IResult<IdentOrNumber> {
         }
     }
 
+    // For multiline dots, update the indent level to match the dot's indent
+    // This is needed so that lambda arguments after the dot have the correct indent context
+    // But don't do this inside argument lists, as it would break multiline argument parsing
+    let result = (TokenType::Eol, indent_token, TokenType::Dot)
+        .process(stream);
+
+    if let Ok((stream, (_, dot_indent_level, _))) = result {
+        // Parse the identifier after the dot
+        let (stream, ident) = ident_or_number.process(stream)?;
+
+        // Update the indent level to match the dot's indent, but only if we're not inside an argument list
+        // Inside argument lists, the indent level is managed by ExpressionWithIndentRestore
+        let mut stream = stream;
+        if !stream.inside_argument_list {
+            stream.indent_level = dot_indent_level as usize;
+        }
+
+        return Ok((stream, ident));
+    }
+
+    // Try inline dots
     preceded(
-        // First try: Eol + Indent + arguments_list_short_circuit + Dot (for closing argument lists)
-        (TokenType::Eol, preceded(arguments_list_short_circuit, (indent_token, TokenType::Dot)))
-            .map(|_| ())
-            .or(
-                // Second try: Eol + Indent + Dot (normal multiline dot)
-                (TokenType::Eol, indented((indent, TokenType::Dot)))
-                    .map(|_| ())
-            )
-            .or(
-                // Third try: inline dots
-                TokenType::Dot
-                    .or(preceded(arguments_list_short_circuit, TokenType::SpacedDot))
-                    .map(|_| ())
-            ),
+        TokenType::Dot
+            .or(preceded(arguments_list_short_circuit, TokenType::SpacedDot)),
         ident_or_number,
     )
     .process(stream)
 }
 
 pub fn double_dot(stream: Input) -> IResult<IdentOrNumber> {
+    // For multiline double dots, update the indent level to match the double dot's indent
+    // But don't do this inside argument lists, as it would break multiline argument parsing
+    let result = (TokenType::Eol, indent_token, TokenType::DoubleDot)
+        .process(stream);
+
+    if let Ok((stream, (_, double_dot_indent_level, _))) = result {
+        // Parse the identifier after the double dot
+        let (stream, ident) = ident_or_number.process(stream)?;
+
+        // Update the indent level to match the double dot's indent, but only if we're not inside an argument list
+        let mut stream = stream;
+        if !stream.inside_argument_list {
+            stream.indent_level = double_dot_indent_level as usize;
+        }
+
+        return Ok((stream, ident));
+    }
+
+    // Try inline double dots
     preceded(
-        (TokenType::Eol, indented((indent, TokenType::DoubleDot)))
-            .map(|_| ())
-            .or(TokenType::DoubleDot.map(|_| ())),
+        TokenType::DoubleDot,
         preceded(arguments_list_short_circuit, ident_or_number),
     )
     .process(stream)
