@@ -19,10 +19,15 @@ where
     type Output = Parser1::Output;
 
     fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
-        if let Ok((tokens, output)) = self.parser1.process(tokens) {
-            return Ok((tokens, output));
+        match self.parser1.process(tokens) {
+            Ok((tokens, output)) => Ok((tokens, output)),
+            Err(err1) => match self.parser2.process(tokens) {
+                Ok((tokens, output)) => Ok((tokens, output)),
+                Err(err2) => {
+                    // Return the error that progressed furthest into the input
+                    Err(err1.choose_better(err2))
+                }
+            },
         }
-
-        self.parser2.process(tokens)
     }
 }

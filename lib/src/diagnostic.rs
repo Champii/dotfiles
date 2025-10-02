@@ -21,11 +21,22 @@ pub struct Diagnostic {
 impl From<ParseError> for Diagnostic {
     fn from(err: ParseError) -> Self {
         match err {
-            ParseError::UnexpectedToken(got, expected) => Diagnostic {
-                message: format!("Unexpected token: {:?}", got),
-                labels: vec![(format!("Expected {:?}", expected), expected.span.clone())],
-                span: expected.span,
-                kind: DiagnosticType::Error,
+            ParseError::UnexpectedToken(expected_desc, got_token) => {
+                let got_display = if got_token.token_type.to_string().is_empty() {
+                    format!("end of file")
+                } else {
+                    format!("'{}'", got_token.token_type.to_string())
+                };
+
+                Diagnostic {
+                    message: format!("Unexpected token: {}", got_display),
+                    labels: vec![(
+                        format!("Expected {}, but got {}", expected_desc, got_display),
+                        got_token.span.clone()
+                    )],
+                    span: got_token.span,
+                    kind: DiagnosticType::Error,
+                }
             },
             /* ParseError::UnexpectedKeyword(token, expected) => Diagnostic {
                 message: format!("Unexpected keyword: {:?}", token.token_type,),

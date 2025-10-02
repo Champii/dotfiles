@@ -34,4 +34,42 @@ impl ParseError {
             ParseError::AssertFailed => "AssertFailed",
         }
     }
+
+    /// Get the position (span) of this error for comparison purposes.
+    /// Returns the start position of the error's span.
+    /// Errors that occurred later in the input are considered "better" to report.
+    pub fn position(&self) -> usize {
+        match self {
+            ParseError::UnexpectedToken(_, token) => token.span.start,
+            ParseError::UnexpectedEOF => usize::MAX, // EOF errors are always at the end
+            ParseError::MacroNoCorrespondance { invoc_name, .. } => invoc_name.start,
+            ParseError::UnexpectedIndent(_) => 0,
+            ParseError::ExpectedOneOrMore => 0,
+            ParseError::UnknownFile(_) => 0,
+            ParseError::Lexer(_) => 0,
+            ParseError::Fail => 0,
+            ParseError::ShortCircuit => 0,
+            ParseError::AssertFailed => 0,
+        }
+    }
+
+    /// Choose the "better" error to report between two errors.
+    /// The error that occurred later in the input (higher position) is considered better.
+    pub fn choose_better(self, other: ParseError) -> ParseError {
+        // Special cases: ShortCircuit and Fail should never be reported
+        match (&self, &other) {
+            (ParseError::ShortCircuit, _) => return other,
+            (_, ParseError::ShortCircuit) => return self,
+            (ParseError::Fail, _) => return other,
+            (_, ParseError::Fail) => return self,
+            _ => {}
+        }
+
+        // Compare positions - prefer the error that occurred later
+        if self.position() >= other.position() {
+            self
+        } else {
+            other
+        }
+    }
 }

@@ -53,10 +53,7 @@ pub fn compile(config: &Config) -> Result<Program, Diagnostics> {
     let ast: Program = match new_parser::parse(config) {
         Ok(ast) => ast,
         Err(e) => {
-            let diags = Diagnostics::from(e);
-            diags.report();
-
-            return Err(diags);
+            return Err(Diagnostics::from(e));
         }
     };
 

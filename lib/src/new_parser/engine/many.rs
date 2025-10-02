@@ -1,4 +1,4 @@
-use super::{parser_trait::Parser, IResult, Input};
+use super::{parser_trait::Parser, IResult, Input, ParseError};
 
 pub struct Many<P> {
     parser: P,
@@ -13,22 +13,32 @@ where
 
     fn process<'a>(&mut self, mut tokens: Input<'a>) -> IResult<'a, Self::Output> {
         let mut output = Vec::new();
+        let mut deepest_error: Option<ParseError> = None;
 
         loop {
             if tokens.is_empty() {
                 break;
             }
 
-            if let Ok((new_tokens, t)) = self.parser.process(tokens) {
-                tokens = new_tokens;
-                output.push(t);
-            } else {
-                break;
+            match self.parser.process(tokens) {
+                Ok((new_tokens, t)) => {
+                    tokens = new_tokens;
+                    output.push(t);
+                }
+                Err(err) => {
+                    // Track the deepest error we've encountered
+                    deepest_error = Some(match deepest_error {
+                        Some(prev_err) => prev_err.choose_better(err),
+                        None => err,
+                    });
+                    break;
+                }
             }
         }
 
         if self.at_least_one_result && output.is_empty() {
-            return Err(super::ParseError::ExpectedOneOrMore);
+            // If we have a deepest error, use it; otherwise use ExpectedOneOrMore
+            return Err(deepest_error.unwrap_or(ParseError::ExpectedOneOrMore));
         }
 
         Ok((tokens, output))

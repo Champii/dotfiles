@@ -46,12 +46,44 @@ impl Lexer {
 
         self.position = token.span.end;
 
-        self.last_token = Some(token.clone());
+        // Check if we need to skip this token
+        let should_skip = if let TokenType::Comment(_) = token.token_type {
+            true
+        } else if let TokenType::Eol = token.token_type {
+            // Skip EOL if the last token was a comment
+            if let Some(last) = &self.last_token {
+                matches!(last.token_type, TokenType::Comment(_))
+            } else {
+                false
+            }
+        } else if let TokenType::Indent(_) = token.token_type {
+            // Look ahead to see if this indent is followed by a comment
+            // If so, skip the indent (but not if this is the very first token)
+            if self.last_token.is_none() {
+                false // Don't skip the first token
+            } else {
+                let next_pos = token.span.end;
+                let saved_pos = self.position;
+                self.position = next_pos;
 
-        if let TokenType::Comment(_) = token.token_type {
+                if let Ok(next_token) = self.match_current_char() {
+                    self.position = saved_pos; // Restore position
+                    matches!(next_token.token_type, TokenType::Comment(_))
+                } else {
+                    self.position = saved_pos; // Restore position
+                    false
+                }
+            }
+        } else {
+            false
+        };
+
+        if should_skip {
+            // Don't update last_token for skipped tokens
             return self.next();
         }
 
+        self.last_token = Some(token.clone());
         Ok(token)
     }
 

@@ -1,4 +1,44 @@
 use crate::new_parser::*;
+use crate::lexer::TokenType;
+
+fn token_type_description(tt: &TokenType) -> String {
+    match tt {
+        TokenType::Ident(_) => "identifier".to_string(),
+        TokenType::Type(_) => "type".to_string(),
+        TokenType::Number(_) => "number".to_string(),
+        TokenType::Float(_) => "float".to_string(),
+        TokenType::Operator(s) => format!("operator '{}'", s),
+        TokenType::Comment(_) => "comment".to_string(),
+        TokenType::StuckOperator(s) => format!("operator '{}'", s),
+        TokenType::NativeOperator(s) => format!("native operator '{}'", s),
+        TokenType::Keyword(s) => format!("keyword '{}'", s),
+        TokenType::MacroVar(_) => "macro variable".to_string(),
+        TokenType::MacroInvoc(_) => "macro invocation".to_string(),
+        TokenType::MacroRepeatOpen => "'$('".to_string(),
+        TokenType::MacroRepeatClose => "')'".to_string(),
+        TokenType::Equal => "'='".to_string(),
+        TokenType::OpenParen => "'('".to_string(),
+        TokenType::CloseParen => "')'".to_string(),
+        TokenType::OpenBracket => "'['".to_string(),
+        TokenType::CloseBracket => "']'".to_string(),
+        TokenType::Char(_) => "character literal".to_string(),
+        TokenType::String(_) => "string literal".to_string(),
+        TokenType::Arrow => "'->'".to_string(),
+        TokenType::FatArrow => "'=>'".to_string(),
+        TokenType::Coma => "','".to_string(),
+        TokenType::Colon => "':'".to_string(),
+        TokenType::DoubleColon => "'::'".to_string(),
+        TokenType::Dot => "'.'".to_string(),
+        TokenType::DoubleDot => "'..'".to_string(),
+        TokenType::SpacedDot => "spaced dot".to_string(),
+        TokenType::Arobase => "'@'".to_string(),
+        TokenType::Interogation => "'?'".to_string(),
+        TokenType::Indent(level) => format!("indent level {}", level),
+        TokenType::Underscore => "'_'".to_string(),
+        TokenType::Eol => "newline".to_string(),
+        TokenType::Eof => "end of file".to_string(),
+    }
+}
 
 macro_rules! token {
     ($stream:ident, $pat:pat => $result:expr) => {{
@@ -8,7 +48,7 @@ macro_rules! token {
             Ok(($stream, $result))
         } else {
             Err(ParseError::UnexpectedToken(
-                token.token_type.discriminant().to_string(),
+                token_type_description(&token.token_type),
                 token.clone(),
             ))
         }
@@ -25,7 +65,7 @@ macro_rules! token_with_span {
             Ok(($stream, $result))
         } else {
             Err(ParseError::UnexpectedToken(
-                token.token_type.discriminant().to_string(),
+                token_type_description(&token.token_type),
                 token,
             ))
         }
