@@ -9,7 +9,7 @@ pub const KEYWORDS: [&str; 24] = [
 ];
 pub const OPERATORS_CHARS: [char; 11] = ['+', '-', '*', '/', '=', '!', '<', '>', '$', '|', '&'];
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum LexerError {
     UnknownToken(char, Span),
 }

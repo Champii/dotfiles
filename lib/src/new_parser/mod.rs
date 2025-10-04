@@ -27,9 +27,19 @@ pub fn parse_module(file_path: PathBuf, config: &Config) -> Result<Module, Parse
         println!("{:#?}", tokens);
     }
 
-    let (_ctx, program) = module_inline.process(ParseCtx::from(&tokens, config))?;
+    // Reset the best error tracker at the start of parsing
+    engine::reset_best_error();
 
-    Ok(program)
+    let ctx = ParseCtx::from(&tokens, config);
+    let result = module_inline.process(ctx);
+
+    match result {
+        Ok((_, program)) => Ok(program),
+        Err(e) => {
+            // Return the best error we've seen during parsing
+            Err(engine::get_best_error(e))
+        }
+    }
 }
 
 pub fn parse_string(input: &str, config: &Config) -> Result<Program, ParseError> {
@@ -41,7 +51,17 @@ pub fn parse_string(input: &str, config: &Config) -> Result<Program, ParseError>
         println!("{:#?}", tokens);
     }
 
-    let (_ctx, program) = program.process(ParseCtx::from(&tokens, config))?;
+    // Reset the best error tracker at the start of parsing
+    engine::reset_best_error();
 
-    Ok(program)
+    let ctx = ParseCtx::from(&tokens, config);
+    let result = program.process(ctx);
+
+    match result {
+        Ok((_, program)) => Ok(program),
+        Err(e) => {
+            // Return the best error we've seen during parsing
+            Err(engine::get_best_error(e))
+        }
+    }
 }

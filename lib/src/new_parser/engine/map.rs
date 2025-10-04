@@ -19,7 +19,13 @@ where
     type Output = T;
 
     fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
-        let (tokens, output) = self.parser.process(tokens)?;
+        let (tokens, output) = match self.parser.process(tokens) {
+            Ok(result) => result,
+            Err(e) => {
+                super::track_error(&e);
+                return Err(e);
+            }
+        };
         Ok((tokens, (self.f)(output)))
     }
 }

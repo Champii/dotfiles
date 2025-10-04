@@ -21,13 +21,21 @@ where
     fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
         match self.parser1.process(tokens) {
             Ok((tokens, output)) => Ok((tokens, output)),
-            Err(err1) => match self.parser2.process(tokens) {
-                Ok((tokens, output)) => Ok((tokens, output)),
-                Err(err2) => {
-                    // Return the error that progressed furthest into the input
-                    Err(err1.choose_better(err2))
+            Err(err1) => {
+                // Track the error from the first parser
+                super::track_error(&err1);
+
+                match self.parser2.process(tokens) {
+                    Ok((tokens, output)) => Ok((tokens, output)),
+                    Err(err2) => {
+                        // Track the error from the second parser
+                        super::track_error(&err2);
+
+                        // Return the better of the two errors
+                        Err(err1.choose_better(err2))
+                    }
                 }
-            },
+            }
         }
     }
 }

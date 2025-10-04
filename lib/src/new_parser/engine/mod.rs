@@ -43,6 +43,42 @@ pub use separated::*;
 
 pub type Input<'a> = ParseCtx<'a>;
 
+use std::cell::RefCell;
+
+thread_local! {
+    /// Track the best (furthest) error seen during parsing
+    /// This is reset at the start of each parse and updated as parsing progresses
+    static BEST_ERROR: RefCell<Option<ParseError>> = RefCell::new(None);
+}
+
+/// Track an error if it's better than the current best error
+pub fn track_error(error: &ParseError) {
+    BEST_ERROR.with(|best| {
+        let mut best = best.borrow_mut();
+        *best = Some(match best.take() {
+            Some(prev) => prev.choose_better(error.clone()),
+            None => error.clone(),
+        });
+    });
+}
+
+/// Get the best error seen so far, or return the given error if no better error exists
+pub fn get_best_error(fallback: ParseError) -> ParseError {
+    BEST_ERROR.with(|best| {
+        best.borrow()
+            .as_ref()
+            .map(|e| e.clone().choose_better(fallback.clone()))
+            .unwrap_or(fallback)
+    })
+}
+
+/// Reset the best error tracker (should be called at the start of each parse)
+pub fn reset_best_error() {
+    BEST_ERROR.with(|best| {
+        *best.borrow_mut() = None;
+    });
+}
+
 #[derive(Clone, Debug)]
 pub struct ParseCtx<'a> {
     pub tokens: &'a [Token],
@@ -119,6 +155,8 @@ impl ParseCtx<'_> {
 
         Ok(self.tokens[n].clone())
     }
+
+
 
     pub fn from<'a>(tokens: &'a [Token], config: &'a Config) -> ParseCtx<'a> {
         let mut indent_step = Self::determine_indent_step(tokens, config);

@@ -1,6 +1,6 @@
 use crate::lexer::{Span, Token};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ParseError {
     UnexpectedToken(String, Token), // expected, got
     UnexpectedEOF,

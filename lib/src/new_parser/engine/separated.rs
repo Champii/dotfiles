@@ -31,11 +31,12 @@ where
 
             let (new_remaining_tokens, item) = match self.parser.process(remaining_tokens) {
                 Ok((new_remaining_tokens, item)) => (new_remaining_tokens, item),
-                Err(_) => {
+                Err(e) => {
+                    // Track the error
+                    super::track_error(&e);
                     if !self.trailing_delimiter {
                         remaining_tokens = remaining_tokens_with_delim;
                     }
-                    // diagnostics = e;
                     break;
                 }
             };

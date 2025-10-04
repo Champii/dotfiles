@@ -11,7 +11,13 @@ macro_rules! impl_parsable_for_tuple {
                     $name,
                 )*) = self;
                 $(
-                    let (tokens, $name) = $name.process(tokens)?;
+                    let (tokens, $name) = match $name.process(tokens) {
+                        Ok(result) => result,
+                        Err(e) => {
+                            super::track_error(&e);
+                            return Err(e);
+                        }
+                    };
                 )*
                 Ok((tokens, ($($name,)*)))
             }
@@ -26,7 +32,13 @@ macro_rules! impl_parsable_for_tuple {
                     $name,
                 )*) = self;
                 $(
-                    let (tokens, $name) = $name.process(tokens)?;
+                    let (tokens, $name) = match $name.process(tokens) {
+                        Ok(result) => result,
+                        Err(e) => {
+                            super::track_error(&e);
+                            return Err(e);
+                        }
+                    };
                 )*
                 Ok((tokens, ($($name,)*)))
             }
@@ -41,7 +53,13 @@ macro_rules! impl_parsable_for_tuple {
                     mut $name,
                 )*) = self.clone();
                 $(
-                    let (tokens, $name) = $name.process(tokens)?;
+                    let (tokens, $name) = match $name.process(tokens) {
+                        Ok(result) => result,
+                        Err(e) => {
+                            super::track_error(&e);
+                            return Err(e);
+                        }
+                    };
                 )*
                 Ok((tokens, ($($name,)*)))
             }

@@ -19,8 +19,20 @@ where
     type Output = Parser2::Output;
 
     fn process<'a>(&mut self, tokens: Input<'a>) -> IResult<'a, Self::Output> {
-        let (tokens, _) = self.precedent.process(tokens)?;
-        self.parser.process(tokens)
+        let (tokens, _) = match self.precedent.process(tokens) {
+            Ok(result) => result,
+            Err(e) => {
+                super::track_error(&e);
+                return Err(e);
+            }
+        };
+        match self.parser.process(tokens) {
+            Ok(result) => Ok(result),
+            Err(e) => {
+                super::track_error(&e);
+                Err(e)
+            }
+        }
     }
 }
 
