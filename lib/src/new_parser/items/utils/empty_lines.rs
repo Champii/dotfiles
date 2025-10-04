@@ -4,7 +4,11 @@ use crate::{
 };
 
 pub fn empty_lines(stream: Input) -> IResult<usize> {
-    many((indent_token, TokenType::Eol))
+    many(
+        (indent_token, TokenType::Eol)
+            .map(|_| ())
+            .or(TokenType::Eol.map(|_| ()))
+    )
         .map(|x| x.len())
         .process(stream)
 }
