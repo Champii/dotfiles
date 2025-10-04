@@ -193,14 +193,14 @@ impl From<ParseError> for Diagnostic {
 
                 // Get the label from the innermost error
                 let labels = match current_error {
-                    ParseError::UnexpectedToken(expected_desc, got_token) => {
+                    ParseError::UnexpectedToken(_expected_desc, got_token) => {
                         let got_display = if got_token.token_type.to_string().is_empty() {
                             format!("end of file")
                         } else {
                             format!("'{}'", got_token.token_type.to_string())
                         };
                         vec![(
-                            format!("Expected {}, but got {}", expected_desc, got_display),
+                            format!("Unexpected {}", got_display),
                             got_token.span.clone()
                         )]
                     },

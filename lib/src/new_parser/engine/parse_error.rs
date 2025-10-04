@@ -88,6 +88,57 @@ impl ParseError {
         }
     }
 
+    /// Determine if this error makes sense given the context.
+    /// Some errors are clearly wrong (e.g., expecting 'if' when we got ')').
+    /// Returns a score: higher is better (more sensible).
+    fn sensibility_score(&self) -> i32 {
+        match self {
+            ParseError::UnexpectedToken(expected, got) => {
+                use crate::lexer::TokenType;
+
+                // If we're expecting a keyword but got a structural token (paren, bracket, etc.),
+                // this is likely a wrong alternative being tried
+                if expected.contains("keyword") {
+                    match &got.token_type {
+                        TokenType::CloseParen | TokenType::CloseBracket |
+                        TokenType::OpenParen | TokenType::OpenBracket |
+                        TokenType::Coma | TokenType::Colon | TokenType::Arrow |
+                        TokenType::FatArrow | TokenType::Dot => {
+                            return -10; // Very unlikely to be the right error
+                        }
+                        _ => {}
+                    }
+                }
+
+                // If we're expecting an opening bracket/paren but got a closing one,
+                // this is also likely wrong
+                if expected.contains("[") || expected.contains("(") {
+                    match &got.token_type {
+                        TokenType::CloseParen | TokenType::CloseBracket => {
+                            return -5; // Unlikely to be the right error
+                        }
+                        _ => {}
+                    }
+                }
+
+                // If we're expecting an arrow but got a closing paren/bracket,
+                // this is likely wrong (trying to parse a lambda when it's not)
+                if expected.contains("->") {
+                    match &got.token_type {
+                        TokenType::CloseParen | TokenType::CloseBracket => {
+                            return -8; // Unlikely to be the right error
+                        }
+                        _ => {}
+                    }
+                }
+
+                0 // Default score
+            }
+            ParseError::WithContext { error, .. } => error.sensibility_score(),
+            _ => 0,
+        }
+    }
+
     /// Choose the "better" error to report between two errors.
     /// Prefers errors that occurred later in the input, but if positions are equal,
     /// prefers errors with more context (deeper in the parsing tree).
@@ -111,7 +162,17 @@ impl ParseError {
             return other;
         }
 
-        // Positions are equal - prefer the error with more context
+        // Positions are equal - check sensibility scores
+        let self_sensibility = self.sensibility_score();
+        let other_sensibility = other.sensibility_score();
+
+        if self_sensibility > other_sensibility {
+            return self;
+        } else if other_sensibility > self_sensibility {
+            return other;
+        }
+
+        // Positions and sensibility are equal - prefer the error with more context
         let self_depth = self.context_depth();
         let other_depth = other.context_depth();
 
