@@ -10,7 +10,7 @@ pub fn parenthesis<P: Parser>(parser: P) -> impl FnMut(Input) -> IResult<P::Outp
     )
         .map(|(_, _, x, _, _)| x);
 
-    move |mut input: Input| {
+    move |input: Input| {
         let was_in_arg_list = input.inside_argument_list;
         let result = parser.process(input)?;
         let (mut output_stream, value) = result;

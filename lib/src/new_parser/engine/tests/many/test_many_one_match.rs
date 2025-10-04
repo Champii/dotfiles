@@ -1,4 +1,3 @@
-use crate::lexer::TokenType;
 use crate::new_parser::engine::tests::common::*;
 use crate::new_parser::engine::{many, Parser};
 

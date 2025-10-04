@@ -21,7 +21,7 @@ pub struct Diagnostic {
 impl From<ParseError> for Diagnostic {
     fn from(err: ParseError) -> Self {
         match err {
-            ParseError::UnexpectedToken(expected_desc, got_token) => {
+            ParseError::UnexpectedToken(_expected_desc, got_token) => {
                 let got_display = if got_token.token_type.to_string().is_empty() {
                     format!("end of file")
                 } else {
@@ -31,7 +31,7 @@ impl From<ParseError> for Diagnostic {
                 Diagnostic {
                     message: format!("Unexpected token: {}", got_display),
                     labels: vec![(
-                        format!("Expected {}, but got {}", expected_desc, got_display),
+                        format!("Unexpected {}", got_display),
                         got_token.span.clone()
                     )],
                     span: got_token.span,
@@ -160,7 +160,7 @@ impl From<ParseError> for Diagnostic {
                 // Now current_error is the innermost non-context error
                 // Get its base message and span
                 let (base_message, span) = match current_error {
-                    ParseError::UnexpectedToken(expected_desc, got_token) => {
+                    ParseError::UnexpectedToken(_expected_desc, got_token) => {
                         let got_display = if got_token.token_type.to_string().is_empty() {
                             format!("end of file")
                         } else {

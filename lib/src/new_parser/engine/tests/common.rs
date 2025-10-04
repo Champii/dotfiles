@@ -1,5 +1,5 @@
 use crate::lexer::{Lexer, Token, TokenType};
-use crate::new_parser::engine::{IResult, ParseCtx, Parser};
+use crate::new_parser::engine::{IResult, ParseCtx};
 use crate::Config;
 use std::path::PathBuf;
 
