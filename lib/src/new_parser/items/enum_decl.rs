@@ -3,13 +3,13 @@ use crate::{
     new_parser::{engine::*, EnumDecl, EnumVariant, NamedFieldsOrTypesList, ParseTypeInner},
 };
 
-use super::{empty_lines, indent, parse_type_inner, struct_decl_field};
+use super::{empty_lines_permissive, indent, parse_type_inner, struct_decl_field};
 
 pub fn enum_decl(stream: Input) -> IResult<EnumDecl> {
     (
         TokenType::Keyword("enum".to_string()),
         parse_type_inner,
-        TokenType::Eol.followed_by(empty_lines),
+        TokenType::Eol.followed_by(empty_lines_permissive),
         indented(many(enum_variant)),
     )
         .map(|(_, name, _, variants)| EnumDecl { name, variants })
@@ -20,7 +20,7 @@ pub fn enum_variant(stream: Input) -> IResult<EnumVariant> {
     (
         indent,
         parse_type_inner,
-        TokenType::Eol.followed_by(empty_lines).opt(),
+        TokenType::Eol.followed_by(empty_lines_permissive).opt(),
         indented(named_fields_or_types_list).opt(),
     )
         .map(|(_, name, _, fields_opt)| {
