@@ -4,7 +4,7 @@ use crate::Config;
 
 #[test]
 fn test_parse_function_shorthand() {
-    let input = "myfn = (+2)\n";
+    let input = "myfn = (+ 2)\n";
     let tokens = lex_test(input);
     let config = Config::default();
 

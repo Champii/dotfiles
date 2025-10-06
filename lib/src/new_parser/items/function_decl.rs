@@ -5,7 +5,7 @@ use crate::{
 
 use super::{
     block, consume_tokens_until, get_span, ident, operator_token, parenthesis, parse_type, pattern,
-    reset_inside_argument_list, seek, stuck_operator_token,
+    reset_inside_argument_list, seek,
 };
 
 pub fn function_decl(stream: Input<'_>) -> IResult<'_, FunctionDecl> {
@@ -70,7 +70,6 @@ pub fn prefix_function_shorthand(stream: Input) -> IResult<LambdaDecl> {
         get_span,
         seek(
             operator_token
-                .or(stuck_operator_token)
                 .map(|_| ())
                 .or(TokenType::Dot.map(|_| ())),
         ),
