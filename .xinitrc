@@ -55,5 +55,8 @@ xset fp+ $HOME/.fonts/terminesspowerline
 
 
 # exec emacs
-i3
-
+# i3
+#
+#
+export DESKTOP_SESSION=plasma
+startx /usr/bin/startplasma-x11

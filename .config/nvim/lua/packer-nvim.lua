@@ -112,7 +112,7 @@ local plugins = {
         "williamboman/mason-lspconfig.nvim",
         config = function()
             require('mason-lspconfig').setup {}
-            require('mason-lspconfig').setup_handlers {
+            --[[ require('mason-lspconfig').setup_handlers {
                 function(server_name) -- default handler (optional)
                     require("lspconfig")[server_name].setup {
                         on_attach = require("lsp-format").on_attach,
@@ -139,20 +139,8 @@ local plugins = {
                             },
                         },
                     }
-                    --[[ require("lspconfig").rust_analyzer.setup {
-                        on_attach = require("lsp-format").on_attach,
-                        settings = {
-                            ["rust-analyzer"] = {
-                                inlayHints = {
-                                    typeHints = {
-                                        enabled = true,
-                                    },
-                                },
-                            },
-                        },
-                    } ]]
                 end,
-            }
+            } ]]
         end
     },
     'neovim/nvim-lspconfig',
@@ -339,10 +327,10 @@ local plugins = {
         end,
     },
     "https://github.com/ron-rs/ron.vim",
-    {
+    --[[ {
         'Exafunction/codeium.vim',
         event = 'BufEnter'
-    },
+    }, ]]
 }
 
 require("lazy").setup(plugins)
