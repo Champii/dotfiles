@@ -1,3 +1,72 @@
+package.preload["galaxyline.provider_lsp"] = function()
+    local function get_lsp_client(msg)
+        msg = msg or "No Active Lsp"
+
+        local bufnr = vim.api.nvim_get_current_buf()
+        local clients = vim.lsp.get_clients({ bufnr = bufnr })
+        if #clients == 0 then
+            return msg
+        end
+
+        local buf_ft = vim.bo[bufnr].filetype
+        for _, client in ipairs(clients) do
+            local filetypes = client.config.filetypes
+            if not filetypes or vim.tbl_contains(filetypes, buf_ft) then
+                return client.name
+            end
+        end
+
+        return msg
+    end
+
+    return { get_lsp_client = get_lsp_client }
+end
+
+package.preload["galaxyline.provider_diagnostic"] = function()
+    local function get_coc_diagnostic(diag_type)
+        local has_info, info = pcall(vim.api.nvim_buf_get_var, 0, "coc_diagnostic_info")
+        if has_info and info[diag_type] and info[diag_type] > 0 then
+            return info[diag_type]
+        end
+        return ""
+    end
+
+    local function get_nvim_lsp_diagnostic(severity)
+        if #vim.lsp.get_clients({ bufnr = 0 }) == 0 then
+            return ""
+        end
+
+        local result = vim.diagnostic.get(0, { severity = severity })
+        if result and #result ~= 0 then
+            return #result .. " "
+        end
+
+        return ""
+    end
+
+    local function get_diagnostic(diag_type, severity)
+        if vim.fn.exists("*coc#rpc#start_server") == 1 then
+            return get_coc_diagnostic(diag_type)
+        end
+        return get_nvim_lsp_diagnostic(severity)
+    end
+
+    return {
+        get_diagnostic_error = function()
+            return get_diagnostic("error", vim.diagnostic.severity.ERROR)
+        end,
+        get_diagnostic_warn = function()
+            return get_diagnostic("warning", vim.diagnostic.severity.WARN)
+        end,
+        get_diagnostic_hint = function()
+            return get_diagnostic("hint", vim.diagnostic.severity.HINT)
+        end,
+        get_diagnostic_info = function()
+            return get_diagnostic("information", vim.diagnostic.severity.INFO)
+        end,
+    }
+end
+
 local colors2 = require("galaxyline.theme").default
 
 local gl = require("galaxyline")

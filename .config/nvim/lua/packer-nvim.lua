@@ -3,7 +3,7 @@
 
 -- Lazy init
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -15,10 +15,88 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local function setup_augment_nvim_012_compat()
+    local augment_module_path = vim.fn.stdpath("data") .. "/lazy/augment.vim/lua/augment.lua"
+    local ok, lines = pcall(vim.fn.readfile, augment_module_path)
+    if ok then
+        local source = table.concat(lines, "\n")
+        if not source:find("vim.lsp.start_client", 1, true) and not source:find("client.request", 1, true) then
+            return
+        end
+    end
+
+    package.preload["augment"] = function()
+        local M = {}
+
+        M.start_client = function(command, notification_methods, workspace_folders)
+            local handlers = {}
+            for _, method in ipairs(notification_methods) do
+                handlers[method] = function(_, params, _)
+                    vim.call("augment#client#NvimNotification", method, params)
+                end
+            end
+
+            local config = {
+                name = "Augment Server",
+                cmd = command,
+                init_options = {
+                    editor = "nvim",
+                    vimVersion = tostring(vim.version()),
+                    pluginVersion = vim.call("augment#version#Version"),
+                },
+                on_exit = function(code, signal, client_id)
+                    vim.schedule(function()
+                        vim.call("augment#client#NvimOnExit", code, signal, client_id)
+                    end)
+                end,
+                handlers = handlers,
+            }
+
+            if workspace_folders and #workspace_folders > 0 then
+                config.workspace_folders = workspace_folders
+            end
+
+            return vim.lsp.start(config, { attach = false })
+        end
+
+        M.open_buffer = function(client_id, bufnr)
+            vim.lsp.buf_attach_client(bufnr, client_id)
+        end
+
+        M.notify = function(client_id, method, params)
+            local client = vim.lsp.get_client_by_id(client_id)
+            if not client then
+                vim.call("augment#log#Error", "No lsp client found for id: " .. client_id)
+                return
+            end
+
+            client:notify(method, params)
+        end
+
+        M.request = function(client_id, method, params)
+            local client = vim.lsp.get_client_by_id(client_id)
+            if not client then
+                vim.call("augment#log#Error", "No lsp client found for id: " .. client_id)
+                return
+            end
+
+            local _, id = client:request(method, params, function(err, result)
+                vim.call("augment#client#NvimResponse", method, params, result, err)
+            end)
+            return id
+        end
+
+        return M
+    end
+end
+
 local plugins = {
     -- 'wbthomason/packer.nvim',
     -- -- 'glepnir/dashboard-nvim',
-    'augmentcode/augment.vim',
+    {
+        'augmentcode/augment.vim',
+        init = setup_augment_nvim_012_compat,
+    },
     'j-hui/fidget.nvim',
     'ibhagwan/fzf-lua',
     'junegunn/fzf.vim',
@@ -72,7 +150,19 @@ local plugins = {
     -- 'glepnir/nvim-dap-virtual-text',
     -- 'glepnir/dap-buddy',
     -- 'glepnir/firenvim',
-    'jackMort/ChatGPT.nvim',
+    {
+        'jackMort/ChatGPT.nvim',
+        cmd = {
+            'ChatGPT',
+            'ChatGPTActAs',
+            'ChatGPTEditWithInstructions',
+            'ChatGPTRun',
+            'ChatGPTCompleteCode',
+        },
+        config = function()
+            require('chatgpt').setup({})
+        end,
+    },
     'nvim-lua/plenary.nvim',
     'nvim-telescope/telescope.nvim',
     {
@@ -96,14 +186,7 @@ local plugins = {
         "rcarriga/nvim-notify",
         config = function() require("notify").setup {} end
     },
-    "jose-elias-alvarez/null-ls.nvim",
-    {
-        'lvimuser/lsp-inlayhints.nvim',
-        branch = 'anticonceal',
-        config = function()
-            require("lsp-inlayhints").setup {}
-        end
-    },
+    "nvimtools/none-ls.nvim",
     {
         "williamboman/mason.nvim",
         config = function() require('mason').setup {} end
@@ -146,7 +229,7 @@ local plugins = {
     'neovim/nvim-lspconfig',
     'simrat39/rust-tools.nvim',
     "rktjmp/highlight-current-n.nvim",
-    { 'michaelb/sniprun', run = 'bash ./install.sh' },
+    { 'michaelb/sniprun', build = 'bash ./install.sh 1' },
     "nvim-treesitter/playground",
     {
         "aserowy/tmux.nvim",
@@ -333,4 +416,6 @@ local plugins = {
     }, ]]
 }
 
-require("lazy").setup(plugins)
+require("lazy").setup(plugins, {
+    rocks = { enabled = false },
+})

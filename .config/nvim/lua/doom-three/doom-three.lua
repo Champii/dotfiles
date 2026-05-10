@@ -36,7 +36,7 @@ local function highlight(group, opts)
     vim.api.nvim_set_hl(0, group, opts)
 end
 
-vim.highlight.priorities.semantic_tokens = 1000
+vim.hl.priorities.semantic_tokens = 1000
 
 local bg_dark                            = '#141414'
 local bg_darker                          = '#111111'

@@ -22,7 +22,8 @@ require('plugins.hlargs_config')
 -- require('plugins.dap-install_config')
 -- require('plugins.dap-ui_config')
 require('plugins.indent-blankline-nvim_config')
-require('plugins.chat-gpt_config')
+-- ChatGPT.nvim is configured lazily from the plugin spec to avoid startup warnings
+-- when OPENAI_API_KEY is not exported.
 -- require('plugins.code_fixer_test')
 
 require('plugins.project_config')
