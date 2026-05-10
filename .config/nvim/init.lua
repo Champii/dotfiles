@@ -16,3 +16,10 @@ vim.g.dashboard_default_executive = 'fzf'
 
 
 require 'pii'
+
+-- Rock language support
+vim.filetype.add({
+  extension = {
+    rk = 'rock',
+  },
+})

@@ -112,3 +112,9 @@ zle -N disabled
 # bind widget to ESC-o
 bindkey '\e[25~' disabled
 
+# >>> rockup initialize >>>
+export ROCKUP_HOME="${ROCKUP_HOME:-$HOME/.rockup}"
+if [ -f "$ROCKUP_HOME/env" ]; then
+    . "$ROCKUP_HOME/env"
+fi
+# <<< rockup initialize <<<

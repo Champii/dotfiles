@@ -4,8 +4,8 @@
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.rock = {
     install_info = {
-        url = "~/prog/rust/treesitter/tree-sitter-rock/", -- local path or git repo
-        files = { "src/parser.c", "src/scanner.cc" },
+        url = "/home/champii/prog/rust/new_lang/tree-sitter-rock", -- local path or git repo
+        files = { "src/parser.c" },
         -- optional entries:
         -- branch = "main", -- default branch in case of git repo if different from master
         -- generate_requires_npm = false, -- if stand-alone parser without npm dependencies
@@ -15,7 +15,7 @@ parser_config.rock = {
 }
 -- local ft_to_parser = require "nvim-treesitter.parsers".filetype_to_parsername
 local ft_to_parser = vim.treesitter.language.register
-ft_to_parser('rk', 'rock')
+ft_to_parser('rock', 'rk')
 
 require("nvim-treesitter.configs").setup {
     incremental_selection = {
