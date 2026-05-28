@@ -73,7 +73,6 @@ map("n", "<leader>qL", '<cmd>lua require("persistence").load({ last = true })<cr
 map("n", "<leader>qd", '<cmd>lua require("persistence").stop()<cr>', opts)
 
 -- Terminals
-map('n', '<Leader>ot', ':ToggleTerm<CR>', opts)
 map('n', '<Leader>to', ':ToggleTerm<CR>', opts)
 
 -- PWD

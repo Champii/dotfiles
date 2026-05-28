@@ -118,3 +118,9 @@ if [ -f "$ROCKUP_HOME/env" ]; then
     . "$ROCKUP_HOME/env"
 fi
 # <<< rockup initialize <<<
+
+# opencode
+export PATH=/home/champii/.opencode/bin:$PATH
+
+# Pi
+export PATH="/usr/bin:$PATH"

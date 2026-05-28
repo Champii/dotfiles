@@ -163,6 +163,22 @@ local plugins = {
             require('chatgpt').setup({})
         end,
     },
+    {
+        'sudo-tee/opencode.nvim',
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+        },
+        config = function()
+            require('opencode').setup({
+                preferred_picker = 'fzf',
+                preferred_completion = 'nvim-cmp',
+                keymap_prefix = '<leader>o',
+                ui = {
+                    enable_treesitter_markdown = false,
+                },
+            })
+        end,
+    },
     'nvim-lua/plenary.nvim',
     'nvim-telescope/telescope.nvim',
     {
